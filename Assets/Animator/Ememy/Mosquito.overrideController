@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Mosquito
+  m_Controller: {fileID: 9100000, guid: 968cd9552f807124a8ae244b88261bb6, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 43423724f4d4bc24581466ccdbffa52b, type: 2}
+    m_OverrideClip: {fileID: 1827226128182048838, guid: 32eabf87c5874ae2b4a1a0cc8b55b52b, type: 3}
+  - m_OriginalClip: {fileID: 7400000, guid: 9b59b003370e42746af6dd7bc7a40fdd, type: 2}
+    m_OverrideClip: {fileID: 1827226128182048838, guid: f9ac037bacb2422eb183ed814e3a6d1d, type: 3}
+  - m_OriginalClip: {fileID: 7400000, guid: 48db5229f9c24394a9d87604fea92789, type: 2}
+    m_OverrideClip: {fileID: 1827226128182048838, guid: c78e4349565c42a8bc257e2133792c35, type: 3}
+  - m_OriginalClip: {fileID: 7400000, guid: f0a7701f07deb954e848ce4294c7b106, type: 2}
+    m_OverrideClip: {fileID: 1827226128182048838, guid: 085e31323a6b42248f44aff75446a550, type: 3}
+  - m_OriginalClip: {fileID: 7400000, guid: 0922a4507e0d09b46a2fb54dd344c81c, type: 2}
+    m_OverrideClip: {fileID: 1827226128182048838, guid: 162c982447ff467a81c63f0c731aed7a, type: 3}
