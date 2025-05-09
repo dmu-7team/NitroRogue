@@ -1,18 +1,20 @@
-using System.Collections.Generic;
-using Unity.Behavior;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.AI;
+using Unity.Behavior;
+using TMPro;
+using System.Collections.Generic;
 
 public class EnemyBase : CharacterStats
 {
     [Header("공격 관련")]
     public AttackObjectBase[] attackObjs;
     private List<AttackBase> attacks = new List<AttackBase>();
-    AttackBase currentAttack;
+    private AttackBase currentAttack;
 
     [Header("애니메이션/AI")]
-    Animator animator;
-    BehaviorGraphAgent behavior;
+    private Animator animator;
+    private BehaviorGraphAgent behavior;
     public bool isAttacking = false;
 
     [Header("체력바 UI")]
@@ -21,24 +23,25 @@ public class EnemyBase : CharacterStats
     [Header("드랍 박스")]
     public GameObject boxPrefab;
 
-    private bool isDead = false; // 추가: 중복 죽음 방지
+    [Header("데미지 팝업")]
+    public GameObject damagePopupPrefab;
+    public Transform popupSpawnPoint;
+    public Camera worldCamera; //  직접 연결하는 카메라
 
-    Color[] colors = new Color[8]
+
+    private bool isDead = false;
+
+    protected override void Start()
     {
-    Color.red,       // 빨강
-    Color.yellow,    // 노랑 (주황 대체 없음)
-    Color.green,     // 초록
-    Color.cyan,      // 청록
-    Color.blue,      // 파랑
-    Color.magenta,   // 보라
-    Color.gray,      // 회색 (중간톤 보조)
-    Color.white      // 흰색 (밝기 강조 보조)
-    };
-    
-    void Awake()
-    {
+        base.Start();
+
         behavior = GetComponent<BehaviorGraphAgent>();
         animator = GetComponent<Animator>();
+
+        if (worldCamera == null)
+        {
+            worldCamera = Camera.main;
+        }
 
         foreach (var attackObj in attackObjs)
         {
@@ -47,38 +50,20 @@ public class EnemyBase : CharacterStats
             attackInstance.lastUsedTime = Time.time;
             attacks.Add(attackInstance);
         }
+
+        UpdateHealthBar();
     }
 
-    protected override void Start()
-    {
-        base.Start();
-        UpdateHealthBar(); // 시작할 때 체력바 세팅
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        for (int i=0; i<attackObjs.Length; i++)
-        {
-            Gizmos.color = colors[i];
-            Gizmos.DrawWireSphere(transform.position, attackObjs[i].range);
-        }
-    }
-
-    /// <summary>
-    /// 쿨타임과 사정거리를 충족할 경우 타겟에게 공격을 시도함
-    /// </summary>
-    /// <param name="target"></param>
     public virtual void UseAllAttack(GameObject target)
     {
         for (int i = 0; i < attacks.Count; i++)
         {
-            if (attacks[i].IsReadyToExecute(gameObject, target))
+            if (attacks[i].IsCooldownReady() && attacks[i].IsInRange(gameObject, target))
             {
                 currentAttack = attacks[i];
                 attacks[i].Execute(gameObject, target);
 
                 isAttacking = true;
-
                 animator.SetInteger("attackIndex", i);
                 animator.SetTrigger("doAttack");
                 return;
@@ -87,45 +72,33 @@ public class EnemyBase : CharacterStats
         isAttacking = false;
     }
 
-    /// <summary>
-    /// 모든 공격 쿨타임 초기화
-    /// </summary>
-    public void ForceCooldownStart()
-    {
-        foreach (var attack in attacks)
-        {
-            attack.lastUsedTime = Time.time;
-        }
-    }
-
-    /// <summary>
-    /// 공격 애니메이션 끝 이벤트
-    /// </summary>
     public void OnAttackAnimationEnd()
     {
         isAttacking = false;
-        behavior?.SetVariableValue("IsAttacking", isAttacking);
-        currentAttack?.ForceCooldownStart(); // ← 여기서 쿨타임 시작
+        if (behavior != null)
+            behavior.SetVariableValue("IsAttacking", isAttacking);
+
+        currentAttack?.ForceCooldownStart();
     }
 
-    /// <summary>
-    /// 공격 애니메이션 이벤트
-    /// </summary>
     public void OnAnimationEvent(string eventName)
     {
         if (currentAttack == null) return;
         currentAttack.OnAnimationEvent(eventName);
     }
+
     public override void TakeDamage(float amount, GameObject attacker)
     {
         base.TakeDamage(amount, attacker);
         UpdateHealthBar();
+        ShowDamagePopup((int)amount); //  팝업 호출
 
         if (CurrentHealth <= 0)
         {
-            Die(); // 체력 0 이하일 때 사망 처리
+            Die();
         }
     }
+
     private void UpdateHealthBar()
     {
         if (healthBarImage != null)
@@ -134,17 +107,52 @@ public class EnemyBase : CharacterStats
         }
     }
 
+    private void ShowDamagePopup(int amount)
+    {
+        if (damagePopupPrefab == null)
+        {
+            Debug.LogWarning("[EnemyBase] DamagePopup 프리팹이 연결되지 않았습니다.");
+            return;
+        }
+
+        Vector3 spawnPos = popupSpawnPoint != null ? popupSpawnPoint.position : transform.position + Vector3.up * 1.5f;
+        GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity);
+        Debug.Log($"[DamagePopup] Showing damage: {amount}");
+
+        // 텍스트 설정
+        TMP_Text text = popup.GetComponentInChildren<TMP_Text>();
+        if (text != null)
+        {
+            text.text = amount.ToString();
+        }
+
+        // 카메라 방향으로 보이게
+        if (worldCamera != null)
+        {
+            popup.transform.LookAt(worldCamera.transform);
+            popup.transform.Rotate(0, 180f, 0);
+        }
+        else
+        {
+            Debug.LogWarning("[DamagePopup] worldCamera가 비어있습니다.");
+        }
+
+        // 스케일 및 제거
+        popup.transform.localScale = Vector3.one * 0.01f;
+        Destroy(popup, 1.0f);
+
+    }
+
     protected override void Die()
     {
-        if (isDead) return; // 이미 죽었으면 무시
+        if (isDead) return;
         isDead = true;
 
         base.Die();
 
-        behavior?.SetVariableValue("IsDead", true);
-        behavior?.SetVariableValue("IsAttacking", true);
+        if (behavior != null)
+            behavior.SetVariableValue("IsDead", true);
 
-        Debug.Log(gameObject.name);
         DropBox();
         Destroy(gameObject);
     }
