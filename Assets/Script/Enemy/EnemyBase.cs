@@ -28,8 +28,30 @@ public class EnemyBase : CharacterStats
     public Transform popupSpawnPoint;
     public Camera worldCamera; //  직접 연결하는 카메라
 
-
     private bool isDead = false;
+    
+    //테스트 용도
+    Color[] colors = new Color[8]
+    {
+        Color.red,
+        Color.yellow,
+        Color.green,
+        Color.cyan,
+        Color.blue,
+        Color.magenta,
+        Color.gray,
+        Color.white
+    };
+
+    //몬스터 공격 범위 표시해주는 테스트 코드 밸런스 잡을때 필요해요
+    void OnDrawGizmosSelected()
+    {
+        for (int i = 0; i < attackObjs.Length; i++)
+        {
+            Gizmos.color = colors[i];
+            Gizmos.DrawWireSphere(transform.position, attackObjs[i].range);
+        }
+    }
 
     protected override void Start()
     {
@@ -58,7 +80,7 @@ public class EnemyBase : CharacterStats
     {
         for (int i = 0; i < attacks.Count; i++)
         {
-            if (attacks[i].IsCooldownReady() && attacks[i].IsInRange(gameObject, target))
+            if (attacks[i].IsReadyToExecute(gameObject, target))
             {
                 currentAttack = attacks[i];
                 attacks[i].Execute(gameObject, target);
@@ -75,8 +97,7 @@ public class EnemyBase : CharacterStats
     public void OnAttackAnimationEnd()
     {
         isAttacking = false;
-        if (behavior != null)
-            behavior.SetVariableValue("IsAttacking", isAttacking);
+        behavior?.SetVariableValue("IsAttacking", isAttacking);
 
         currentAttack?.ForceCooldownStart();
     }
@@ -150,8 +171,7 @@ public class EnemyBase : CharacterStats
 
         base.Die();
 
-        if (behavior != null)
-            behavior.SetVariableValue("IsDead", true);
+        behavior?.SetVariableValue("IsDead", true);
 
         DropBox();
         Destroy(gameObject);
