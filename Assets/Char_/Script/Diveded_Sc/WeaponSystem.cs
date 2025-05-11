@@ -53,10 +53,38 @@ public class WeaponSystem : MonoBehaviour
 
     void Start()
     {
+        AutoAssignUI();  // 자동 연결
         UpdateAmmoUI();
         defaultFOV = playerCamera.fieldOfView;
         scopeOverlay?.SetActive(false);
         crosshair?.SetActive(true);
+    }
+
+    private void AutoAssignUI()
+    {
+        if (scopeOverlay == null)
+        {
+            scopeOverlay = GameObject.Find("ScopeOverlay");
+            if (scopeOverlay == null)
+                Debug.LogWarning(" WeaponSystem: ScopeOverlay가 자동으로 할당되지 않았습니다.");
+        }
+
+        if (crosshair == null)
+        {
+            crosshair = GameObject.Find("Crosshair");
+            if (crosshair == null)
+                Debug.LogWarning("WeaponSystem: Crosshair가 자동으로 할당되지 않았습니다.");
+        }
+
+        if (ammoText == null)
+        {
+            GameObject ammoObj = GameObject.Find("AmmoText");
+            if (ammoObj != null)
+                ammoText = ammoObj.GetComponent<Text>();
+
+            if (ammoText == null)
+                Debug.LogWarning("WeaponSystem: AmmoText가 자동으로 할당되지 않았습니다.");
+        }
     }
 
     void Update()
@@ -78,16 +106,13 @@ public class WeaponSystem : MonoBehaviour
 
     void FireBulletBasedOnType()
     {
-        // 이펙트: 총구 화염 + 소리
         PlayMuzzleFlash();
         PlayWeaponSound();
 
-        // 항상 카메라 중앙 기준 방향 계산
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         Vector3 targetPoint = ray.origin + ray.direction * 100f;
         Vector3 fireDirection = (targetPoint - muzzle.position).normalized;
 
-        // 탄 생성 (기존 구조 유지)
         GameObject bullet = Instantiate(bulletPrefab, muzzle.position, Quaternion.LookRotation(fireDirection));
         Bullet bulletScript = bullet.GetComponent<Bullet>();
 
