@@ -1,2 +1,29 @@
 fileFormatVersion: 2
 guid: f26779a6b81e7ce4b89bd04a9c712448
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - muzzle: {instanceID: 0}
+  - bulletPrefab: {instanceID: 0}
+  - ammoText: {instanceID: 0}
+  - scopeOverlay: {instanceID: 0}
+  - crosshair: {instanceID: 0}
+  - playerCamera: {instanceID: 0}
+  - cameraHolder: {instanceID: 0}
+  - defaultCamPos: {instanceID: 0}
+  - aimCamPos: {instanceID: 0}
+  - animator: {instanceID: 0}
+  - muzzleFlash: {instanceID: 0}
+  - audioSource: {instanceID: 0}
+  - smgSound: {instanceID: 0}
+  - arSound: {instanceID: 0}
+  - dmrSound: {instanceID: 0}
+  - sniperSound: {instanceID: 0}
+  - shotgunSound: {instanceID: 0}
+  - glSound: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
