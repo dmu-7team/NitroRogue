@@ -771,6 +771,9 @@ GameObject:
   - component: {fileID: 5585805015951844119}
   - component: {fileID: 6507835074403960196}
   - component: {fileID: 3326261204699524952}
+  - component: {fileID: -444254498970016976}
+  - component: {fileID: 2872253783096191498}
+  - component: {fileID: -8865114003521532488}
   m_Layer: 0
   m_Name: SlimePolyart
   m_TagString: Enemy
@@ -831,8 +834,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 3
   attackObjs:
@@ -842,7 +848,12 @@ MonoBehaviour:
   boxPrefab: {fileID: 845490078162693129, guid: e01977033274b7f4d8b7d76d80fdf06b, type: 3}
   damagePopupPrefab: {fileID: 2887878822012969408, guid: 321834f1836dced4a8f4a662c0fee81c, type: 3}
   popupSpawnPoint: {fileID: 7028296636629154919}
-  worldCamera: {fileID: 0}
+  targetVar:
+    GUID:
+      m_Value0: 0
+      m_Value1: 0
+    Name: 
+    m_Value: {fileID: 0}
 --- !u!195 &5585805015951844119
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -880,6 +891,7 @@ MonoBehaviour:
   m_Graph: {fileID: -6902127770538224615, guid: 3644645cf3defba42b1c5930b29d7138, type: 2}
   m_BlackboardVariableOverridesList:
   - rid: 520324379251310806
+  - rid: 9080907499719098626
   m_IsInitialised: 0
   m_IsStarted: 0
   references:
@@ -893,6 +905,14 @@ MonoBehaviour:
           m_Value1: 0
         Name: Self
         m_Value: {fileID: 7153141402127884706}
+    - rid: 9080907499719098626
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10508235337809877687
+          m_Value1: 12089629142269642235
+        Name: Target
+        m_Value: {fileID: 8269937752400224285, guid: 8820f04a47cbf7c4cbfa857b2c107186, type: 3}
 --- !u!54 &3326261204699524952
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -920,6 +940,74 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &-444254498970016976
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7153141402127884706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 2518021647
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
+--- !u!114 &2872253783096191498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7153141402127884706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ff3ba0becae47b8b9381191598957c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 7498142190150400792}
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChangeCorrectionMultiplier: 2
+  useFixedUpdate: 0
+  rotationSensitivity: 0.01
+  positionPrecision: 0.01
+  scalePrecision: 0.01
+--- !u!114 &-8865114003521532488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7153141402127884706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f6f3bf89aa97405989c802ba270f815, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  clientAuthority: 0
+  animator: {fileID: 8035681660144644490}
 --- !u!1 &7446019047767849115
 GameObject:
   m_ObjectHideFlags: 0

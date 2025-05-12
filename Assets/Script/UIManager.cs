@@ -3,9 +3,6 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 
-/// <summary>
-/// 플레이어의 스탯 정보를 UI와 동기화하는 매니저
-/// </summary>
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
@@ -79,8 +76,8 @@ public class UIManager : MonoBehaviour
 
         UpdateHealthUI(stats.CurrentHealth, stats.MaxHealth);
         UpdateExpUI(stats.CurrentExp, stats.ExpToLevelUp);
-        UpdateSpeedUI(stats.moveSpeed);
-        UpdatePowerUI(stats.attackDamage);
+        UpdateSpeedUI(stats.MoveSpeed);         // 수정된 부분
+        UpdatePowerUI(stats.AttackDamage);      // 수정된 부분
 
         if (levelText != null)
         {

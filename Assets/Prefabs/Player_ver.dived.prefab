@@ -2536,6 +2536,7 @@ GameObject:
   - component: {fileID: 2865514762917790362}
   - component: {fileID: 9038747172793516929}
   - component: {fileID: 7925346088279301365}
+  - component: {fileID: 2959877072214285225}
   m_Layer: 0
   m_Name: Player_ver.dived
   m_TagString: Player
@@ -2627,8 +2628,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d879b055902b72f4591751779fd1621a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 100
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 10
   currentExp: 0
@@ -2745,6 +2749,31 @@ MonoBehaviour:
   rotationSensitivity: 0.01
   positionPrecision: 0.01
   scalePrecision: 0.01
+--- !u!114 &2959877072214285225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7929354656396367374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8681d013f7333ce489a520c437d3aac0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  currentHealth: 0
+  maxHealth: 100
+  attackDamage: 10
+  moveSpeed: 5
+  currentExp: 0
+  expToLevelUp: 100
+  level: 1
+  healthPerLevel: 10
+  damagePerLevel: 5
+  speedPerLevel: 0.5
 --- !u!1 &8049450594546008610
 GameObject:
   m_ObjectHideFlags: 0
