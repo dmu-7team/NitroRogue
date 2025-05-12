@@ -19,24 +19,29 @@ public partial class NavigateToTargetAction : Action
     private Vector3 adjustedTargetPosition;
     private float colliderOffset;
 
-    
-
     protected override Status OnStart()
     {
         if (Agent?.Value == null || Target?.Value == null)
         {
-            //Debug.LogWarning("[NavigateToTarget] Agent or Target is null.");
             return Status.Failure;
         }
-        MoveSpeed = (BlackboardVariable<float>)Agent.Value.GetComponent<EnemyBase>().moveSpeed;
+
+        // 수정된 부분: moveSpeed 값을 BlackboardVariable에 할당
+        EnemyBase enemy = Agent.Value.GetComponent<EnemyBase>();
+        if (enemy != null)
+        {
+            MoveSpeed.Value = enemy.MoveSpeed;
+        }
+
         navAgent = Agent.Value.GetComponent<NavMeshAgent>();
         anim = Agent.Value.GetComponent<Animator>();
         colliderOffset = GetColliderOffset();
 
         adjustedTargetPosition = GetAdjustedTargetPosition();
+
         if (navAgent != null && navAgent.isOnNavMesh)
         {
-            navAgent.speed = MoveSpeed;
+            navAgent.speed = MoveSpeed.Value;
             navAgent.stoppingDistance = DistanceThreshold.Value;
             navAgent.updatePosition = true;
             navAgent.updateRotation = true;
@@ -71,6 +76,7 @@ public partial class NavigateToTargetAction : Action
                 anim?.SetFloat("speed", 0f);
                 return Status.Success;
             }
+
             anim?.SetFloat("speed", 1f);
             return Status.Running;
         }
@@ -80,7 +86,7 @@ public partial class NavigateToTargetAction : Action
         direction.y = 0f;
         direction.Normalize();
 
-        Agent.Value.transform.position += direction * MoveSpeed * Time.deltaTime;
+        Agent.Value.transform.position += direction * MoveSpeed.Value * Time.deltaTime;
         Agent.Value.transform.forward = direction;
 
         return Status.Running;
@@ -124,5 +130,3 @@ public partial class NavigateToTargetAction : Action
         return Vector3.Distance(a, b);
     }
 }
-
-

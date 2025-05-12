@@ -15,13 +15,14 @@ public partial class EnemyAttackAction : Action
     protected override Status OnUpdate()
     {
         if (Target.Value == null) return Status.Failure;
+
         EnemyBase enemyBase = Self.Value.GetComponent<EnemyBase>();
         if (enemyBase == null) return Status.Failure;
 
+        // 공격 실행
         enemyBase.UseAllAttack(Target.Value);
         IsAttacking.Value = enemyBase.isAttacking;
 
-        return IsAttacking.Value? Status.Success: Status.Running;
+        return IsAttacking.Value ? Status.Success : Status.Running;
     }
 }
-

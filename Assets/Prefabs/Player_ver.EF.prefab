@@ -2388,6 +2388,7 @@ GameObject:
   - component: {fileID: 3489332963726481834}
   - component: {fileID: 654151041400447612}
   - component: {fileID: 1103428219484028173}
+  - component: {fileID: 6866471980379329976}
   m_Layer: 0
   m_Name: Player_ver.EF
   m_TagString: Player
@@ -2479,8 +2480,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d879b055902b72f4591751779fd1621a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 100
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   currentExp: 0
@@ -2597,6 +2601,31 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
+--- !u!114 &6866471980379329976
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8269937752400224285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8681d013f7333ce489a520c437d3aac0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  currentHealth: 0
+  maxHealth: 100
+  attackDamage: 10
+  moveSpeed: 5
+  currentExp: 0
+  expToLevelUp: 100
+  level: 1
+  healthPerLevel: 10
+  damagePerLevel: 5
+  speedPerLevel: 0.5
 --- !u!1 &8289463576006986533
 GameObject:
   m_ObjectHideFlags: 0

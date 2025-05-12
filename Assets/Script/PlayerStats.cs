@@ -24,12 +24,15 @@ public class PlayerStats : CharacterStats
     public float CurrentExp => currentExp;
     public float ExpToLevelUp => expToLevelUp;
     public int Level => level;
+
     private bool isDead = false;
     private float originalSpeed;
     private float originalDamage;
 
-    protected override void Start()
+    public override void Start()
     {
+        base.Start();
+
         SetHealth(maxHealth, maxHealth);
         UIManager.Instance?.RegisterPlayer(this);
 
@@ -72,7 +75,6 @@ public class PlayerStats : CharacterStats
 
         UIManager.Instance?.UpdateLevelText(level);
         Debug.Log($"레벨 업! 현재 레벨: {level}");
-
     }
 
     protected override void Die()
@@ -95,6 +97,7 @@ public class PlayerStats : CharacterStats
                 break;
         }
     }
+
     public void ApplySpeedBoost(float amount, float duration)
     {
         StartCoroutine(SpeedBoost(amount, duration));
