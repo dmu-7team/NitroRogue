@@ -2405,7 +2405,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3.5, y: 3.5, z: 3.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4869489677161972190}
@@ -2482,7 +2482,7 @@ MonoBehaviour:
   maxHealth: 100
   currentHealth: 100
   attackDamage: 20
-  moveSpeed: 10
+  moveSpeed: 5
   currentExp: 0
   expToLevelUp: 100
   level: 1
@@ -2491,7 +2491,7 @@ MonoBehaviour:
   speedPerLevel: 0.5
   controller: {fileID: 1127815438393555169}
   cameraHolder: {fileID: 6472670531707923904}
-  runSpeed: 20
+  runSpeed: 10
   gravity: 0
   jumpHeight: 40
   mouseSensitivity: 120
