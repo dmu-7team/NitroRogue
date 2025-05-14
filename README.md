@@ -1,5 +1,5 @@
 
-# 🎮 Nitroglycerin
+# 🎮 NitroRogue
 
 ## 🚀 프로젝트 소개
 > ![소개 이미지](images/image.png)
