@@ -1,22 +1,24 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.AI;
-using TMPro;
-using Mirror;
 using Unity.Behavior;
+using TMPro;
+using System.Collections.Generic;
+using Mirror;
+using System.Collections;
 
-[RequireComponent(typeof(NetworkIdentity))]
 public class EnemyBase : CharacterStats
 {
     [Header("공격 관련")]
     public AttackObjectBase[] attackObjs;
+    private List<AttackBase> attacks = new List<AttackBase>();
+    private AttackBase currentAttack;
 
     [Header("애니메이션/AI")]
     private Animator animator;
-    private NetworkAnimator networkAnimator;
-    private BehaviorGraphAgent behaviorAgent;
+    private BehaviorGraphAgent behavior;
     public bool isAttacking = false;
-    private NavMeshAgent agent;
+
     [Header("체력바 UI")]
     public Image healthBarImage;
 
@@ -26,203 +28,194 @@ public class EnemyBase : CharacterStats
     [Header("데미지 팝업")]
     public GameObject damagePopupPrefab;
     public Transform popupSpawnPoint;
+    public Camera worldCamera; //  직접 연결하는 카메라
 
-    [Header("AI 타겟 변수")]
-    [SerializeField] private BlackboardVariable<GameObject> targetVar;
+    private bool isDead = false;
 
-    private GameObject currentTarget;
-
-    public override void Start()
+    //테스트 용도
+    Color[] colors = new Color[8]
     {
-        base.Start();
+        Color.red,
+        Color.yellow,
+        Color.green,
+        Color.cyan,
+        Color.blue,
+        Color.magenta,
+        Color.gray,
+        Color.white
+    };
 
+    //몬스터 공격 범위 표시해주는 테스트 코드 밸런스 잡을때 필요해요
+    void OnDrawGizmosSelected()
+    {
+        for (int i = 0; i < attackObjs.Length; i++)
+        {
+            Gizmos.color = colors[i];
+            Gizmos.DrawWireSphere(transform.position, attackObjs[i].range);
+        }
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+
+        behavior = GetComponent<BehaviorGraphAgent>();
         animator = GetComponent<Animator>();
-        networkAnimator = GetComponent<NetworkAnimator>();
-        behaviorAgent = GetComponent<BehaviorGraphAgent>();
 
-        if (NetworkServer.active && behaviorAgent != null && targetVar != null)
+        if (worldCamera == null)
         {
-            var players = GameObject.FindObjectsByType<PlayerStats>(FindObjectsSortMode.None);
-            GameObject nearestPlayer = null;
-            float minDist = float.MaxValue;
-
-            foreach (var p in players)
-            {
-                float dist = Vector3.Distance(transform.position, p.transform.position);
-                if (dist < minDist)
-                {
-                    minDist = dist;
-                    nearestPlayer = p.gameObject;
-                }
-            }
-
-            if (nearestPlayer != null)
-            {
-                targetVar.Value = nearestPlayer;
-                Debug.Log($"[EnemyBase] Target 설정 완료: {nearestPlayer.name}");
-            }
-            else
-            {
-                Debug.LogWarning("[EnemyBase] 근처에 플레이어를 찾지 못했습니다.");
-            }
-        }
-        else
-        {
-            if (!NetworkServer.active)
-                Debug.LogWarning("[EnemyBase] 서버가 아님. Target 설정 생략.");
-            if (targetVar == null)
-                Debug.LogWarning("[EnemyBase] targetVar가 연결되지 않았습니다.");
+            worldCamera = Camera.main;
         }
 
-        // 디버깅용: Animator 파라미터 확인
-        foreach (AnimatorControllerParameter param in animator.parameters)
+        foreach (var attackObj in attackObjs)
         {
-            Debug.Log($"[Animator] 파라미터 이름: {param.name}, 타입: {param.type}");
-        }
-        agent = GetComponent<NavMeshAgent>();
-        if (!isServer)
-        {
-            agent.enabled = false; // 클라이언트에서는 NavMeshAgent 끔
+            var attackInstance = attackObj.CreateAttackInstance();
+            attackInstance.Initialize(gameObject);
+            attackInstance.lastUsedTime = Time.time;
+            attacks.Add(attackInstance);
         }
 
-    }
-    void Update()
-    {
-        if (!isServer) return;
-
-        if (currentTarget == null)
-        {
-            Debug.DrawRay(transform.position, Vector3.up * 2, Color.gray);
-            return;
-        }
-
-        float dist = Vector3.Distance(transform.position, currentTarget.transform.position);
-        Debug.DrawLine(transform.position, currentTarget.transform.position, Color.red);
-
-        Debug.Log($"[EnemyBase] 거리: {dist}, OnNavMesh={agent.isOnNavMesh}, isStopped={agent.isStopped}");
-
-        if (!isAttacking && dist > 3f)
-        {
-            agent.isStopped = false;
-            agent.SetDestination(currentTarget.transform.position);
-            animator.SetFloat("speed", 1);
-        }
-        else
-        {
-            agent.isStopped = true;
-            animator.SetFloat("speed", 0);
-        }
+        RpcUpdateHealthBar(CurrentHealth, MaxHealth);
     }
 
-    public override void TakeDamage(float damage, GameObject attacker = null)
+    [Server]
+    public virtual void UseAllAttack(GameObject target)
     {
-        base.TakeDamage(damage, attacker);
-        ShowDamagePopup(damage);
-    }
-
-    private void ShowDamagePopup(float damage)
-    {
-        if (damagePopupPrefab != null && popupSpawnPoint != null)
+        for (int i = 0; i < attacks.Count; i++)
         {
-            GameObject popup = Instantiate(damagePopupPrefab, popupSpawnPoint.position, Quaternion.identity);
-            var text = popup.GetComponentInChildren<TextMeshProUGUI>();
-            if (text != null)
+            if (attacks[i].IsReadyToExecute(gameObject, target))
             {
-                text.text = damage.ToString("F0");
+                currentAttack = attacks[i];
+                attacks[i].Execute(gameObject, target);
+
+                isAttacking = true;
+                RpcPlayAttackAnimation(i);
+                return;
             }
         }
+        isAttacking = false;
     }
 
-    protected override void Die()
+    [ClientRpc]
+    void RpcPlayAttackAnimation(int index)
     {
-        base.Die();
-        DropItem();
-
-        if (NetworkServer.active)
-        {
-            NetworkServer.Destroy(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject, 1f);
-        }
+        currentAttack = attacks[index];
+        animator.SetInteger("attackIndex", index);
+        animator.SetTrigger("doAttack");
     }
-
-    private void DropItem()
-    {
-        if (boxPrefab != null)
-        {
-            Instantiate(boxPrefab, transform.position, Quaternion.identity);
-        }
-    }
-
-    public void UseAllAttack(GameObject target)
-    {
-        if (!NetworkServer.active) return;
-
-        currentTarget = target;
-        isAttacking = true;
-
-        // Animator 상태가 Move일 때만 공격 조건을 걸어야 하므로,
-        // 일단 Move 상태로 유도 (SetFloat("speed", 1) 또는 Trigger 활용)
-        animator.Play("Move");
-
-        // 공격 인덱스 지정 (1~8)
-        int attackIndex = Random.Range(1, 9);
-        animator.SetInteger("attackInd", attackIndex);
-        animator.SetBool("doAttack", true);
-
-        Debug.Log($"[EnemyBase] 공격 설정 → attackInd: {attackIndex}");
-    }
-
 
     public void OnAttackAnimationEnd()
     {
-        Debug.Log("[EnemyBase] 공격 애니메이션 종료 → 상태 초기화");
         isAttacking = false;
-        animator.SetBool("doAttack", false);
+        behavior?.SetVariableValue("IsAttacking", isAttacking);
+
+        currentAttack?.ForceCooldownStart();
     }
 
-
-    public void OnAnimationEvent()
+    public void OnAnimationEvent(string eventName)
     {
-        Debug.Log("[EnemyBase] OnAnimationEvent 실행됨");
+        if (currentAttack == null) return;
+        currentAttack.OnAnimationEvent(eventName);
+    }
 
-        if (currentTarget == null)
+    [Server]
+    public override void TakeDamage(float amount, GameObject attacker)
+    {
+        currentHealth -= amount;
+        RpcUpdateHealthBar(CurrentHealth, MaxHealth);
+        RpcShowDamagePopup((int)amount); //  팝업 호출
+
+        if (CurrentHealth <= 0)
         {
-            Debug.LogWarning("[EnemyBase] currentTarget이 null임");
+            Die();
+        }
+    }
+
+    [ClientRpc]
+    private void RpcUpdateHealthBar(float current, float max)
+    {
+        if (healthBarImage != null)
+        {
+            healthBarImage.fillAmount = current / max;
+        }
+    }
+
+    [ClientRpc]
+    private void RpcShowDamagePopup(int amount)
+    {
+        if (damagePopupPrefab == null)
+        {
+            Debug.LogWarning("[EnemyBase] DamagePopup 프리팹이 연결되지 않았습니다.");
             return;
         }
 
-        var stats = currentTarget.GetComponent<CharacterStats>();
-        if (stats == null)
+        Vector3 spawnPos = popupSpawnPoint != null ? popupSpawnPoint.position : transform.position + Vector3.up * 1.5f;
+        Debug.Log($"popupSpawnPoint: {popupSpawnPoint}");
+        GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity, popupSpawnPoint);
+        Debug.Log($"[DamagePopup] Showing damage: {amount}");
+
+        // 텍스트 설정
+        TMP_Text text = popup.GetComponentInChildren<TMP_Text>();
+        if (text != null)
         {
-            Debug.LogWarning("[EnemyBase] currentTarget에 CharacterStats 없음");
-            return;
+            text.text = amount.ToString();
         }
 
-        stats.TakeDamage(attackObjs[0].damage, gameObject);
-        Debug.Log($"→ {currentTarget.name}에게 {attackObjs[0].damage} 데미지!");
-    }
-
-
-    private void OnDestroy()
-    {
-        // 정리 필요 시 처리
-    }
-}
-
-// Animator에 해당 파라미터가 존재하는지 안전하게 확인하는 확장 메서드
-public static class AnimatorExtensions
-{
-    public static bool HasParameter(this Animator animator, string paramName)
-    {
-        foreach (var param in animator.parameters)
+        // 카메라 방향으로 보이게
+        if (worldCamera != null)
         {
-            if (param.name == paramName)
-                return true;
+            popup.transform.LookAt(worldCamera.transform);
+            popup.transform.Rotate(0, 180f, 0);
         }
-        return false;
+        else
+        {
+            Debug.LogWarning("[DamagePopup] worldCamera가 비어있습니다.");
+        }
+
+        // 스케일 및 제거
+        popup.transform.localScale = Vector3.one * 0.01f;
+        Destroy(popup, 1.0f);
+
+    }
+
+    [Server]
+    protected override void Die()
+    {
+        if (isDead) return;
+        isDead = true;
+
+        behavior?.SetVariableValue("IsDead", true);
+        
+        RpcPlayDeathAnimation();
+        DropBox();
+        StartCoroutine(DelayedDestroy());
+    }
+
+    [ClientRpc]
+    void RpcPlayDeathAnimation()
+    {
+        animator.SetTrigger("doDie");
+    }
+
+    [Server]
+    private IEnumerator DelayedDestroy()
+    {
+        yield return new WaitForSeconds(3f);
+        NetworkServer.Destroy(gameObject);
+    }
+
+    [Server]
+    private void DropBox()
+    {
+        if (boxPrefab != null)
+        {
+            GameObject box = Instantiate(boxPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
+            NetworkServer.Spawn(box);
+            Debug.Log("[EnemyBase] 박스 드랍 완료");
+        }
+        else
+        {
+            Debug.LogWarning("[EnemyBase] 드랍할 박스 프리팹이 없습니다.");
+        }
     }
 }
-

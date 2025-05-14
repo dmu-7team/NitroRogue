@@ -20,9 +20,9 @@ public class PlayerMovement : PlayerStats
     private Vector3 velocity;
     private WeaponSystem weaponSystem;
 
-    public override void Start()
+    public override void OnStartServer()
     {
-        base.Start();
+        base.OnStartServer();
         weaponSystem = GetComponent<WeaponSystem>();
     }
 
