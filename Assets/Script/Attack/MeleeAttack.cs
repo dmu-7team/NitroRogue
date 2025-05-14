@@ -1,37 +1,48 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MeleeAttack : AttackBase
 {
     AttackObjectMelee attackObjectMelee;
-    Hitbox hitbox;
+    List<GameObject> attackEntities = new();
+    List<Hitbox> hitboxes = new();
     public override bool Execute(GameObject caster, GameObject target)
     {
         if (target == null) return false;
-        if (attackEntity == null) return false;
-
+        if (attackEntities.Count == 0) return false;
         Vector3 direction = (target.transform.position - caster.transform.position).normalized;
         caster.transform.forward = direction;
 
-        //Debug.Log($"[Attack] {caster.name}이 {target.name}에게 {attackObj.damage} 데미지");
-        hitbox.Initialize(attackObj.damage, caster);
+        foreach (var hitbox in hitboxes)
+        {
+            hitbox.Initialize(attackObj.damage, caster);
+        }
 
         return true;
     }
 
     public override void Initialize(GameObject caster)
     {
-        var hitboxes = caster.GetComponentsInChildren<Hitbox>(true);
-        foreach (var hb in hitboxes)
+        attackEntities.Clear();
+        hitboxes.Clear();
+
+        var allHitboxes = caster.GetComponentsInChildren<Hitbox>(true);
+        foreach (var name in attackObjectMelee.hitboxName)
         {
-            if (hb.name == attackObjectMelee.hitboxName)
+            foreach (var hb in allHitboxes)
             {
-                attackEntity = hb.gameObject;
-                hitbox = attackEntity.GetComponent<Hitbox>();
-                break;
+                if (hb.name == name)
+                {
+                    attackEntities.Add(hb.gameObject);
+                    hitboxes.Add(hb);
+                    break;
+                }
             }
         }
-        if (hitbox == null) {
-            Debug.Log("melee 히트박스 생성해주세요");
+
+        if (hitboxes.Count == 0)
+        {
+            Debug.LogWarning("MeleeAttack: 히트박스를 하나도 찾지 못했습니다.");
         }
     }
 
@@ -39,12 +50,18 @@ public class MeleeAttack : AttackBase
     {
         if (eventName == "EnableAttackEntity")
         {
-            if (attackEntity == null) return;
-            attackEntity.SetActive(true);
+            if (attackEntities.Count == 0) return;
+            foreach (var entity in attackEntities)
+            {
+                entity.SetActive(true);
+            }
         } else if (eventName == "DisableAttackEntity")
         {
-            if (attackEntity == null) return;
-            attackEntity.SetActive(false);
+            if (attackEntities.Count == 0) return;
+            foreach (var entity in attackEntities)
+            {
+                entity.SetActive(false);
+            }
         }
     }
 
