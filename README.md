@@ -24,6 +24,8 @@
 ## 🛠️ 기술 스택
 
 * **Front-end**: Unity
+
+> ![직업 이미지](images/mirror.png)
 * **api**: Mirror
   
 ## 👥 팀원
