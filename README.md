@@ -23,7 +23,7 @@
 
 ## 🛠️ 기술 스택
 > ![직업 이미지](images/uinity.jfif)
-* **Front-end**: Unity
+* **game-engine**: Unity
 
 > ![직업 이미지](images/mirror.png)
 * **api**: Mirror
