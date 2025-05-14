@@ -18,4 +18,5 @@ MonoBehaviour:
   cooldown: 0.5
   range: 1.7
   damage: 2
-  hitboxName: MeleeHitbox
+  hitboxName:
+  - MeleeHitbox
