@@ -16,11 +16,13 @@ public class CharacterStats : NetworkBehaviour
 
     public virtual event Action<float, float> OnHealthChanged;
 
-    public virtual void Start()
+    public override void OnStartServer()
     {
+        base.OnStartServer();
         currentHealth = maxHealth;
     }
 
+    [Server]
     public virtual void SetHealth(float current, float max)
     {
         currentHealth = current;
@@ -28,6 +30,7 @@ public class CharacterStats : NetworkBehaviour
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
+    [Server]
     public virtual void TakeDamage(float damage, GameObject attacker = null)
     {
         currentHealth -= damage;
@@ -39,6 +42,7 @@ public class CharacterStats : NetworkBehaviour
         }
     }
 
+    [Server]
     protected virtual void Die()
     {
         Debug.Log($"{gameObject.name} »ç¸Á");

@@ -29,9 +29,9 @@ public class PlayerStats : CharacterStats
     private float originalSpeed;
     private float originalDamage;
 
-    public override void Start()
+    public override void OnStartServer()
     {
-        base.Start();
+        base.OnStartServer();
 
         SetHealth(maxHealth, maxHealth);
         UIManager.Instance?.RegisterPlayer(this);

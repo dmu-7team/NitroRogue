@@ -27407,7 +27407,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   enemyPrefab: {fileID: 6919168529496773260, guid: fab2ffe5e0338324fab515d8605ef080, type: 3}
-  spawnInterval: 10
+  spawnInterval: 9999
   spawnPoints:
   - {fileID: 1679209264}
 --- !u!1001 &576865133

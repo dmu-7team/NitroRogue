@@ -18,8 +18,8 @@ public class MonsterSpawner : NetworkBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(spawnInterval);
             SpawnEnemy();
+            yield return new WaitForSeconds(spawnInterval);
         }
     }
 

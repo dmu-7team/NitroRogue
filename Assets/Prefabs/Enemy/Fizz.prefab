@@ -1018,12 +1018,7 @@ MonoBehaviour:
   boxPrefab: {fileID: 845490078162693129, guid: e01977033274b7f4d8b7d76d80fdf06b, type: 3}
   damagePopupPrefab: {fileID: 2887878822012969408, guid: 321834f1836dced4a8f4a662c0fee81c, type: 3}
   popupSpawnPoint: {fileID: 3494356421046586297}
-  targetVar:
-    GUID:
-      m_Value0: 0
-      m_Value1: 0
-    Name: 
-    m_Value: {fileID: 0}
+  worldCamera: {fileID: 0}
 --- !u!195 &3957005394629393417
 NavMeshAgent:
   m_ObjectHideFlags: 0
