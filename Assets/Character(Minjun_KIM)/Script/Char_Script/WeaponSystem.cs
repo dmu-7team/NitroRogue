@@ -47,44 +47,19 @@ public class WeaponSystem : MonoBehaviour
     [SerializeField] private AudioClip shotgunSound;
     [SerializeField] private AudioClip glSound;
 
+    [Header("Trail Effect")]
+    [SerializeField] private GameObject bulletTrailPrefab;
+
     private bool isReloading = false;
     private bool isScoped = false;
     private float defaultFOV;
 
     void Start()
     {
-        AutoAssignUI();  // 자동 연결
         UpdateAmmoUI();
         defaultFOV = playerCamera.fieldOfView;
         scopeOverlay?.SetActive(false);
         crosshair?.SetActive(true);
-    }
-
-    private void AutoAssignUI()
-    {
-        if (scopeOverlay == null)
-        {
-            scopeOverlay = GameObject.Find("ScopeOverlay");
-            if (scopeOverlay == null)
-                Debug.LogWarning(" WeaponSystem: ScopeOverlay가 자동으로 할당되지 않았습니다.");
-        }
-
-        if (crosshair == null)
-        {
-            crosshair = GameObject.Find("Crosshair");
-            if (crosshair == null)
-                Debug.LogWarning("WeaponSystem: Crosshair가 자동으로 할당되지 않았습니다.");
-        }
-
-        if (ammoText == null)
-        {
-            GameObject ammoObj = GameObject.Find("AmmoText");
-            if (ammoObj != null)
-                ammoText = ammoObj.GetComponent<Text>();
-
-            if (ammoText == null)
-                Debug.LogWarning("WeaponSystem: AmmoText가 자동으로 할당되지 않았습니다.");
-        }
     }
 
     void Update()
@@ -113,27 +88,90 @@ public class WeaponSystem : MonoBehaviour
         Vector3 targetPoint = ray.origin + ray.direction * 100f;
         Vector3 fireDirection = (targetPoint - muzzle.position).normalized;
 
-        GameObject bullet = Instantiate(bulletPrefab, muzzle.position, Quaternion.LookRotation(fireDirection));
-        Bullet bulletScript = bullet.GetComponent<Bullet>();
-
-        if (bulletScript != null)
+        /*
+        // ❌ GL은 현재 사용하지 않음
+        if (weaponType == WeaponType.GL && bulletPrefab != null)
         {
-            bool isProj = (weaponType == WeaponType.SG || weaponType == WeaponType.GL);
-            bulletScript.Init(fireDirection, bulletForce, isProj);
+            GameObject bullet = Instantiate(bulletPrefab, muzzle.position, Quaternion.LookRotation(fireDirection));
+            Bullet bulletScript = bullet.GetComponent<Bullet>();
+            bulletScript?.Init(fireDirection, bulletForce, true);
+            return;
+        }
+        */
 
-            if (!isProj)
+        if (weaponType == WeaponType.SG)
+        {
+            int pelletCount = 8;
+            float spreadAngle = 6f;
+
+            for (int i = 0; i < pelletCount; i++)
             {
-                int layerMask = LayerMask.GetMask("DamageCollider", "Map");
-                if (Physics.Raycast(ray, out RaycastHit hit, 100f, layerMask))
+                Vector3 spreadDir = ApplySpread(playerCamera.transform.forward, spreadAngle);
+                Ray pelletRay = new Ray(playerCamera.transform.position, spreadDir);
+
+                if (Physics.Raycast(pelletRay, out RaycastHit hit, 100f))
                 {
-                    if (hit.collider.gameObject.layer == LayerMask.NameToLayer("DamageCollider"))
-                    {
-                        var enemy = hit.collider.GetComponentInParent<EnemyBase>();
-                        enemy?.TakeDamage(weaponDamage, gameObject);
-                    }
+                    EnemyHealth enemy = hit.collider.GetComponent<EnemyHealth>();
+                    if (enemy != null)
+                        enemy.TakeDamage(weaponDamage);
+
+                    if (ShouldDrawTrail())
+                        CreateBulletTrail(muzzle.position, hit.point);
+                }
+                else
+                {
+                    if (ShouldDrawTrail())
+                        CreateBulletTrail(muzzle.position, muzzle.position + spreadDir * 100f);
                 }
             }
         }
+        else
+        {
+            if (Physics.Raycast(ray, out RaycastHit hit, 100f))
+            {
+                EnemyHealth enemy = hit.collider.GetComponent<EnemyHealth>();
+                if (enemy != null)
+                    enemy.TakeDamage(weaponDamage);
+
+                if (ShouldDrawTrail())
+                    CreateBulletTrail(muzzle.position, hit.point);
+            }
+            else
+            {
+                if (ShouldDrawTrail())
+                    CreateBulletTrail(muzzle.position, muzzle.position + fireDirection * 100f);
+            }
+        }
+    }
+
+    Vector3 ApplySpread(Vector3 direction, float angle)
+    {
+        float yaw = Random.Range(-angle, angle);
+        float pitch = Random.Range(-angle, angle);
+        return Quaternion.Euler(pitch, yaw, 0) * direction;
+    }
+
+    void CreateBulletTrail(Vector3 start, Vector3 end)
+    {
+        if (bulletTrailPrefab == null) return;
+
+        GameObject trail = Instantiate(bulletTrailPrefab, start, Quaternion.identity);
+        LineRenderer lr = trail.GetComponent<LineRenderer>();
+        if (lr != null)
+        {
+            lr.SetPosition(0, start);
+            lr.SetPosition(1, end);
+        }
+
+        float trailLifetime = (weaponType == WeaponType.Sniper) ? 0.2f : 0.05f;
+        Destroy(trail, trailLifetime);
+    }
+
+    bool ShouldDrawTrail()
+    {
+        return weaponType == WeaponType.SMG || weaponType == WeaponType.AR ||
+               weaponType == WeaponType.DMR || weaponType == WeaponType.Sniper ||
+               weaponType == WeaponType.SG;
     }
 
     void PlayMuzzleFlash()
