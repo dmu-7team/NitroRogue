@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4160449851668915}
   - component: {fileID: 148771797237050623}
   - component: {fileID: 255709012759055500}
+  - component: {fileID: 6677061997992397862}
   m_Layer: 0
   m_Name: TreasureChest
   m_TagString: TreasureChest
@@ -98,6 +99,23 @@ MonoBehaviour:
   itemOptions:
   - {fileID: 11400000, guid: e9e8f45278f20a149afc2f4faf9a7891, type: 2}
   - {fileID: 11400000, guid: 037494a928c02894d99355a86325bd9f, type: 2}
+--- !u!114 &6677061997992397862
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 845490078162693129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 1372196655
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1001 &8436616571637706202
 PrefabInstance:
   m_ObjectHideFlags: 0

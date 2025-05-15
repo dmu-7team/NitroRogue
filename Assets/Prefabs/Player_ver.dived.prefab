@@ -2537,6 +2537,7 @@ GameObject:
   - component: {fileID: 9038747172793516929}
   - component: {fileID: 7925346088279301365}
   - component: {fileID: 2959877072214285225}
+  - component: {fileID: 7346288222995718857}
   m_Layer: 0
   m_Name: Player_ver.dived
   m_TagString: Player
@@ -2774,6 +2775,22 @@ MonoBehaviour:
   healthPerLevel: 10
   damagePerLevel: 5
   speedPerLevel: 0.5
+--- !u!114 &7346288222995718857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7929354656396367374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51c30080cab63164bb17e3e3f079d0e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  slots: []
 --- !u!1 &8049450594546008610
 GameObject:
   m_ObjectHideFlags: 0

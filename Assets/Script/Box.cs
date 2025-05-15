@@ -1,34 +1,68 @@
 using UnityEngine;
+using Mirror;
 
-public class Box : MonoBehaviour
+namespace NitroGame
 {
-    public ItemData[] itemOptions; // 드랍 가능한 아이템 리스트
-    private bool isOpened = false; // 중복 지급 방지용
-
-    private void OnTriggerEnter(Collider other)
+    public class Box : NetworkBehaviour
     {
-        if (isOpened) return; // 이미 열렸으면 아무것도 안 함
+        public ItemData[] itemOptions;
+        private bool isOpened = false;
 
-        if (other.CompareTag("Player"))
+        private GameObject currentPlayer;
+        private bool playerInRange = false;
+
+        private void OnTriggerEnter(Collider other)
         {
-            isOpened = true; // 첫 번째 충돌만 처리
-            GiveItemToPlayer(other.gameObject);
-            Destroy(gameObject); // 박스 오브젝트 삭제
+            if (other.CompareTag("Player"))
+            {
+                currentPlayer = other.gameObject;
+                playerInRange = true;
+            }
         }
-    }
 
-    private void GiveItemToPlayer(GameObject player)
-    {
-        if (itemOptions.Length == 0) return;
-
-        int index = Random.Range(0, itemOptions.Length);
-        ItemData selectedItem = itemOptions[index];
-
-        Inventory inventory = player.GetComponent<Inventory>();
-        if (inventory != null)
+        private void OnTriggerExit(Collider other)
         {
-            inventory.AddItem(selectedItem);
-            Debug.Log($"[Box] {selectedItem.name} 지급됨");
+            if (other.CompareTag("Player") && other.gameObject == currentPlayer)
+            {
+                currentPlayer = null;
+                playerInRange = false;
+            }
+        }
+
+        private void Update()
+        {
+            if (isOpened) return;
+
+            if (playerInRange && currentPlayer != null && Input.GetKeyDown(KeyCode.E))
+            {
+                var inventory = currentPlayer.GetComponent<Inventory>();
+                var identity = currentPlayer.GetComponent<NetworkIdentity>();
+
+                if (inventory != null && identity != null)
+                {
+                    inventory.CmdPickupBox(this.netIdentity);
+                    isOpened = true;
+                }
+            }
+        }
+
+        public void GiveItemToPlayer(GameObject player)
+        {
+            if (itemOptions == null || itemOptions.Length == 0) return;
+
+            int index = Random.Range(0, itemOptions.Length);
+            ItemData selectedItem = itemOptions[index];
+
+            Inventory inventory = player.GetComponent<Inventory>();
+            if (inventory != null)
+            {
+                inventory.AddItem(selectedItem);
+                Debug.Log($"[Box] {selectedItem.name} 지급 완료");
+            }
+            else
+            {
+                Debug.LogWarning("[Box] Inventory 컴포넌트를 찾을 수 없습니다.");
+            }
         }
     }
 }
