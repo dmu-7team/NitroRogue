@@ -2870,6 +2870,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f26779a6b81e7ce4b89bd04a9c712448, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   weaponType: 0
   muzzle: {fileID: 3730166463358528294}
   bulletPrefab: {fileID: 839224178500407364, guid: 2e85b9f5bcc94f2448d106859125dfd7, type: 3}
@@ -2896,6 +2899,7 @@ MonoBehaviour:
   sniperSound: {fileID: 0}
   shotgunSound: {fileID: 0}
   glSound: {fileID: 0}
+  bulletTrailPrefab: {fileID: 7841963988429107884, guid: a0d4757442a469c43a553966959f328d, type: 3}
 --- !u!114 &3489332963726481834
 MonoBehaviour:
   m_ObjectHideFlags: 0
