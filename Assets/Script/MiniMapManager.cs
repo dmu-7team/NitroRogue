@@ -1,91 +1,111 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
+using Mirror;
 
 public class MiniMapManager : MonoBehaviour
 {
-    [Header("카메라 설정")]
-    public Transform player;              // 플레이어 트랜스폼
-    public Camera miniMapCamera;           // 미니맵 카메라
+    public Camera miniMapCamera;
+    public Vector2 worldSize = new Vector2(100, 100);
+    public Vector2 miniMapSize = new Vector2(230, 230);
 
-    [Header("미니맵 설정")]
-    public RectTransform miniMapRect;      // 미니맵 UI 영역 (RawImage)
-    public Vector2 worldSize = new Vector2(100, 100);    // 실제 월드 크기
-    public Vector2 miniMapSize = new Vector2(150, 150);  // 미니맵 UI 크기(px)
+    public RectTransform miniMapRect;
+    public Transform iconParent;
+    public RectTransform playerIconPrefab;
+    public RectTransform enemyIconPrefab;
 
-    [Header("아이콘 설정")]
-    public RectTransform playerIcon;       // 플레이어 아이콘
-    public MiniMapIconData[] monsterIcons; // 몬스터 아이콘들 (타겟 + 아이콘 세트)
+    private Dictionary<Transform, RectTransform> trackedIcons = new();
+
+    void Start()
+    {
+        InvokeRepeating(nameof(UpdateTrackedObjects), 0f, 1f);
+    }
 
     void LateUpdate()
     {
-        UpdateMiniMapCamera();
-        UpdateIcons();
-    }
+        List<Transform> toRemove = new();
 
-    // 플레이어 따라 카메라 이동
-    private void UpdateMiniMapCamera()
-    {
-        if (player != null && miniMapCamera != null)
+        foreach (var pair in trackedIcons)
         {
-            Vector3 newPosition = player.position;
-            newPosition.y = miniMapCamera.transform.position.y; // 높이 고정
-            miniMapCamera.transform.position = newPosition;
-        }
-    }
-
-    // 아이콘 위치 업데이트
-    private void UpdateIcons()
-    {
-        if (miniMapRect == null) return;
-
-        // 플레이어 아이콘 이동
-        if (playerIcon != null && player != null)
-        {
-            playerIcon.anchoredPosition = WorldToMiniMapPosition(player.position);
-        }
-
-        // 몬스터 아이콘들 이동
-        foreach (var iconData in monsterIcons)
-        {
-            if (iconData != null && iconData.target != null && iconData.icon != null)
+            if (pair.Key == null || pair.Value == null)
             {
-                iconData.icon.anchoredPosition = WorldToMiniMapPosition(iconData.target.position);
+                if (pair.Value != null)
+                    Destroy(pair.Value.gameObject);
+                toRemove.Add(pair.Key);
+                continue;
+            }
+
+            pair.Value.anchoredPosition = WorldToMiniMapPosition(pair.Key.position);
+        }
+
+        foreach (var r in toRemove)
+            trackedIcons.Remove(r);
+
+        UpdateMiniMapCamera();
+    }
+
+    void UpdateTrackedObjects()
+    {
+        foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            NetworkIdentity net = player.GetComponent<NetworkIdentity>();
+            if (net != null && net.isLocalPlayer && !trackedIcons.ContainsKey(player.transform))
+            {
+                RectTransform icon = Instantiate(playerIconPrefab, iconParent);
+                icon.gameObject.SetActive(true);
+                trackedIcons.Add(player.transform, icon);
+            }
+        }
+
+        foreach (var enemy in GameObject.FindGameObjectsWithTag("Enemy"))
+        {
+            if (!trackedIcons.ContainsKey(enemy.transform))
+            {
+                RectTransform icon = Instantiate(enemyIconPrefab, iconParent);
+                icon.gameObject.SetActive(true);
+                trackedIcons.Add(enemy.transform, icon);
             }
         }
     }
 
-    // 월드 좌표를 미니맵 좌표로 변환
-    private Vector2 WorldToMiniMapPosition(Vector3 worldPosition)
+    void UpdateMiniMapCamera()
     {
-        // World 중심 보정
-        float halfWorldWidth = worldSize.x * 0.5f;
-        float halfWorldHeight = worldSize.y * 0.5f;
+        foreach (var kv in trackedIcons)
+        {
+            if (kv.Key.CompareTag("Player"))
+            {
+                NetworkIdentity net = kv.Key.GetComponent<NetworkIdentity>();
+                if (net != null && net.isLocalPlayer)
+                {
+                    Vector3 newPos = kv.Key.position;
+                    newPos.y = miniMapCamera.transform.position.y;
+                    miniMapCamera.transform.position = newPos;
+                    break;
+                }
+            }
+        }
+    }
 
-        float normalizedX = (worldPosition.x + halfWorldWidth) / worldSize.x;
-        float normalizedY = (worldPosition.z + halfWorldHeight) / worldSize.y;
+    Vector2 WorldToMiniMapPosition(Vector3 worldPos)
+    {
+        float halfW = worldSize.x * 0.5f;
+        float halfH = worldSize.y * 0.5f;
 
-        float miniMapWidth = miniMapSize.x;
-        float miniMapHeight = miniMapSize.y;
+        float normX = (worldPos.x + halfW) / worldSize.x;
+        float normY = (worldPos.z + halfH) / worldSize.y;
 
-        float posX = (normalizedX * miniMapWidth) - (miniMapWidth * 0.5f);
-        float posY = (normalizedY * miniMapHeight) - (miniMapHeight * 0.5f);
+        float posX = (normX * miniMapSize.x) - (miniMapSize.x * 0.5f);
+        float posY = (normY * miniMapSize.y) - (miniMapSize.y * 0.5f);
 
         return new Vector2(posX, posY);
     }
 
-    // 몬스터 아이콘 추가
-    public void AddMonsterIcon(MiniMapIconData iconData)
+    public void RemoveTarget(Transform target)
     {
-        var tempList = new System.Collections.Generic.List<MiniMapIconData>(monsterIcons);
-        tempList.Add(iconData);
-        monsterIcons = tempList.ToArray();
+        if (trackedIcons.ContainsKey(target))
+        {
+            Destroy(trackedIcons[target].gameObject);
+            trackedIcons.Remove(target);
+        }
     }
-}
-
-// 아이콘 데이터 클래스
-[System.Serializable]
-public class MiniMapIconData
-{
-    public Transform target;         // 따라갈 대상 (플레이어나 몬스터 Transform)
-    public RectTransform icon;       // UI 상의 아이콘
 }
