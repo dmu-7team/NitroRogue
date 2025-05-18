@@ -13,7 +13,6 @@ public class PlayerController2 : NetworkBehaviour
 
     public override void OnStartAuthority()
     {
-        base.OnStartAuthority();
         if (!isLocalPlayer) return;
 
         movement = GetComponent<PlayerMovement>();
