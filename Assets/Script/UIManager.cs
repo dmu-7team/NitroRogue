@@ -116,7 +116,7 @@ public class UIManager : MonoBehaviour
 
         if (healthText != null)
         {
-            healthText.text = $"HP {current:F0} / {max:F0}";
+            healthText.text = $"체력 {current:F0} / {max:F0}";
         }
     }
 
@@ -131,7 +131,7 @@ public class UIManager : MonoBehaviour
 
         if (expText != null)
         {
-            expText.text = $"EXP {current:F0} / {toLevelUp:F0}";
+            expText.text = $"경험치 {current:F0} / {toLevelUp:F0}";
         }
     }
 
@@ -139,7 +139,7 @@ public class UIManager : MonoBehaviour
     {
         if (powerText != null)
         {
-            powerText.text = $"Power {current:F0}";
+            powerText.text = $"파워 {current:F0}";
         }
     }
 
@@ -147,7 +147,7 @@ public class UIManager : MonoBehaviour
     {
         if (speedText != null)
         {
-            speedText.text = $"Speed {current:F1}";
+            speedText.text = $"스피드 {current:F1}";
         }
     }
 
