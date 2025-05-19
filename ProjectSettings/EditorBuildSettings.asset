@@ -8,6 +8,15 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/WoojinScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/Title.unity
+    guid: 0081c7a75d886244b960c9ab34d0c61b
+  - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: b294091ce0d9e9d43a20a3abef3ba034
+  - enabled: 1
+    path: Assets/Scenes/SampleScene.unity
+    guid: 479d9e473931dd94b86f11bbad00be61
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 99f9c9493070a9d4c979a8fec7c5a8d3, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
