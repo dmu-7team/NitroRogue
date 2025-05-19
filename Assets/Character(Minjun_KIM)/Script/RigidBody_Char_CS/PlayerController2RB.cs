@@ -1,21 +1,21 @@
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerMovementRB))]
-[RequireComponent(typeof(WeaponSystem))]
+[RequireComponent(typeof(WeaponSystemRB))]
 public class PlayerController2RB : MonoBehaviour
 {
     private PlayerMovementRB movement;
-    private WeaponSystem weaponSystem;
+    private WeaponSystemRB weaponSystemrb;
 
     void Start()
     {
         movement = GetComponent<PlayerMovementRB>();
-        weaponSystem = GetComponent<WeaponSystem>();
+        weaponSystemrb = GetComponent<WeaponSystemRB>();
     }
 
     void Update()
     {
-        weaponSystem.HandleFire();     // 사격
-        weaponSystem.HandleReload();   // 재장전
+        weaponSystemrb.HandleFire();     // 사격
+        weaponSystemrb.HandleReload();   // 재장전
     }
 }
