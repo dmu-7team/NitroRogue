@@ -189,6 +189,8 @@ public class EnemyBase : CharacterStats
         RpcPlayDeathAnimation();
         DropBox();
         StartCoroutine(DelayedDestroy());
+        NetworkMissionManager.Instance.CheckMissionProgress();
+
     }
 
     [ClientRpc]
