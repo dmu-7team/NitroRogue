@@ -1,29 +1,89 @@
+using Mirror;
 using UnityEngine;
+using Mirror;
+using Unity.AppUI.UI;
+using System.Collections;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(WeaponSystem))]
-public class PlayerController2 : MonoBehaviour
+public class PlayerController2 : NetworkBehaviour
 {
     private PlayerMovement movement;
     private WeaponSystem weaponSystem;
 
-    void Start()
+    public override void OnStartAuthority()
     {
+        if (!isLocalPlayer) return;
+
         movement = GetComponent<PlayerMovement>();
         weaponSystem = GetComponent<WeaponSystem>();
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
     void Update()
     {
-        movement.HandleMove();               // ÀÌµ¿
-        weaponSystem.HandleFire();           // »ç°Ý
-        weaponSystem.HandleReload();         // ÀçÀåÀü
+        if (!isLocalPlayer) return;
+
+        movement.HandleMove();
+        movement.HandleLook();
+        weaponSystem.HandleFire();
+        weaponSystem.HandleReload();
+        weaponSystem.HandleAim();
     }
 
-    void LateUpdate()
+    //  Mirror Ä¿ï¿½Çµï¿½: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã» (WeaponSystemï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½ï¿½)
+    [Command]
+    public void CmdDealDamage(GameObject enemyObj, float damage)
     {
-        movement.HandleLook();               // ½ÃÁ¡ È¸Àü (¾Ö´Ï¸ÞÀÌ¼Ç ÀÌÈÄ Ã³¸® ¡æ Ä«¸Þ¶ó Èçµé¸² ¹æÁö)
+        if (enemyObj == null)
+        {
+            Debug.LogWarning("[CMD]  enemyObj is null");
+            return;
+        }
+
+        EnemyBase enemy = enemyObj.GetComponent<EnemyBase>();
+        if (enemy != null)
+        {
+            Debug.Log($"[CMD] EnemyBase È®ï¿½ï¿½: {enemy.name}");
+            enemy.TakeDamage(damage, gameObject);
+        }
+        else
+        {
+            Debug.LogWarning("[CMD]  EnemyBase ï¿½ï¿½ï¿½ï¿½");
+        }
+    }
+
+    [Command]
+    public void CmdSpawnTrail(Vector3 start, Vector3 end)
+    {
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ bulletTrailPrefabï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¾ï¿½ ï¿½ï¿½
+        WeaponSystem weapon = GetComponent<WeaponSystem>();
+        if (weapon == null)
+        {
+            Debug.LogError("[CMD] WeaponSystemï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
+            return;
+        }
+
+        GameObject trail = Instantiate(weapon.bulletTrailPrefab, start, Quaternion.identity);
+        NetworkServer.Spawn(trail);
+
+        var lr = trail.GetComponent<LineRenderer>();
+        if (lr != null)
+        {
+            lr.SetPosition(0, start);
+            lr.SetPosition(1, end);
+        }
+
+        StartCoroutine(DestroyAfter(trail, 0.1f));
+    }
+
+
+
+    private IEnumerator DestroyAfter(GameObject obj, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        NetworkServer.Destroy(obj);
     }
 }
