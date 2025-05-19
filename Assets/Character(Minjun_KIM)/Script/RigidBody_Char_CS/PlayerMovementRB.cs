@@ -21,14 +21,14 @@ public class PlayerMovementRB : MonoBehaviour
     private Rigidbody rb;
     private float xRotation = 0f;
     private bool isGrounded;
-    private WeaponSystem weaponSystem;
+    private WeaponSystemRB weaponSystemrb;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
 
-        weaponSystem = GetComponent<WeaponSystem>();
+        weaponSystemrb = GetComponent<WeaponSystemRB>();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -38,7 +38,7 @@ public class PlayerMovementRB : MonoBehaviour
         HandleLook();
         HandleJump();
         HandleGroundCheck();
-        
+
     }
 
     void FixedUpdate()
@@ -67,7 +67,7 @@ public class PlayerMovementRB : MonoBehaviour
         bool isMoving = moveDirection.magnitude > 0.1f;
 
         // ✅ 기존과 동일한 달리기 조건
-        bool isRunning = Input.GetKey(KeyCode.LeftShift) && z > 0f && isMoving && !weaponSystem.IsReloading();
+        bool isRunning = Input.GetKey(KeyCode.LeftShift) && z > 0f && isMoving && !weaponSystemrb.IsReloading();
         float currentSpeed = isRunning ? runSpeed : moveSpeed;
 
         Vector3 velocity = moveDirection.normalized * currentSpeed;
@@ -83,7 +83,7 @@ public class PlayerMovementRB : MonoBehaviour
 
     void HandleJump()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded && !weaponSystem.IsReloading())
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded && !weaponSystemrb.IsReloading())
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             animator?.SetTrigger("ClickSpacebar");

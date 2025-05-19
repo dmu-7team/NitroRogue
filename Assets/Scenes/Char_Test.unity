@@ -212,7 +212,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!81 &330585544
 AudioListener:
   m_ObjectHideFlags: 0
@@ -604,41 +604,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2081826101}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &500916168
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5852672803415713782}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b8cbbd4c5c537f4280e0a973f1f9c1d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &500916169
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5852672803415713782}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26318abe99d27e14997396dfd951b761, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 5
-  runSpeed: 8
-  jumpForce: 5
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 512
-  groundCheck: {fileID: 4396855209076702760}
-  groundDistance: 0.3
-  cameraHolder: {fileID: 118972733278804047}
-  mouseSensitivity: 100
-  animator: {fileID: 6653696991071303277}
 --- !u!1 &654128340
 GameObject:
   m_ObjectHideFlags: 0
@@ -10717,45 +10682,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1534972033976697058
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5852672803415713782}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f26779a6b81e7ce4b89bd04a9c712448, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponType: 0
-  muzzle: {fileID: 7770067052569915066}
-  bulletPrefab: {fileID: 0}
-  bulletForce: 100
-  weaponDamage: 1
-  currentAmmo: 30
-  maxAmmo: 30
-  ammoText: {fileID: 928366654}
-  scopeOverlay: {fileID: 208209614}
-  crosshair: {fileID: 755908079}
-  playerCamera: {fileID: 6292993524395312546}
-  cameraHolder: {fileID: 118972733278804047}
-  defaultCamPos: {fileID: 7542434076274584045}
-  aimCamPos: {fileID: 4053755803730918503}
-  camTransitionSpeed: 5
-  scopedFOV: 30
-  aimMode: 0
-  animator: {fileID: 6653696991071303277}
-  muzzleFlash: {fileID: 8864215205976785012}
-  audioSource: {fileID: 0}
-  smgSound: {fileID: 0}
-  arSound: {fileID: 0}
-  dmrSound: {fileID: 0}
-  sniperSound: {fileID: 0}
-  shotgunSound: {fileID: 0}
-  glSound: {fileID: 0}
-  bulletTrailPrefab: {fileID: 235673213667241877, guid: 6c4ffb140e19fe6439d7075e4941926d, type: 3}
 --- !u!1 &1602316771376051536
 GameObject:
   m_ObjectHideFlags: 0
@@ -26718,11 +26644,11 @@ GameObject:
   - component: {fileID: 6653696991071303277}
   - component: {fileID: 8373283779324353124}
   - component: {fileID: 2467582355008864968}
-  - component: {fileID: 1534972033976697058}
-  - component: {fileID: 500916169}
-  - component: {fileID: 500916168}
+  - component: {fileID: 8373283779324353127}
+  - component: {fileID: 8373283779324353126}
+  - component: {fileID: 8373283779324353125}
   m_Layer: 0
-  m_Name: 'Player_ver.Test '
+  m_Name: Player_ver.Rigid
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37967,6 +37893,80 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &8373283779324353125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5852672803415713782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b8cbbd4c5c537f4280e0a973f1f9c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8373283779324353126
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5852672803415713782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b91676cb35bb59441baaf0a201b918ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponType: 0
+  muzzle: {fileID: 7770067052569915066}
+  bulletPrefab: {fileID: 0}
+  bulletForce: 100
+  weaponDamage: 1
+  currentAmmo: 30
+  maxAmmo: 30
+  ammoText: {fileID: 928366654}
+  scopeOverlay: {fileID: 208209614}
+  crosshair: {fileID: 755908079}
+  playerCamera: {fileID: 6292993524395312546}
+  cameraHolder: {fileID: 118972733278804047}
+  defaultCamPos: {fileID: 7542434076274584045}
+  aimCamPos: {fileID: 4053755803730918503}
+  camTransitionSpeed: 5
+  scopedFOV: 30
+  aimMode: 0
+  animator: {fileID: 6653696991071303277}
+  muzzleFlash: {fileID: 8864215205976785012}
+  audioSource: {fileID: 0}
+  smgSound: {fileID: 0}
+  arSound: {fileID: 0}
+  dmrSound: {fileID: 0}
+  sniperSound: {fileID: 0}
+  shotgunSound: {fileID: 0}
+  glSound: {fileID: 0}
+  bulletTrailPrefab: {fileID: 235673213667241877, guid: 6c4ffb140e19fe6439d7075e4941926d, type: 3}
+--- !u!114 &8373283779324353127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5852672803415713782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26318abe99d27e14997396dfd951b761, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 5
+  runSpeed: 8
+  jumpForce: 5
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 512
+  groundCheck: {fileID: 4396855209076702760}
+  groundDistance: 0.3
+  cameraHolder: {fileID: 118972733278804047}
+  mouseSensitivity: 100
+  animator: {fileID: 6653696991071303277}
 --- !u!4 &8584913158413197443
 Transform:
   m_ObjectHideFlags: 0
