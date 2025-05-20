@@ -25,7 +25,7 @@ public class PlayerControllerRBM : NetworkBehaviour
         if (!isLocalPlayer) return;
 
         movement.HandleLook();
-        weaponSystem.HandleFire();
+        //weaponSystem.HandleFire();
         weaponSystem.HandleReload();
     }
 
