@@ -16385,7 +16385,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponType: 0
   muzzle: {fileID: 8921274276070274184}
-  bulletPrefab: {fileID: 0}
+  bulletPrefab: {fileID: 839224178500407364, guid: 2e85b9f5bcc94f2448d106859125dfd7, type: 3}
   bulletForce: 100
   weaponDamage: 1
   currentAmmo: 30
