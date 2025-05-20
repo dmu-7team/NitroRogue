@@ -1,14 +1,15 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System;
 using System.Collections;
-
+using Mirror;
 /// <summary>
-/// ÇÃ·¹ÀÌ¾î Àü¿ë ½ºÅÈ: °æÇèÄ¡, ·¹º§, Ã¼·Â Áõ°¡ µî
+/// í”Œë ˆì´ì–´ ì „ìš© ìŠ¤íƒ¯: ê²½í—˜ì¹˜, ë ˆë²¨, ì²´ë ¥ ì¦ê°€ ë“±
 /// </summary>
 public class PlayerStats : CharacterStats
 {
-    public event Action<float, float> OnExpChanged;     // ÇöÀç °æÇèÄ¡, ÇÊ¿ä °æÇèÄ¡ Àü´Ş
-    public event Action<int> OnLevelChanged;            // ·¹º§ º¯°æ ½Ã È£Ãâ (UI¿¡¼­ »ç¿ë °¡´É)
+    public override event Action<float, float> OnHealthChanged;
+    public event Action<float, float> OnExpChanged;
+    public event Action<int> OnLevelChanged;
     public event Action<float> OnSpeedChanged;
     public event Action<float> OnPowerChanged;
 
@@ -16,7 +17,6 @@ public class PlayerStats : CharacterStats
     [SerializeField] private float expToLevelUp = 100f;
     [SerializeField] private int level = 1;
 
-    // ·¹º§¾÷ ½Ã ½ºÅÈ Áõ°¡ ¼öÄ¡
     public float healthPerLevel = 10f;
     public float damagePerLevel = 5f;
     public float speedPerLevel = 0.5f;
@@ -25,14 +25,12 @@ public class PlayerStats : CharacterStats
     public float ExpToLevelUp => expToLevelUp;
     public int Level => level;
 
-    private bool isDead = false;
     private float originalSpeed;
     private float originalDamage;
 
     public override void OnStartServer()
     {
         base.OnStartServer();
-
         SetHealth(maxHealth, maxHealth);
         UIManager.Instance?.RegisterPlayer(this);
 
@@ -40,7 +38,32 @@ public class PlayerStats : CharacterStats
         originalDamage = attackDamage;
     }
 
-    // °æÇèÄ¡¸¦ Ãß°¡ÇÏ°í, ·¹º§¾÷ Á¶°ÇÀ» ¸¸Á·ÇÏ¸é ÀÚµ¿À¸·Î »ó½Â
+    [Server]
+    public override void SetHealth(float current, float max)
+    {
+        currentHealth = current;
+        maxHealth = max;
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
+    [Server]
+    public override void TakeDamage(float damage, GameObject attacker = null)
+    {
+        currentHealth -= damage;
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    public void Heal(float amount)
+    {
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
     public void AddExp(float exp)
     {
         currentExp += exp;
@@ -52,35 +75,25 @@ public class PlayerStats : CharacterStats
         }
     }
 
-    // ·¹º§¾÷ Ã³¸®: °æÇèÄ¡ Â÷°¨, ½ºÅÈ Áõ°¡
     private void LevelUp()
     {
         currentExp -= expToLevelUp;
         level++;
         expToLevelUp *= 1.5f;
 
-        // ½ºÅÈ Áõ°¡
         maxHealth += healthPerLevel;
         attackDamage += damagePerLevel;
         moveSpeed += speedPerLevel;
 
-        // Ã¼·ÂÀº Ç×»ó Ç® È¸º¹
         SetHealth(maxHealth, maxHealth);
 
-        // UI °»½Å
         OnExpChanged?.Invoke(currentExp, expToLevelUp);
         OnLevelChanged?.Invoke(level);
         OnSpeedChanged?.Invoke(moveSpeed);
         OnPowerChanged?.Invoke(attackDamage);
 
         UIManager.Instance?.UpdateLevelText(level);
-        Debug.Log($"·¹º§ ¾÷! ÇöÀç ·¹º§: {level}");
-    }
-
-    protected override void Die()
-    {
-        Debug.Log("ÇÃ·¹ÀÌ¾î »ç¸Á Ã³¸®");
-        base.Die();
+        Debug.Log($"ë ˆë²¨ ì—…! í˜„ì¬ ë ˆë²¨: {level}");
     }
 
     public void ApplyItemEffect(ItemData.ItemType itemType, float amount, float duration)
@@ -121,9 +134,14 @@ public class PlayerStats : CharacterStats
     {
         attackDamage = originalDamage * amount;
         OnPowerChanged?.Invoke(attackDamage);
-
         yield return new WaitForSeconds(duration);
         attackDamage = originalDamage;
         OnPowerChanged?.Invoke(attackDamage);
+    }
+
+    protected override void Die()
+    {
+        Debug.Log("í”Œë ˆì´ì–´ ì‚¬ë§ ì²˜ë¦¬");
+        base.Die();
     }
 }
