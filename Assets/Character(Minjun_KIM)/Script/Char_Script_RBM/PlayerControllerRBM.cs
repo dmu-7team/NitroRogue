@@ -2,8 +2,8 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(PlayerMovementRB))]
-[RequireComponent(typeof(WeaponSystemRB))]
+[RequireComponent(typeof(PlayerMovementRBM))]
+[RequireComponent(typeof(WeaponSystemRBM))]
 public class PlayerControllerRBM : NetworkBehaviour
 {
     private PlayerMovementRBM movement;

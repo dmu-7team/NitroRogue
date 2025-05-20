@@ -24,6 +24,8 @@ public class PlayerStats : CharacterStats
     public float CurrentExp => currentExp;
     public float ExpToLevelUp => expToLevelUp;
     public int Level => level;
+    public float MoveSpeed => moveSpeed;
+    public float AttackDamage => attackDamage;
 
     private float originalSpeed;
     private float originalDamage;

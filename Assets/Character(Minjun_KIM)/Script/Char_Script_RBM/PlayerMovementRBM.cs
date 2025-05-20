@@ -22,6 +22,7 @@ public class PlayerMovementRBM : MonoBehaviour
     private float xRotation = 0f;
     private bool isGrounded;
     private WeaponSystemRBM weaponSystem;
+    private PlayerStats stats;
 
     void Start()
     {
@@ -29,6 +30,8 @@ public class PlayerMovementRBM : MonoBehaviour
         rb.freezeRotation = true;
 
         weaponSystem = GetComponent<WeaponSystemRBM>();
+        stats = GetComponent<PlayerStats>();
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -54,8 +57,8 @@ public class PlayerMovementRBM : MonoBehaviour
         bool isMoving = moveDirection.magnitude > 0.1f;
 
         bool isRunning = Input.GetKey(KeyCode.LeftShift) && z > 0f && isMoving && !weaponSystem.IsReloading();
-        float currentSpeed = isRunning ? runSpeed : moveSpeed;
-
+        //float currentSpeed = isRunning ? runSpeed : moveSpeed;
+        float currentSpeed = isRunning ? stats.MoveSpeed * 1.5f : stats.MoveSpeed;
         Vector3 velocity = moveDirection.normalized * currentSpeed;
         velocity.y = rb.linearVelocity.y;
         rb.linearVelocity = velocity;

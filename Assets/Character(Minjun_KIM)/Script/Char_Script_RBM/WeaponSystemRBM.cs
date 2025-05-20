@@ -54,11 +54,11 @@ public class WeaponSystemRBM : NetworkBehaviour
     private bool isReloading = false;
     private bool isScoped = false;
     private float defaultFOV;
-
+    private PlayerStats stats;
     void Start()
     {
         if (!isLocalPlayer) return;
-
+        stats = GetComponent<PlayerStats>();
         UpdateAmmoUI();
         defaultFOV = playerCamera.fieldOfView;
         scopeOverlay?.SetActive(false);
@@ -108,8 +108,10 @@ public class WeaponSystemRBM : NetworkBehaviour
                 {
                     EnemyBase enemy = hit.collider.GetComponentInParent<EnemyBase>();
                     if (enemy != null)
-                        CmdDealDamage(enemy.gameObject, weaponDamage);
-
+                    {
+                        float finalDamage = stats != null ? stats.AttackDamage : 1f;
+                        CmdDealDamage(enemy.gameObject, finalDamage);
+                    }
                     if (ShouldDrawTrail())
                         CreateBulletTrail(muzzle.position, hit.point);
                 }
@@ -126,8 +128,10 @@ public class WeaponSystemRBM : NetworkBehaviour
             {
                 EnemyBase enemy = hit.collider.GetComponentInParent<EnemyBase>();
                 if (enemy != null)
-                    CmdDealDamage(enemy.gameObject, weaponDamage);
-
+                {
+                    float finalDamage = stats != null ? stats.AttackDamage : 1f;
+                    CmdDealDamage(enemy.gameObject, finalDamage);
+                }
                 if (ShouldDrawTrail())
                     CreateBulletTrail(muzzle.position, hit.point);
             }
