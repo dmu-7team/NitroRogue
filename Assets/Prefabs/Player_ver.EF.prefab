@@ -2746,6 +2746,8 @@ GameObject:
   - component: {fileID: 1103428219484028173}
   - component: {fileID: 6866471980379329976}
   - component: {fileID: 3600222831305438468}
+  - component: {fileID: 1761769404827231888}
+  - component: {fileID: 5132275442228923771}
   m_Layer: 0
   m_Name: Player_ver.EF
   m_TagString: Player
@@ -2982,6 +2984,38 @@ MonoBehaviour:
   - {fileID: 5477723079950616673}
   - {fileID: 3896964434415851428}
   - {fileID: 1229586059315487462}
+--- !u!114 &1761769404827231888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8269937752400224285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d17e718851449a6879986e45c458fb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  MatchID: 
+--- !u!114 &5132275442228923771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8269937752400224285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42efc7abc69317a42a71f26068698d7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  matchId: 
 --- !u!1 &8289463576006986533
 GameObject:
   m_ObjectHideFlags: 0
