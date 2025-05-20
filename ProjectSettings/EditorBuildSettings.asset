@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 479d9e473931dd94b86f11bbad00be61
+  - enabled: 1
+    path: Assets/Mirror/Examples/Room/Scenes/MirrorRoomOnline.unity
+    guid: d7a6763559b31854586c9e49916273ef
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 99f9c9493070a9d4c979a8fec7c5a8d3, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
