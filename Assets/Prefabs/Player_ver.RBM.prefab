@@ -27676,15 +27676,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3df75ae82d370141a53d292d65cdd6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  weaponType: 2
+  weaponType: 0
   muzzle: {fileID: 5315169888042317356}
   bulletTrailPrefab: {fileID: 235673213667241877, guid: 6c4ffb140e19fe6439d7075e4941926d, type: 3}
   maxAmmo: 30
   bulletForce: 100
   weaponDamage: 5
+  ammoText: {fileID: 0}
+  scopeOverlay: {fileID: 0}
+  crosshair: {fileID: 0}
   playerCamera: {fileID: 3487344639845763655}
   cameraHolder: {fileID: 5197195993801820986}
   defaultCamPos: {fileID: 5486398225597569259}
@@ -27692,12 +27692,15 @@ MonoBehaviour:
   camTransitionSpeed: 5
   scopedFOV: 30
   aimMode: 0
-  scopeOverlay: {fileID: 0}
-  crosshair: {fileID: 0}
-  ammoText: {fileID: 0}
   animator: {fileID: 1866105014591861558}
   muzzleFlash: {fileID: 2946068002783915075}
   audioSource: {fileID: 0}
+  smgSound: {fileID: 0}
+  arSound: {fileID: 0}
+  dmrSound: {fileID: 0}
+  sniperSound: {fileID: 0}
+  shotgunSound: {fileID: 0}
+  glSound: {fileID: 0}
 --- !u!114 &2448191328230396683
 MonoBehaviour:
   m_ObjectHideFlags: 0

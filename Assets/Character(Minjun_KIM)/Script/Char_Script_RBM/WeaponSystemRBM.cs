@@ -1,219 +1,150 @@
 using UnityEngine;
-using Mirror;
 using UnityEngine.UI;
 using System.Collections;
+using Mirror;
 
 public class WeaponSystemRBM : NetworkBehaviour
 {
     public enum WeaponType { DMR, SMG, AR, Sniper, SG, GL }
 
     [Header("Weapon Settings")]
-    public WeaponType weaponType;
-    public Transform muzzle;
-    public GameObject bulletTrailPrefab;
-    public int maxAmmo = 30;
-    public float bulletForce = 100f;
-    public int weaponDamage = 1;
+    [SerializeField] private WeaponType weaponType;
+    [SerializeField] private Transform muzzle;
+    [SerializeField] public GameObject bulletPrefab;
+    [SerializeField] private float bulletForce = 100f;
+    [SerializeField] private int weaponDamage = 1;
+    [SerializeField] private int currentAmmo = 30;
+    [SerializeField] private int maxAmmo = 30;
 
-    private int currentAmmo;
-    private bool isReloading = false;
-    private bool isOnCooldown = false;
+    [Header("UI")]
+    [SerializeField] private Text ammoText;
+    [SerializeField] private GameObject scopeOverlay;
+    [SerializeField] private GameObject crosshair;
 
-    [Header("Camera & Aiming")]
-    public Camera playerCamera;
-    public Transform cameraHolder;
-    public Transform defaultCamPos;
-    public Transform aimCamPos;
-    public float camTransitionSpeed = 5f;
-    public float scopedFOV = 30f;
-    private float defaultFOV;
+    [Header("Camera")]
+    [SerializeField] private Camera playerCamera;
+    [SerializeField] private Transform cameraHolder;
+    [SerializeField] private Transform defaultCamPos;
+    [SerializeField] private Transform aimCamPos;
+    [SerializeField] private float camTransitionSpeed = 5f;
+    [SerializeField] private float scopedFOV = 30f;
 
     public enum AimMode { Zoom, Scope }
 
     [Header("Aiming Mode")]
-    public AimMode aimMode = AimMode.Zoom;
+    [SerializeField] private AimMode aimMode = AimMode.Zoom;
 
-    [Header("UI")]
-    public GameObject scopeOverlay;
-    public GameObject crosshair;
-    public Text ammoText;
+    [Header("Animator")]
+    [SerializeField] private Animator animator;
 
-    [Header("Animator & FX")]
-    public Animator animator;
-    public ParticleSystem muzzleFlash;
-    public AudioSource audioSource;
+    [Header("Effects")]
+    [SerializeField] private ParticleSystem muzzleFlash;
+    [SerializeField] private AudioSource audioSource;
 
+    [SerializeField] private AudioClip smgSound;
+    [SerializeField] private AudioClip arSound;
+    [SerializeField] private AudioClip dmrSound;
+    [SerializeField] private AudioClip sniperSound;
+    [SerializeField] private AudioClip shotgunSound;
+    [SerializeField] private AudioClip glSound;
+
+    [Header("Trail Effect")]
+    [SerializeField] public GameObject bulletTrailPrefab;
+
+    private bool isReloading = false;
     private bool isScoped = false;
+    private float defaultFOV;
 
     void Start()
     {
-        currentAmmo = maxAmmo;
-        if (playerCamera != null)
-            defaultFOV = playerCamera.fieldOfView;
+        if (!isLocalPlayer) return;
 
+        UpdateAmmoUI();
+        defaultFOV = playerCamera.fieldOfView;
         scopeOverlay?.SetActive(false);
         crosshair?.SetActive(true);
-        UpdateAmmoUI();
     }
 
     void Update()
     {
         if (!isLocalPlayer) return;
+
         HandleAim();
     }
 
     public void HandleFire()
     {
         if (!isLocalPlayer) return;
-
-        switch (weaponType)
-        {
-            case WeaponType.SMG:
-                if (Input.GetMouseButton(0))
-                    TryFire();
-                break;
-            case WeaponType.AR:
-            case WeaponType.DMR:
-            case WeaponType.SG:
-            case WeaponType.Sniper:
-                if (Input.GetMouseButtonDown(0))
-                    TryFire();
-                break;
-        }
-    }
-
-    void TryFire()
-    {
-        if (isReloading || currentAmmo <= 0 || animator.GetBool("isRunning") || isOnCooldown)
+        if (!Input.GetMouseButtonDown(0) || animator.GetBool("isRunning") || currentAmmo <= 0 || isReloading)
             return;
 
-        switch (weaponType)
-        {
-            case WeaponType.AR:
-                StopAllCoroutines(); // 중복 방지
-                StartCoroutine(FireBurst(3, 0.1f));
-                break;
-            case WeaponType.Sniper:
-                FireSingleShot();
-                StartCoroutine(Cooldown(1.0f));
-                break;
-            case WeaponType.SG:
-                FireShotgun();
-                break;
-            default:
-                FireSingleShot();
-                break;
-        }
+        currentAmmo--;
+        UpdateAmmoUI();
+        animator.SetTrigger("Shoot");
+
+        FireBulletBasedOnType();
     }
 
-    IEnumerator FireBurst(int shots, float interval)
+    void FireBulletBasedOnType()
     {
-        isOnCooldown = true;
+        PlayMuzzleFlash();
+        PlayWeaponSound();
 
-        int fired = 0;
-        for (int i = 0; i < shots; i++)
+        Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        Vector3 targetPoint = ray.origin + ray.direction * 100f;
+        Vector3 fireDirection = (targetPoint - muzzle.position).normalized;
+
+        if (weaponType == WeaponType.SG)
         {
-            if (currentAmmo > 0)
+            int pelletCount = 8;
+            float spreadAngle = 6f;
+
+            for (int i = 0; i < pelletCount; i++)
             {
-                FireSingleShot();
-                fired++;
-                yield return new WaitForSeconds(interval);
+                Vector3 spreadDir = ApplySpread(playerCamera.transform.forward, spreadAngle);
+                Ray pelletRay = new Ray(playerCamera.transform.position, spreadDir);
+
+                if (Physics.Raycast(pelletRay, out RaycastHit hit, 100f))
+                {
+                    EnemyBase enemy = hit.collider.GetComponentInParent<EnemyBase>();
+                    if (enemy != null)
+                        CmdDealDamage(enemy.gameObject, weaponDamage);
+
+                    if (ShouldDrawTrail())
+                        CreateBulletTrail(muzzle.position, hit.point);
+                }
+                else
+                {
+                    if (ShouldDrawTrail())
+                        CreateBulletTrail(muzzle.position, muzzle.position + spreadDir * 100f);
+                }
             }
         }
-
-        yield return new WaitForSeconds(0.1f * (3 - fired)); // 남은 발 보정 시간
-        isOnCooldown = false;
-    }
-
-    void FireSingleShot()
-    {
-        currentAmmo--;
-        UpdateAmmoUI();
-        animator.SetTrigger("Shoot");
-        FireRay(playerCamera.transform.forward);
-        PlayEffects();
-    }
-
-    void FireShotgun()
-    {
-        currentAmmo--;
-        UpdateAmmoUI();
-        animator.SetTrigger("Shoot");
-        PlayEffects();
-
-        int pelletCount = 8;
-        float spreadAngle = 6f;
-
-        Vector3[] directions = new Vector3[pelletCount];
-        for (int i = 0; i < pelletCount; i++)
+        else
         {
-            directions[i] = ApplySpread(playerCamera.transform.forward, spreadAngle);
-        }
-
-        CmdFireShotgunPellets(muzzle.position, directions);
-    }
-
-    [Command]
-    void CmdFireShotgunPellets(Vector3 startPosition, Vector3[] directions)
-    {
-        foreach (Vector3 dir in directions)
-        {
-            Ray ray = new Ray(startPosition, dir);
             if (Physics.Raycast(ray, out RaycastHit hit, 100f))
             {
                 EnemyBase enemy = hit.collider.GetComponentInParent<EnemyBase>();
                 if (enemy != null)
-                    enemy.TakeDamage(weaponDamage, gameObject);
+                    CmdDealDamage(enemy.gameObject, weaponDamage);
 
-                SpawnTrail(startPosition, hit.point);
+                if (ShouldDrawTrail())
+                    CreateBulletTrail(muzzle.position, hit.point);
             }
             else
             {
-                SpawnTrail(startPosition, startPosition + dir * 100f);
+                if (ShouldDrawTrail())
+                    CreateBulletTrail(muzzle.position, muzzle.position + fireDirection * 100f);
             }
         }
     }
 
-    [Server]
-    void SpawnTrail(Vector3 start, Vector3 end)
+    [Command]
+    void CmdDealDamage(GameObject target, float damage)
     {
-        if (bulletTrailPrefab == null) return;
-
-        GameObject trail = Instantiate(bulletTrailPrefab, start, Quaternion.identity);
-        NetworkServer.Spawn(trail);
-
-        LineRenderer lr = trail.GetComponent<LineRenderer>();
-        if (lr != null)
+        if (target.TryGetComponent(out EnemyBase enemy))
         {
-            lr.SetPosition(0, start);
-            lr.SetPosition(1, end);
-        }
-
-        StartCoroutine(DestroyAfter(trail, 0.1f));
-    }
-
-    private IEnumerator DestroyAfter(GameObject obj, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        NetworkServer.Destroy(obj);
-    }
-
-    void FireRay(Vector3 direction)
-    {
-        Ray ray = new Ray(playerCamera.transform.position, direction);
-        if (Physics.Raycast(ray, out RaycastHit hit, 100f))
-        {
-            var pc = NetworkClient.localPlayer.GetComponent<PlayerControllerRBM>();
-            EnemyBase enemy = hit.collider.GetComponentInParent<EnemyBase>();
-            if (enemy != null)
-                pc?.CmdDealDamage(enemy.gameObject, weaponDamage);
-
-            pc?.CmdSpawnTrail(muzzle.position, hit.point);
-        }
-        else
-        {
-            var pc = NetworkClient.localPlayer.GetComponent<PlayerControllerRBM>();
-            pc?.CmdSpawnTrail(muzzle.position, muzzle.position + direction * 100f);
+            enemy.TakeDamage(damage, gameObject);
         }
     }
 
@@ -221,19 +152,54 @@ public class WeaponSystemRBM : NetworkBehaviour
     {
         float yaw = Random.Range(-angle, angle);
         float pitch = Random.Range(-angle, angle);
-        Quaternion spreadRotation = Quaternion.Euler(pitch, yaw, 0);
-        return playerCamera.transform.rotation * spreadRotation * Vector3.forward;
+        return Quaternion.Euler(pitch, yaw, 0) * direction;
     }
 
-    IEnumerator Cooldown(float delay)
+    void CreateBulletTrail(Vector3 start, Vector3 end)
     {
-        isOnCooldown = true;
-        yield return new WaitForSeconds(delay);
-        isOnCooldown = false;
+        if (bulletTrailPrefab == null) return;
+
+        GameObject trail = Instantiate(bulletTrailPrefab, start, Quaternion.identity);
+        LineRenderer lr = trail.GetComponent<LineRenderer>();
+        if (lr != null)
+        {
+            lr.SetPosition(0, start);
+            lr.SetPosition(1, end);
+        }
+
+        float trailLifetime = (weaponType == WeaponType.Sniper) ? 0.2f : 0.05f;
+        Destroy(trail, trailLifetime);
+    }
+
+    bool ShouldDrawTrail()
+    {
+        return weaponType == WeaponType.SMG || weaponType == WeaponType.AR ||
+               weaponType == WeaponType.DMR || weaponType == WeaponType.Sniper ||
+               weaponType == WeaponType.SG;
+    }
+
+    void PlayMuzzleFlash()
+    {
+        muzzleFlash?.Play();
+    }
+
+    void PlayWeaponSound()
+    {
+        switch (weaponType)
+        {
+            case WeaponType.SMG: audioSource.PlayOneShot(smgSound); break;
+            case WeaponType.AR: audioSource.PlayOneShot(arSound); break;
+            case WeaponType.DMR: audioSource.PlayOneShot(dmrSound); break;
+            case WeaponType.Sniper: audioSource.PlayOneShot(sniperSound); break;
+            case WeaponType.SG: audioSource.PlayOneShot(shotgunSound); break;
+            case WeaponType.GL: audioSource.PlayOneShot(glSound); break;
+        }
     }
 
     public void HandleReload()
     {
+        if (!isLocalPlayer) return;
+
         if (Input.GetKeyDown(KeyCode.R) && currentAmmo < maxAmmo && !isReloading)
         {
             animator.SetTrigger("Reload");
@@ -241,7 +207,7 @@ public class WeaponSystemRBM : NetworkBehaviour
         }
     }
 
-    private IEnumerator ReloadAfterDelay(float delay)
+    IEnumerator ReloadAfterDelay(float delay)
     {
         isReloading = true;
         yield return new WaitForSeconds(delay);
@@ -250,13 +216,13 @@ public class WeaponSystemRBM : NetworkBehaviour
         UpdateAmmoUI();
     }
 
-    public bool IsReloading() => isReloading;
-
     void UpdateAmmoUI()
     {
         if (ammoText != null)
             ammoText.text = currentAmmo + " / " + maxAmmo;
     }
+
+    public bool IsReloading() => isReloading;
 
     private void HandleAim()
     {
@@ -284,12 +250,11 @@ public class WeaponSystemRBM : NetworkBehaviour
 
         crosshair?.SetActive(true);
         scopeOverlay?.SetActive(false);
-        if (playerCamera != null)
-            playerCamera.fieldOfView = isAiming ? scopedFOV : defaultFOV;
+        playerCamera.fieldOfView = defaultFOV;
         isScoped = false;
     }
 
-    private IEnumerator OnScoped()
+    IEnumerator OnScoped()
     {
         yield return new WaitForSeconds(0.1f);
         scopeOverlay?.SetActive(true);
@@ -301,17 +266,18 @@ public class WeaponSystemRBM : NetworkBehaviour
         cameraHolder.rotation = Quaternion.Lerp(cameraHolder.rotation, aimCamPos.rotation, Time.deltaTime * camTransitionSpeed);
     }
 
-    private void OnUnscoped()
+    void OnUnscoped()
     {
         StopAllCoroutines();
         scopeOverlay?.SetActive(false);
         crosshair?.SetActive(true);
         playerCamera.fieldOfView = defaultFOV;
         isScoped = false;
+
         StartCoroutine(SmoothUnscope());
     }
 
-    private IEnumerator SmoothUnscope()
+    IEnumerator SmoothUnscope()
     {
         float t = 0f;
         Vector3 startPos = cameraHolder.position;
@@ -324,11 +290,5 @@ public class WeaponSystemRBM : NetworkBehaviour
             cameraHolder.rotation = Quaternion.Lerp(startRot, defaultCamPos.rotation, t);
             yield return null;
         }
-    }
-
-    void PlayEffects()
-    {
-        muzzleFlash?.Play();
-        audioSource?.Play();
     }
 }

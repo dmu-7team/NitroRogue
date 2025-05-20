@@ -2,8 +2,8 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(PlayerMovementRBM))]
-[RequireComponent(typeof(WeaponSystemRBM))]
+[RequireComponent(typeof(PlayerMovementRB))]
+[RequireComponent(typeof(WeaponSystemRB))]
 public class PlayerControllerRBM : NetworkBehaviour
 {
     private PlayerMovementRBM movement;
@@ -24,49 +24,43 @@ public class PlayerControllerRBM : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
 
+        movement.HandleMove();
         movement.HandleLook();
-        weaponSystem.HandleFire();     // ✅ 직접 호출
+        weaponSystem.HandleFire();
         weaponSystem.HandleReload();
     }
 
-    void FixedUpdate()
-    {
-        if (!isLocalPlayer) return;
-        movement.HandleMove();
-    }
-
+    // [WeaponSystemRB]에서 호출되는 Mirror 명령
     [Command]
     public void CmdDealDamage(GameObject enemyObj, float damage)
     {
         if (enemyObj == null)
         {
-            Debug.LogWarning("[CMD] Enemy object is null.");
+            Debug.LogWarning("[CMD] enemyObj is null");
             return;
         }
 
         EnemyBase enemy = enemyObj.GetComponent<EnemyBase>();
         if (enemy != null)
         {
-            Debug.Log($"[CMD] Enemy confirmed: {enemy.name}");
             enemy.TakeDamage(damage, gameObject);
         }
         else
         {
-            Debug.LogWarning("[CMD] EnemyBase component not found.");
+            Debug.LogWarning("[CMD] EnemyBase 컴포넌트를 찾을 수 없습니다.");
         }
     }
 
     [Command]
     public void CmdSpawnTrail(Vector3 start, Vector3 end)
     {
-        WeaponSystemRBM weapon = GetComponent<WeaponSystemRBM>();
-        if (weapon == null || weapon.bulletTrailPrefab == null)
+        if (weaponSystem == null || weaponSystem.bulletTrailPrefab == null)
         {
-            Debug.LogError("[CMD] WeaponSystemRBM or bulletTrailPrefab is missing.");
+            Debug.LogWarning("[CMD] Trail Prefab이 없습니다.");
             return;
         }
 
-        GameObject trail = Instantiate(weapon.bulletTrailPrefab, start, Quaternion.identity);
+        GameObject trail = Instantiate(weaponSystem.bulletTrailPrefab, start, Quaternion.identity);
         NetworkServer.Spawn(trail);
 
         var lr = trail.GetComponent<LineRenderer>();
