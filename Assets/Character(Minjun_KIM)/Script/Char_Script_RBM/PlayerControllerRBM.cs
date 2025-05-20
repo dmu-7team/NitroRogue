@@ -1,4 +1,4 @@
-using Mirror;
+﻿using Mirror;
 using UnityEngine;
 using System.Collections;
 
@@ -25,14 +25,13 @@ public class PlayerControllerRBM : NetworkBehaviour
         if (!isLocalPlayer) return;
 
         movement.HandleLook();
-        //weaponSystem.HandleFire();
+        weaponSystem.HandleFire();     // ✅ 직접 호출
         weaponSystem.HandleReload();
     }
 
     void FixedUpdate()
     {
         if (!isLocalPlayer) return;
-
         movement.HandleMove();
     }
 

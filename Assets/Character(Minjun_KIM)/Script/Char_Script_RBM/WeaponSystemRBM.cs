@@ -3,7 +3,7 @@ using Mirror;
 using UnityEngine.UI;
 using System.Collections;
 
-public class WeaponSystemRBM : MonoBehaviour
+public class WeaponSystemRBM : NetworkBehaviour
 {
     public enum WeaponType { DMR, SMG, AR, Sniper, SG, GL }
 
@@ -43,6 +43,8 @@ public class WeaponSystemRBM : MonoBehaviour
     public ParticleSystem muzzleFlash;
     public AudioSource audioSource;
 
+    private bool isScoped = false;
+
     void Start()
     {
         currentAmmo = maxAmmo;
@@ -56,7 +58,13 @@ public class WeaponSystemRBM : MonoBehaviour
 
     void Update()
     {
+        if (!isLocalPlayer) return;
         HandleAim();
+    }
+
+    public void HandleFire()
+    {
+        if (!isLocalPlayer) return;
 
         switch (weaponType)
         {
@@ -82,11 +90,12 @@ public class WeaponSystemRBM : MonoBehaviour
         switch (weaponType)
         {
             case WeaponType.AR:
+                StopAllCoroutines(); // 중복 방지
                 StartCoroutine(FireBurst(3, 0.1f));
                 break;
             case WeaponType.Sniper:
                 FireSingleShot();
-                StartCoroutine(Cooldown(1.0f)); // SR 쿨타임
+                StartCoroutine(Cooldown(1.0f));
                 break;
             case WeaponType.SG:
                 FireShotgun();
@@ -97,6 +106,25 @@ public class WeaponSystemRBM : MonoBehaviour
         }
     }
 
+    IEnumerator FireBurst(int shots, float interval)
+    {
+        isOnCooldown = true;
+
+        int fired = 0;
+        for (int i = 0; i < shots; i++)
+        {
+            if (currentAmmo > 0)
+            {
+                FireSingleShot();
+                fired++;
+                yield return new WaitForSeconds(interval);
+            }
+        }
+
+        yield return new WaitForSeconds(0.1f * (3 - fired)); // 남은 발 보정 시간
+        isOnCooldown = false;
+    }
+
     void FireSingleShot()
     {
         currentAmmo--;
@@ -104,17 +132,6 @@ public class WeaponSystemRBM : MonoBehaviour
         animator.SetTrigger("Shoot");
         FireRay(playerCamera.transform.forward);
         PlayEffects();
-    }
-
-    IEnumerator FireBurst(int shots, float interval)
-    {
-        isOnCooldown = true;
-        for (int i = 0; i < shots && currentAmmo > 0; i++)
-        {
-            FireSingleShot();
-            yield return new WaitForSeconds(interval);
-        }
-        isOnCooldown = false;
     }
 
     void FireShotgun()
@@ -127,11 +144,58 @@ public class WeaponSystemRBM : MonoBehaviour
         int pelletCount = 8;
         float spreadAngle = 6f;
 
+        Vector3[] directions = new Vector3[pelletCount];
         for (int i = 0; i < pelletCount; i++)
         {
-            Vector3 spreadDir = ApplySpread(playerCamera.transform.forward, spreadAngle);
-            FireRay(spreadDir);
+            directions[i] = ApplySpread(playerCamera.transform.forward, spreadAngle);
         }
+
+        CmdFireShotgunPellets(muzzle.position, directions);
+    }
+
+    [Command]
+    void CmdFireShotgunPellets(Vector3 startPosition, Vector3[] directions)
+    {
+        foreach (Vector3 dir in directions)
+        {
+            Ray ray = new Ray(startPosition, dir);
+            if (Physics.Raycast(ray, out RaycastHit hit, 100f))
+            {
+                EnemyBase enemy = hit.collider.GetComponentInParent<EnemyBase>();
+                if (enemy != null)
+                    enemy.TakeDamage(weaponDamage, gameObject);
+
+                SpawnTrail(startPosition, hit.point);
+            }
+            else
+            {
+                SpawnTrail(startPosition, startPosition + dir * 100f);
+            }
+        }
+    }
+
+    [Server]
+    void SpawnTrail(Vector3 start, Vector3 end)
+    {
+        if (bulletTrailPrefab == null) return;
+
+        GameObject trail = Instantiate(bulletTrailPrefab, start, Quaternion.identity);
+        NetworkServer.Spawn(trail);
+
+        LineRenderer lr = trail.GetComponent<LineRenderer>();
+        if (lr != null)
+        {
+            lr.SetPosition(0, start);
+            lr.SetPosition(1, end);
+        }
+
+        StartCoroutine(DestroyAfter(trail, 0.1f));
+    }
+
+    private IEnumerator DestroyAfter(GameObject obj, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        NetworkServer.Destroy(obj);
     }
 
     void FireRay(Vector3 direction)
@@ -157,7 +221,8 @@ public class WeaponSystemRBM : MonoBehaviour
     {
         float yaw = Random.Range(-angle, angle);
         float pitch = Random.Range(-angle, angle);
-        return Quaternion.Euler(pitch, yaw, 0) * direction;
+        Quaternion spreadRotation = Quaternion.Euler(pitch, yaw, 0);
+        return playerCamera.transform.rotation * spreadRotation * Vector3.forward;
     }
 
     IEnumerator Cooldown(float delay)
@@ -223,8 +288,6 @@ public class WeaponSystemRBM : MonoBehaviour
             playerCamera.fieldOfView = isAiming ? scopedFOV : defaultFOV;
         isScoped = false;
     }
-
-    private bool isScoped = false;
 
     private IEnumerator OnScoped()
     {
