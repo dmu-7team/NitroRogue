@@ -2,9 +2,7 @@
 using System;
 using System.Collections;
 using Mirror;
-/// <summary>
-/// 플레이어 전용 스탯: 경험치, 레벨, 체력 증가 등
-/// </summary>
+
 public class PlayerStats : CharacterStats
 {
     public override event Action<float, float> OnHealthChanged;
@@ -27,8 +25,24 @@ public class PlayerStats : CharacterStats
     public float MoveSpeed => moveSpeed;
     public float AttackDamage => attackDamage;
 
+    [SyncVar(hook = nameof(OnMoveSpeedChanged))]
+    private float moveSpeed = 5f;
+
+    [SyncVar(hook = nameof(OnAttackDamageChanged))]
+    private float attackDamage = 10f;
+
     private float originalSpeed;
     private float originalDamage;
+
+    void OnMoveSpeedChanged(float oldVal, float newVal) => OnSpeedChanged?.Invoke(newVal);
+    void OnAttackDamageChanged(float oldVal, float newVal) => OnPowerChanged?.Invoke(newVal);
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        originalSpeed = moveSpeed;
+        originalDamage = attackDamage;
+    }
 
     public override void OnStartServer()
     {
@@ -39,6 +53,14 @@ public class PlayerStats : CharacterStats
         originalSpeed = moveSpeed;
         originalDamage = attackDamage;
     }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        originalSpeed = moveSpeed;
+        originalDamage = attackDamage;
+    }
+#endif
 
     [Server]
     public override void SetHealth(float current, float max)
@@ -53,11 +75,8 @@ public class PlayerStats : CharacterStats
     {
         currentHealth -= damage;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
-
         if (currentHealth <= 0)
-        {
             Die();
-        }
     }
 
     public void Heal(float amount)
@@ -72,9 +91,7 @@ public class PlayerStats : CharacterStats
         OnExpChanged?.Invoke(currentExp, expToLevelUp);
 
         while (currentExp >= expToLevelUp)
-        {
             LevelUp();
-        }
     }
 
     private void LevelUp()
