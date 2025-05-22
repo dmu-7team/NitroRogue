@@ -1,70 +1,114 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Collections.Generic;
 using Mirror;
+using System.Collections.Generic;
+using System;
 
 public class RoomListUI : MonoBehaviour
 {
-    [Header("Room UI")]
-    public Transform roomListParent;         // ScrollView > Viewport > Content
-    public GameObject roomEntryPrefab;       // Project 창에 있는 Room 프리팹
+    public static RoomListUI Instance;
 
-    private List<GameObject> spawnedRooms = new();
+    [Header("방 리스트 UI")]
+    public GameObject roomUIPrefab;
+    public Transform contentParent;
 
-    void Start()
+    [Header("방 만들기 팝업 UI")]
+    public GameObject createRoomPopup;
+    public TMP_InputField roomNameInputField;
+    public Button createButton;
+    public Button cancelButton;
+
+    private void Awake()
     {
-        if (roomListParent == null || roomEntryPrefab == null)
-        {
-            Debug.LogError("[RoomListUI] 인스펙터에서 RoomListParent 또는 RoomEntryPrefab이 연결되지 않았습니다.");
-            return;
-        }
-
-        RefreshRoomList();
+        Instance = this;
     }
 
-    public void RefreshRoomList()
+    private void Start()
     {
-        // 기존 방 목록 삭제
-        foreach (var obj in spawnedRooms)
+        if (createButton != null)
+            createButton.onClick.AddListener(OnCreateRoomConfirm);
+        if (cancelButton != null)
+            cancelButton.onClick.AddListener(() => createRoomPopup.SetActive(false));
+
+        createRoomPopup?.SetActive(false);
+    }
+
+    public void ShowCreateRoomPopup()
+    {
+        createRoomPopup?.SetActive(true);
+        if (roomNameInputField != null)
+            roomNameInputField.text = "";
+    }
+
+    public void HideCreateRoomPopup()
+    {
+        createRoomPopup?.SetActive(false);
+    }
+
+    public void OnCreateRoomConfirm()
+    {
+        Debug.Log("createRoomPopup: OK");
+
+        string newMatchId = Guid.NewGuid().ToString();
+        Debug.Log($"[RoomListUI] 생성 matchId: {newMatchId}");
+
+        CustomNetworkManager.matchIdToJoin = newMatchId;
+
+        var customNetworkManager = NetworkManager.singleton.GetComponent<CustomNetworkManager>();
+        if (customNetworkManager != null)
         {
-            Destroy(obj);
+            customNetworkManager.StartHost();
+            Debug.Log($"호스트 시작 성공, matchId: {CustomNetworkManager.matchIdToJoin}");
         }
-        spawnedRooms.Clear();
-
-        // 예시로 4개 더미 방 생성
-        for (int i = 0; i < 4; i++)
+        else
         {
-            GameObject roomObj = Instantiate(roomEntryPrefab); // parent 없이 생성
-            roomObj.transform.SetParent(roomListParent, false); // 여기서 parent 지정
+            Debug.LogError("CustomNetworkManager를 찾을 수 없습니다. Inspector에서 확인하세요.");
+        }
 
-            // 방 이름 설정
-            TMP_Text nameText = roomObj.transform.Find("Room Name Text")?.GetComponent<TMP_Text>();
-            if (nameText != null)
-                nameText.text = $"Room {i + 1}";
-            else
-                Debug.LogWarning("[RoomListUI] Room Name Text를 찾을 수 없음");
+        createRoomPopup.SetActive(false);
+    }
 
-            // 상태 텍스트도 원하면 여기에 추가 가능
+    public void RenderRoomList(List<RoomInfo> list)
+    {
+        foreach (Transform child in contentParent)
+            Destroy(child.gameObject);
 
-            // Join 버튼 연결
-            Button joinButton = roomObj.transform.Find("Room Join Button")?.GetComponent<Button>();
-            if (joinButton != null)
+        foreach (RoomInfo info in list)
+        {
+            GameObject obj = Instantiate(roomUIPrefab, contentParent);
+            var texts = obj.GetComponentsInChildren<TextMeshProUGUI>();
+
+            foreach (var t in texts)
             {
-                int roomIndex = i;
-                joinButton.onClick.AddListener(() =>
+                if (t.name.Contains("Name"))
+                    t.text = $"Room {info.matchId.Substring(0, 6)}";
+                if (t.name.Contains("State"))
+                    t.text = $"{info.currentPlayers}/{info.maxPlayers}";
+            }
+
+            var joinBtn = obj.GetComponentInChildren<Button>();
+            joinBtn.onClick.AddListener(() =>
+            {
+                if (!Guid.TryParse(info.matchId, out _))
                 {
-                    Debug.Log($"[JOIN] Room {roomIndex} 클릭됨");
-                    NetworkManager.singleton.networkAddress = "localhost"; // 나중에 실제 주소로 대체
-                    NetworkManager.singleton.StartClient();
-                });
-            }
-            else
-            {
-                Debug.LogError("[RoomListUI] Room Join Button을 찾을 수 없습니다!");
-            }
+                    Debug.LogError("[RoomListUI] 유효하지 않은 matchId");
+                    return;
+                }
 
-            spawnedRooms.Add(roomObj);
+                Debug.Log($"[RoomListUI] 조인 시도 matchId: {info.matchId}");
+                CustomNetworkManager.matchIdToJoin = info.matchId;
+                var customNetworkManager = NetworkManager.singleton.GetComponent<CustomNetworkManager>();
+                if (customNetworkManager != null)
+                {
+                    customNetworkManager.StartClientWithCustomPort();
+                    Debug.Log($"클라이언트 조인 시도, matchId: {CustomNetworkManager.matchIdToJoin}");
+                }
+                else
+                {
+                    Debug.LogError("CustomNetworkManager를 찾을 수 없습니다. Inspector에서 확인하세요.");
+                }
+            });
         }
     }
 }

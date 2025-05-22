@@ -13,15 +13,17 @@ public class RoomPlayer : NetworkBehaviour
         var match = GetComponent<NetworkMatch>();
         if (match != null)
         {
-            try
+            if (string.IsNullOrEmpty(matchId) || !System.Guid.TryParse(matchId, out System.Guid validGuid))
             {
-                match.matchId = new System.Guid(matchId);
-                Debug.Log($"[RoomPlayer] 서버에서 Match ID 설정됨: {matchId}");
+                matchId = System.Guid.NewGuid().ToString();
+                Debug.LogWarning($"[RoomPlayer] matchId가 유효하지 않아 기본값으로 설정됨: {matchId}");
             }
-            catch (System.FormatException)
-            {
-                Debug.LogError($"[RoomPlayer] 잘못된 Match ID 형식: {matchId}");
-            }
+            match.matchId = System.Guid.Parse(matchId);
+            Debug.Log($"[RoomPlayer] Match ID 설정됨: {matchId}, isServer: {isServer}");
+        }
+        else
+        {
+            Debug.LogError("[RoomPlayer] NetworkMatch 컴포넌트를 찾을 수 없습니다.");
         }
     }
 }

@@ -1,66 +1,171 @@
 using UnityEngine;
 using Mirror;
+using System;
 using System.Collections.Generic;
 
 public class CustomNetworkManager : NetworkManager
 {
-    // 모든 Match ID별 참가자 리스트
-    public Dictionary<string, List<NetworkConnectionToClient>> matchRooms = new();
+    public static CustomNetworkManager Instance { get; private set; }
 
-    // 클라이언트가 접속 전에 설정하는 Match ID
-    public static string matchIdToJoin = "";
+    private static string _matchIdToJoin;
+    public static string matchIdToJoin
+    {
+        get => _matchIdToJoin;
+        set
+        {
+            _matchIdToJoin = value;
+            Debug.Log($"matchIdToJoin 설정됨: {_matchIdToJoin}");
+        }
+    }
+
+    public Dictionary<string, List<NetworkConnection>> matchRooms = new();
+    public List<NetworkConnectionToClient> connectedClients = new();
+
+    [SerializeField]
+    private int serverPort = 7777; // 서버 포트
+    [SerializeField]
+    private int clientPort = 7778; // 클라이언트 포트
+
+    protected new void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogWarning("중복 NetworkManager 감지됨. 자동 제거됨.");
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        base.Awake();
+        DontDestroyOnLoad(gameObject);
+    }
+
+    protected new void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
+
+    public override void Start()
+    {
+        var transport = GetComponent<TelepathyTransport>();
+        if (transport != null)
+        {
+            transport.port = (ushort)serverPort;
+            Debug.Log($"TelepathyTransport 서버 포트 설정: {serverPort}");
+        }
+        else
+        {
+            Debug.LogError("TelepathyTransport 컴포넌트를 찾을 수 없습니다. Inspector에서 추가하세요.");
+            return;
+        }
+        base.Start();
+    }
+
+    public void StartClientWithCustomPort()
+    {
+        var transport = GetComponent<TelepathyTransport>();
+        if (transport != null)
+        {
+            transport.port = (ushort)clientPort;
+            Debug.Log($"TelepathyTransport 클라이언트 포트 설정: {clientPort}");
+        }
+        else
+        {
+            Debug.LogError("TelepathyTransport 컴포넌트를 찾을 수 없습니다. Inspector에서 추가하세요.");
+            return;
+        }
+        StartClient();
+    }
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
-        string matchId = matchIdToJoin;
+        base.OnServerAddPlayer(conn);
 
-        if (string.IsNullOrEmpty(matchId))
+        if (string.IsNullOrEmpty(matchIdToJoin))
         {
-            Debug.LogWarning("[CustomNetworkManager] Match ID가 비어 있습니다.");
-            matchId = "default";
+            matchIdToJoin = System.Guid.NewGuid().ToString();
+            Debug.LogWarning($"[ServerAddPlayer] matchIdToJoin이 없어 기본값 설정: {matchIdToJoin}");
         }
 
-        if (!matchRooms.ContainsKey(matchId))
+        Debug.Log($"[ServerAddPlayer] matchIdToJoin: {matchIdToJoin}, Connection ID: {conn.connectionId}");
+
+        connectedClients.Add(conn);
+
+        if (!matchRooms.ContainsKey(matchIdToJoin))
+            matchRooms[matchIdToJoin] = new List<NetworkConnection>();
+
+        matchRooms[matchIdToJoin].Add(conn);
+
+        var player = conn.identity.GetComponent<RoomPlayer>();
+        if (player != null)
         {
-            matchRooms[matchId] = new List<NetworkConnectionToClient>();
+            player.matchId = matchIdToJoin;
+            Debug.Log($"[RoomPlayer] matchId 설정됨: {player.matchId}");
+        }
+        else
+        {
+            Debug.LogError("플레이어 오브젝트에서 RoomPlayer 컴포넌트를 찾을 수 없습니다.");
         }
 
-        // 프리팹 인스턴스 생성
-        GameObject player = Instantiate(playerPrefab);
-        NetworkServer.AddPlayerForConnection(conn, player);
+        Debug.Log($"[CustomNetworkManager] Match {matchIdToJoin}에 플레이어 추가됨");
 
-        // 플레이어에게 Match ID 전달
-        RoomPlayer rp = player.GetComponent<RoomPlayer>();
-        if (rp != null)
+        // 방 리스트 전송 대기
+        if (conn.identity != null)
         {
-            rp.matchId = matchId;
+            SendRoomListToAll();
         }
-
-        matchRooms[matchId].Add(conn);
-
-        Debug.Log($"[CustomNetworkManager] Player joined match {matchId}. 현재 인원: {matchRooms[matchId].Count}");
+        else
+        {
+            Debug.LogWarning("conn.identity가 준비되지 않았습니다. SendRoomListToAll 호출을 지연합니다.");
+            StartCoroutine(DelayedSendRoomList(conn));
+        }
     }
 
-    public override void OnServerDisconnect(NetworkConnectionToClient conn)
+    private System.Collections.IEnumerator DelayedSendRoomList(NetworkConnectionToClient conn)
     {
-        // 나간 사람 MatchID 찾고 제거
+        yield return new WaitForSeconds(0.1f);
+        if (conn.identity != null)
+        {
+            SendRoomListToAll();
+        }
+    }
+
+    public void SendRoomListToAll()
+    {
+        Debug.Log("[서버] 방 리스트 전체 전송 시도");
+        foreach (var conn in connectedClients)
+        {
+            SendRoomListToClient(conn);
+        }
+    }
+
+    public void SendRoomListToClient(NetworkConnection conn)
+    {
+        List<RoomInfo> infoList = new();
+
         foreach (var kvp in matchRooms)
         {
-            if (kvp.Value.Contains(conn))
-            {
-                kvp.Value.Remove(conn);
-                Debug.Log($"[CustomNetworkManager] Player left match {kvp.Key}. 현재 인원: {kvp.Value.Count}");
-
-                if (kvp.Value.Count == 0)
-                {
-                    matchRooms.Remove(kvp.Key);
-                    Debug.Log($"[CustomNetworkManager] Match {kvp.Key} 삭제됨.");
-                }
-
-                break;
-            }
+            infoList.Add(new RoomInfo(kvp.Key, kvp.Value.Count, maxConnections));
         }
 
-        base.OnServerDisconnect(conn);
+        if (conn != null && conn.identity != null && conn.identity.TryGetComponent(out RoomListSync sync))
+        {
+            if (conn is NetworkConnectionToClient connToClient)
+            {
+                Debug.Log($"[서버] 방 리스트를 connId={connToClient.connectionId} 에게 전송");
+            }
+            sync.TargetReceiveRoomList(conn, infoList);
+            // UI 갱신 트리거
+            if (RoomListUI.Instance != null)
+            {
+                RoomListUI.Instance.RenderRoomList(infoList);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("RoomListSync 전송 실패: conn 또는 identity 없음");
+        }
     }
 }
