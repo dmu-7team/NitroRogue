@@ -1,6 +1,6 @@
-using System;
 using UnityEngine;
 using Mirror;
+using System;
 
 public class JoinButtonHandler : MonoBehaviour
 {
@@ -9,17 +9,15 @@ public class JoinButtonHandler : MonoBehaviour
         string matchId = Guid.NewGuid().ToString();
         CustomNetworkManager.matchIdToJoin = matchId;
 
-        Debug.Log($"[JoinButton] 자동 생성된 Match ID: {matchId}");
-
-        if (!NetworkClient.active && !NetworkServer.active)
+        if (NetworkManager.singleton != null)
         {
-            Debug.Log("[JoinButton] Host 시작");
-            NetworkManager.singleton.StartHost(); // 씬 전환 포함됨
+            NetworkManager.singleton.StartClient();
+            Debug.Log($"[JoinButton] 자동 생성된 Match ID: {matchId}");
         }
-        else if (!NetworkClient.active)
+        else
         {
-            Debug.Log("[JoinButton] Client 시작");
-            NetworkManager.singleton.StartClient(); // 씬 전환 없음
+            Debug.LogError("NetworkManager.singleton이 null입니다.");
         }
     }
+
 }

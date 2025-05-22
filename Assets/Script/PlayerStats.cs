@@ -19,20 +19,20 @@ public class PlayerStats : CharacterStats
     public float damagePerLevel = 5f;
     public float speedPerLevel = 0.5f;
 
-    public float CurrentExp => currentExp;
-    public float ExpToLevelUp => expToLevelUp;
-    public int Level => level;
-    public float MoveSpeed => moveSpeed;
-    public float AttackDamage => attackDamage;
-
-    [SyncVar(hook = nameof(OnMoveSpeedChanged))]
-    private float moveSpeed = 5f;
-
-    [SyncVar(hook = nameof(OnAttackDamageChanged))]
-    private float attackDamage = 10f;
+    // 🟢 자식에서 직접 동기화
+    [SyncVar(hook = nameof(OnMoveSpeedChanged))] private float syncedMoveSpeed = 5f;
+    [SyncVar(hook = nameof(OnAttackDamageChanged))] private float syncedAttackDamage = 10f;
 
     private float originalSpeed;
     private float originalDamage;
+
+    public float CurrentExp => currentExp;
+    public float ExpToLevelUp => expToLevelUp;
+    public int Level => level;
+
+    // 🟢 부모의 속성 override
+    public override float MoveSpeed => syncedMoveSpeed;
+    public override float AttackDamage => syncedAttackDamage;
 
     void OnMoveSpeedChanged(float oldVal, float newVal) => OnSpeedChanged?.Invoke(newVal);
     void OnAttackDamageChanged(float oldVal, float newVal) => OnPowerChanged?.Invoke(newVal);
@@ -40,8 +40,8 @@ public class PlayerStats : CharacterStats
     public override void OnStartClient()
     {
         base.OnStartClient();
-        originalSpeed = moveSpeed;
-        originalDamage = attackDamage;
+        originalSpeed = syncedMoveSpeed;
+        originalDamage = syncedAttackDamage;
     }
 
     public override void OnStartServer()
@@ -50,15 +50,15 @@ public class PlayerStats : CharacterStats
         SetHealth(maxHealth, maxHealth);
         UIManager.Instance?.RegisterPlayer(this);
 
-        originalSpeed = moveSpeed;
-        originalDamage = attackDamage;
+        originalSpeed = syncedMoveSpeed;
+        originalDamage = syncedAttackDamage;
     }
 
 #if UNITY_EDITOR
-    private void OnValidate()
+    new private void OnValidate()
     {
-        originalSpeed = moveSpeed;
-        originalDamage = attackDamage;
+        originalSpeed = syncedMoveSpeed;
+        originalDamage = syncedAttackDamage;
     }
 #endif
 
@@ -101,15 +101,15 @@ public class PlayerStats : CharacterStats
         expToLevelUp *= 1.5f;
 
         maxHealth += healthPerLevel;
-        attackDamage += damagePerLevel;
-        moveSpeed += speedPerLevel;
+        syncedAttackDamage += damagePerLevel;
+        syncedMoveSpeed += speedPerLevel;
 
         SetHealth(maxHealth, maxHealth);
 
         OnExpChanged?.Invoke(currentExp, expToLevelUp);
         OnLevelChanged?.Invoke(level);
-        OnSpeedChanged?.Invoke(moveSpeed);
-        OnPowerChanged?.Invoke(attackDamage);
+        OnSpeedChanged?.Invoke(syncedMoveSpeed);
+        OnPowerChanged?.Invoke(syncedAttackDamage);
 
         UIManager.Instance?.UpdateLevelText(level);
         Debug.Log($"레벨 업! 현재 레벨: {level}");
@@ -142,20 +142,20 @@ public class PlayerStats : CharacterStats
 
     private IEnumerator SpeedBoost(float amount, float duration)
     {
-        moveSpeed = originalSpeed * amount;
-        OnSpeedChanged?.Invoke(moveSpeed);
+        syncedMoveSpeed = originalSpeed * amount;
+        OnSpeedChanged?.Invoke(syncedMoveSpeed);
         yield return new WaitForSeconds(duration);
-        moveSpeed = originalSpeed;
-        OnSpeedChanged?.Invoke(moveSpeed);
+        syncedMoveSpeed = originalSpeed;
+        OnSpeedChanged?.Invoke(syncedMoveSpeed);
     }
 
     private IEnumerator DamageBoost(float amount, float duration)
     {
-        attackDamage = originalDamage * amount;
-        OnPowerChanged?.Invoke(attackDamage);
+        syncedAttackDamage = originalDamage * amount;
+        OnPowerChanged?.Invoke(syncedAttackDamage);
         yield return new WaitForSeconds(duration);
-        attackDamage = originalDamage;
-        OnPowerChanged?.Invoke(attackDamage);
+        syncedAttackDamage = originalDamage;
+        OnPowerChanged?.Invoke(syncedAttackDamage);
     }
 
     protected override void Die()
