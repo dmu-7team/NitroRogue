@@ -2,8 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Mirror;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+
+// EmptyMessage는 Mirror에서 기본 제공하므로 따로 정의하지 않음
 
 public class RoomListUI : MonoBehaviour
 {
@@ -12,6 +14,7 @@ public class RoomListUI : MonoBehaviour
     [Header("방 리스트 UI")]
     public GameObject roomUIPrefab;
     public Transform contentParent;
+    public Button refreshButton;
 
     [Header("방 만들기 팝업 UI")]
     public GameObject createRoomPopup;
@@ -28,8 +31,12 @@ public class RoomListUI : MonoBehaviour
     {
         if (createButton != null)
             createButton.onClick.AddListener(OnCreateRoomConfirm);
+
         if (cancelButton != null)
             cancelButton.onClick.AddListener(() => createRoomPopup.SetActive(false));
+
+        if (refreshButton != null)
+            refreshButton.onClick.AddListener(RequestRoomListRefresh);
 
         createRoomPopup?.SetActive(false);
     }
@@ -69,46 +76,18 @@ public class RoomListUI : MonoBehaviour
         createRoomPopup.SetActive(false);
     }
 
-    public void RenderRoomList(List<RoomInfo> list)
+
+
+    public void RequestRoomListRefresh()
     {
-        foreach (Transform child in contentParent)
-            Destroy(child.gameObject);
-
-        foreach (RoomInfo info in list)
+        if (NetworkClient.active)
         {
-            GameObject obj = Instantiate(roomUIPrefab, contentParent);
-            var texts = obj.GetComponentsInChildren<TextMeshProUGUI>();
-
-            foreach (var t in texts)
-            {
-                if (t.name.Contains("Name"))
-                    t.text = $"Room {info.matchId.Substring(0, 6)}";
-                if (t.name.Contains("State"))
-                    t.text = $"{info.currentPlayers}/{info.maxPlayers}";
-            }
-
-            var joinBtn = obj.GetComponentInChildren<Button>();
-            joinBtn.onClick.AddListener(() =>
-            {
-                if (!Guid.TryParse(info.matchId, out _))
-                {
-                    Debug.LogError("[RoomListUI] 유효하지 않은 matchId");
-                    return;
-                }
-
-                Debug.Log($"[RoomListUI] 조인 시도 matchId: {info.matchId}");
-                CustomNetworkManager.matchIdToJoin = info.matchId;
-                var customNetworkManager = NetworkManager.singleton.GetComponent<CustomNetworkManager>();
-                if (customNetworkManager != null)
-                {
-                    customNetworkManager.StartClientWithCustomPort();
-                    Debug.Log($"클라이언트 조인 시도, matchId: {CustomNetworkManager.matchIdToJoin}");
-                }
-                else
-                {
-                    Debug.LogError("CustomNetworkManager를 찾을 수 없습니다. Inspector에서 확인하세요.");
-                }
-            });
+            Debug.Log("[RoomListUI] 방 리스트 새로고침 요청");
+            NetworkClient.Send(new EmptyMessage());
+        }
+        else
+        {
+            Debug.LogWarning("[RoomListUI] 네트워크 연결 안 됨 (새로고침 무시)");
         }
     }
 }

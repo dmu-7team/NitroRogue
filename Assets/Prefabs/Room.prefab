@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: name name name name name name
+  m_text: "\uD14C\uC2A4\uD2B8"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6e3fc796b7989284eafc49cc0e5207d0, type: 2}
   m_sharedMaterial: {fileID: 842688090706270138, guid: 6e3fc796b7989284eafc49cc0e5207d0, type: 2}
@@ -337,10 +337,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: state
+  m_text: "\uC815\uBCF4"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2a06bd97a000a674e8943795f51cf863, type: 2}
+  m_sharedMaterial: {fileID: -5071962696887357316, guid: 2a06bd97a000a674e8943795f51cf863, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -529,19 +529,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1808181455941881964}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 3573113419087986327}
-        m_TargetAssemblyTypeName: JoinButtonHandler, Assembly-CSharp
-        m_MethodName: OnClickJoin
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &3573113419087986327
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -567,6 +555,7 @@ GameObject:
   - component: {fileID: 1883471405518077771}
   - component: {fileID: 4560629344707328103}
   - component: {fileID: 5393217936294087124}
+  - component: {fileID: 4666635231530886690}
   m_Layer: 5
   m_Name: Room
   m_TagString: Untagged
@@ -680,3 +669,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4666635231530886690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8905104389162583780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9efb4c646b00fe46b99a1dbbf716efe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  roomNameText: {fileID: 5291401588083422089}
+  roomStateText: {fileID: 803352157553033204}
+  joinButton: {fileID: 6133959451304780452}

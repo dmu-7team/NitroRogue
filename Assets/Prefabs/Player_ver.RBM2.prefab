@@ -1323,8 +1323,6 @@ MonoBehaviour:
   syncInterval: 0
   currentHealth: 0
   maxHealth: 100
-  attackDamage: 10
-  moveSpeed: 5
   currentExp: 0
   expToLevelUp: 100
   level: 1
