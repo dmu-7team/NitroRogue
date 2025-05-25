@@ -6,6 +6,7 @@ public class RoomPlayer : NetworkBehaviour
 {
     [SyncVar]
     public string matchId;
+    public string roomName;
 
     public override void OnStartServer()
     {
@@ -26,4 +27,10 @@ public class RoomPlayer : NetworkBehaviour
             Debug.LogError("[RoomPlayer] NetworkMatch 컴포넌트를 찾을 수 없습니다.");
         }
     }
+    public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+        Debug.Log("[RoomPlayer] OnStartLocalPlayer 호출됨");
+    }
+
 }

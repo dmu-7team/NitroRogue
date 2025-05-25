@@ -1,18 +1,12 @@
 using System;
+using System.Collections.Generic;
+using Mirror;
 
 [Serializable]
-public class RoomInfo
+public struct RoomInfo
 {
     public string matchId;
-    public int currentPlayers; // 속성 이름은 currentPlayers로 유지
+    public string roomName;
+    public int currentPlayers;
     public int maxPlayers;
-
-    public RoomInfo() { }
-
-    public RoomInfo(string matchId, int currentPlayers, int maxPlayers)
-    {
-        this.matchId = matchId;
-        this.currentPlayers = currentPlayers;
-        this.maxPlayers = maxPlayers;
-    }
 }

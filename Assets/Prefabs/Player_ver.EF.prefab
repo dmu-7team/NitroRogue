@@ -2957,8 +2957,6 @@ MonoBehaviour:
   syncInterval: 0
   currentHealth: 0
   maxHealth: 100
-  attackDamage: 10
-  moveSpeed: 5
   currentExp: 0
   expToLevelUp: 100
   level: 1
@@ -3016,6 +3014,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   matchId: 
+  roomName: 
 --- !u!1 &8289463576006986533
 GameObject:
   m_ObjectHideFlags: 0
