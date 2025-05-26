@@ -21442,6 +21442,7 @@ GameObject:
   - component: {fileID: 8812242969239933257}
   - component: {fileID: -4384206218768746743}
   - component: {fileID: -3041943415800481726}
+  - component: {fileID: 8954798629446117697}
   m_Layer: 0
   m_Name: Player_ver.RBM
   m_TagString: Player
@@ -21582,21 +21583,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3df75ae82d370141a53d292d65cdd6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   weaponType: 0
   muzzle: {fileID: 0}
-  bulletTrailPrefab: {fileID: 0}
-  maxAmmo: 30
+  bulletPrefab: {fileID: 0}
   bulletForce: 100
   weaponDamage: 1
+  currentAmmo: 30
+  maxAmmo: 30
+  ammoText: {fileID: 0}
+  scopeOverlay: {fileID: 0}
+  crosshair: {fileID: 0}
   playerCamera: {fileID: 0}
   cameraHolder: {fileID: 0}
   defaultCamPos: {fileID: 0}
   aimCamPos: {fileID: 0}
   camTransitionSpeed: 5
   scopedFOV: 30
+  aimMode: 0
   animator: {fileID: 0}
   muzzleFlash: {fileID: 0}
   audioSource: {fileID: 0}
+  smgSound: {fileID: 0}
+  arSound: {fileID: 0}
+  dmrSound: {fileID: 0}
+  sniperSound: {fileID: 0}
+  shotgunSound: {fileID: 0}
+  glSound: {fileID: 0}
+  bulletTrailPrefab: {fileID: 0}
 --- !u!114 &-3041943415800481726
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21612,6 +21628,23 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+--- !u!114 &8954798629446117697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4779435139897670464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 1625193605
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &5222679680613387422
 GameObject:
   m_ObjectHideFlags: 0
