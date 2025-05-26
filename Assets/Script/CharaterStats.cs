@@ -6,13 +6,18 @@ public class CharacterStats : NetworkBehaviour
 {
     [SyncVar] public float currentHealth;
     [SyncVar] public float maxHealth = 100f;
-    [SyncVar] public float attackDamage = 10f;
-    [SyncVar] public float moveSpeed = 5f;
+
+    //  SyncVar 필드 제거
+    // → 자식이 따로 관리
+    // public float attackDamage;
+    // public float moveSpeed;
+
+    // 속성만 남기고 자식에서 override 하게 만들기
+    public virtual float AttackDamage => 0f;
+    public virtual float MoveSpeed => 0f;
 
     public virtual float CurrentHealth => currentHealth;
     public virtual float MaxHealth => maxHealth;
-    public virtual float AttackDamage => attackDamage;
-    public virtual float MoveSpeed => moveSpeed;
 
     public virtual event Action<float, float> OnHealthChanged;
 
@@ -35,11 +40,8 @@ public class CharacterStats : NetworkBehaviour
     {
         currentHealth -= damage;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
-
         if (currentHealth <= 0)
-        {
             Die();
-        }
     }
 
     [Server]

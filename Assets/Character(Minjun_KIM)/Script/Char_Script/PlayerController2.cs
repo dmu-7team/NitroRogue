@@ -1,6 +1,5 @@
 using Mirror;
 using UnityEngine;
-using Mirror;
 using Unity.AppUI.UI;
 using System.Collections;
 
