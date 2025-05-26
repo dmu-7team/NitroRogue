@@ -1,14 +1,13 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using System;
 using System.Collections;
+using Mirror;
 
-/// <summary>
-/// «√∑π¿ÃæÓ ¿¸øÎ Ω∫≈»: ∞Ê«Ëƒ°, ∑π∫ß, √º∑¬ ¡ı∞° µÓ
-/// </summary>
 public class PlayerStats : CharacterStats
 {
-    public event Action<float, float> OnExpChanged;     // «ˆ¿Á ∞Ê«Ëƒ°, « ø‰ ∞Ê«Ëƒ° ¿¸¥ﬁ
-    public event Action<int> OnLevelChanged;            // ∑π∫ß ∫Ø∞Ê Ω√ »£√‚ (UIø°º≠ ªÁøÎ ∞°¥…)
+    public override event Action<float, float> OnHealthChanged;
+    public event Action<float, float> OnExpChanged;
+    public event Action<int> OnLevelChanged;
     public event Action<float> OnSpeedChanged;
     public event Action<float> OnPowerChanged;
 
@@ -16,76 +15,104 @@ public class PlayerStats : CharacterStats
     [SerializeField] private float expToLevelUp = 100f;
     [SerializeField] private int level = 1;
 
-    // ∑π∫ßæ˜ Ω√ Ω∫≈» ¡ı∞° ºˆƒ°
     public float healthPerLevel = 10f;
     public float damagePerLevel = 5f;
     public float speedPerLevel = 0.5f;
+
+    // üü¢ ÏûêÏãùÏóêÏÑú ÏßÅÏ†ë ÎèôÍ∏∞Ìôî
+    [SyncVar(hook = nameof(OnMoveSpeedChanged))] private float syncedMoveSpeed = 5f;
+    [SyncVar(hook = nameof(OnAttackDamageChanged))] private float syncedAttackDamage = 10f;
+
+    private float originalSpeed;
+    private float originalDamage;
 
     public float CurrentExp => currentExp;
     public float ExpToLevelUp => expToLevelUp;
     public int Level => level;
 
-    private bool isDead = false;
-    private float originalSpeed;
-    private float originalDamage;
+    // üü¢ Î∂ÄÎ™®Ïùò ÏÜçÏÑ± override
+    public override float MoveSpeed => syncedMoveSpeed;
+    public override float AttackDamage => syncedAttackDamage;
+
+    void OnMoveSpeedChanged(float oldVal, float newVal) => OnSpeedChanged?.Invoke(newVal);
+    void OnAttackDamageChanged(float oldVal, float newVal) => OnPowerChanged?.Invoke(newVal);
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        originalSpeed = syncedMoveSpeed;
+        originalDamage = syncedAttackDamage;
+    }
 
     public override void OnStartServer()
     {
         base.OnStartServer();
         SetHealth(maxHealth, maxHealth);
-        originalSpeed = moveSpeed;
-        originalDamage = attackDamage;
-    }
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-        if (isOwned)
-        {
-            UIManager.Instance?.RegisterPlayer(this);
-        }
+        UIManager.Instance?.RegisterPlayer(this);
+
+        originalSpeed = syncedMoveSpeed;
+        originalDamage = syncedAttackDamage;
     }
 
-    // ∞Ê«Ëƒ°∏¶ √ﬂ∞°«œ∞Ì, ∑π∫ßæ˜ ¡∂∞«¿ª ∏∏¡∑«œ∏È ¿⁄µø¿∏∑Œ ªÛΩ¬
+#if UNITY_EDITOR
+    new private void OnValidate()
+    {
+        originalSpeed = syncedMoveSpeed;
+        originalDamage = syncedAttackDamage;
+    }
+#endif
+
+    [Server]
+    public override void SetHealth(float current, float max)
+    {
+        currentHealth = current;
+        maxHealth = max;
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
+    [Server]
+    public override void TakeDamage(float damage, GameObject attacker = null)
+    {
+        currentHealth -= damage;
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        if (currentHealth <= 0)
+            Die();
+    }
+
+    public void Heal(float amount)
+    {
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
     public void AddExp(float exp)
     {
         currentExp += exp;
         OnExpChanged?.Invoke(currentExp, expToLevelUp);
 
         while (currentExp >= expToLevelUp)
-        {
             LevelUp();
-        }
     }
 
-    // ∑π∫ßæ˜ √≥∏Æ: ∞Ê«Ëƒ° ¬˜∞®, Ω∫≈» ¡ı∞°
     private void LevelUp()
     {
         currentExp -= expToLevelUp;
         level++;
         expToLevelUp *= 1.5f;
 
-        // Ω∫≈» ¡ı∞°
         maxHealth += healthPerLevel;
-        attackDamage += damagePerLevel;
-        moveSpeed += speedPerLevel;
+        syncedAttackDamage += damagePerLevel;
+        syncedMoveSpeed += speedPerLevel;
 
-        // √º∑¬¿∫ «◊ªÛ «Æ »∏∫π
         SetHealth(maxHealth, maxHealth);
 
-        // UI ∞ªΩ≈
         OnExpChanged?.Invoke(currentExp, expToLevelUp);
         OnLevelChanged?.Invoke(level);
-        OnSpeedChanged?.Invoke(moveSpeed);
-        OnPowerChanged?.Invoke(attackDamage);
+        OnSpeedChanged?.Invoke(syncedMoveSpeed);
+        OnPowerChanged?.Invoke(syncedAttackDamage);
 
         UIManager.Instance?.UpdateLevelText(level);
-        Debug.Log($"∑π∫ß æ˜! «ˆ¿Á ∑π∫ß: {level}");
-    }
-
-    protected override void Die()
-    {
-        Debug.Log("«√∑π¿ÃæÓ ªÁ∏¡ √≥∏Æ");
-        base.Die();
+        Debug.Log($"Î†àÎ≤® ÏóÖ! ÌòÑÏû¨ Î†àÎ≤®: {level}");
     }
 
     public void ApplyItemEffect(ItemData.ItemType itemType, float amount, float duration)
@@ -115,20 +142,25 @@ public class PlayerStats : CharacterStats
 
     private IEnumerator SpeedBoost(float amount, float duration)
     {
-        moveSpeed = originalSpeed * amount;
-        OnSpeedChanged?.Invoke(moveSpeed);
+        syncedMoveSpeed = originalSpeed * amount;
+        OnSpeedChanged?.Invoke(syncedMoveSpeed);
         yield return new WaitForSeconds(duration);
-        moveSpeed = originalSpeed;
-        OnSpeedChanged?.Invoke(moveSpeed);
+        syncedMoveSpeed = originalSpeed;
+        OnSpeedChanged?.Invoke(syncedMoveSpeed);
     }
 
     private IEnumerator DamageBoost(float amount, float duration)
     {
-        attackDamage = originalDamage * amount;
-        OnPowerChanged?.Invoke(attackDamage);
-
+        syncedAttackDamage = originalDamage * amount;
+        OnPowerChanged?.Invoke(syncedAttackDamage);
         yield return new WaitForSeconds(duration);
-        attackDamage = originalDamage;
-        OnPowerChanged?.Invoke(attackDamage);
+        syncedAttackDamage = originalDamage;
+        OnPowerChanged?.Invoke(syncedAttackDamage);
+    }
+
+    protected override void Die()
+    {
+        Debug.Log("ÌîåÎ†àÏù¥Ïñ¥ ÏÇ¨Îßù Ï≤òÎ¶¨");
+        base.Die();
     }
 }
