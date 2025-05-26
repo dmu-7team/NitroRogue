@@ -234,6 +234,8 @@ GameObject:
   - component: {fileID: 157195085}
   - component: {fileID: 157195084}
   - component: {fileID: 157195083}
+  - component: {fileID: 157195088}
+  - component: {fileID: 157195087}
   m_Layer: 0
   m_Name: EvilMage
   m_TagString: Untagged
@@ -267,7 +269,7 @@ Animator:
   m_GameObject: {fileID: 157195080}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 82561a5771df4d9bbf82fd8bcfa9bb3b, type: 3}
-  m_Controller: {fileID: 9100000, guid: 5d66f9b890934890b663fd80e1c53949, type: 2}
+  m_Controller: {fileID: 22100000, guid: 6fbb4dc370c0334429d393a85049ff6a, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -368,8 +370,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   attackObjs: []
@@ -379,6 +384,57 @@ MonoBehaviour:
   damagePopupPrefab: {fileID: 0}
   popupSpawnPoint: {fileID: 0}
   worldCamera: {fileID: 0}
+--- !u!114 &157195087
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157195080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb803efbe62c34d7baece46c9ffebad9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 157195081}
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChangeCorrectionMultiplier: 2
+  useFixedUpdate: 0
+  rotationSensitivity: 0.01
+  positionPrecision: 0.01
+  scalePrecision: 0.01
+--- !u!114 &157195088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157195080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 766634931
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &158498578
 GameObject:
   m_ObjectHideFlags: 0
@@ -490,6 +546,8 @@ GameObject:
   - component: {fileID: 227041364}
   - component: {fileID: 227041363}
   - component: {fileID: 227041362}
+  - component: {fileID: 227041367}
+  - component: {fileID: 227041366}
   m_Layer: 0
   m_Name: Dragon
   m_TagString: Untagged
@@ -523,7 +581,7 @@ Animator:
   m_GameObject: {fileID: 227041359}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 82561a5771df4d9bbf82fd8bcfa9bb3b, type: 3}
-  m_Controller: {fileID: 9100000, guid: 009726fb7f8840548960b9e82fb44095, type: 2}
+  m_Controller: {fileID: 22100000, guid: d808cdf0d242f9849aff08ddb29621b7, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -624,8 +682,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   attackObjs: []
@@ -635,6 +696,57 @@ MonoBehaviour:
   damagePopupPrefab: {fileID: 0}
   popupSpawnPoint: {fileID: 0}
   worldCamera: {fileID: 0}
+--- !u!114 &227041366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 227041359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb803efbe62c34d7baece46c9ffebad9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 227041360}
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChangeCorrectionMultiplier: 2
+  useFixedUpdate: 0
+  rotationSensitivity: 0.01
+  positionPrecision: 0.01
+  scalePrecision: 0.01
+--- !u!114 &227041367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 227041359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 3108912272
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &299425075
 GameObject:
   m_ObjectHideFlags: 0
@@ -835,6 +947,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2055892260}
     m_Modifications:
+    - target: {fileID: -444254498970016976, guid: 28e43039a54c12c41ba9184f61ca2de3, type: 3}
+      propertyPath: sceneId
+      value: 1297724361
+      objectReference: {fileID: 0}
     - target: {fileID: 7153141402127884706, guid: 28e43039a54c12c41ba9184f61ca2de3, type: 3}
       propertyPath: m_Name
       value: SlimePolyart
@@ -1125,6 +1241,8 @@ GameObject:
   - component: {fileID: 503910591}
   - component: {fileID: 503910590}
   - component: {fileID: 503910589}
+  - component: {fileID: 503910594}
+  - component: {fileID: 503910593}
   m_Layer: 0
   m_Name: MonsterPlant
   m_TagString: Untagged
@@ -1158,7 +1276,7 @@ Animator:
   m_GameObject: {fileID: 503910586}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: f4eb4cc0838243bcb22e7925b0cb8216, type: 3}
-  m_Controller: {fileID: 9100000, guid: 8dcb375fe30441a4be410a80c53fa296, type: 2}
+  m_Controller: {fileID: 22100000, guid: 95fd3362033ce344eba6bf74a147662a, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1259,8 +1377,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   attackObjs: []
@@ -1270,6 +1391,57 @@ MonoBehaviour:
   damagePopupPrefab: {fileID: 0}
   popupSpawnPoint: {fileID: 0}
   worldCamera: {fileID: 0}
+--- !u!114 &503910593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 503910586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb803efbe62c34d7baece46c9ffebad9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 503910587}
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChangeCorrectionMultiplier: 2
+  useFixedUpdate: 0
+  rotationSensitivity: 0.01
+  positionPrecision: 0.01
+  scalePrecision: 0.01
+--- !u!114 &503910594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 503910586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 946244637
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &520873420
 GameObject:
   m_ObjectHideFlags: 0
@@ -1284,6 +1456,7 @@ GameObject:
   - component: {fileID: 520873421}
   - component: {fileID: 520873425}
   - component: {fileID: 520873426}
+  - component: {fileID: 520873427}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1421,8 +1594,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8681d013f7333ce489a520c437d3aac0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   currentExp: 0
@@ -1431,6 +1607,23 @@ MonoBehaviour:
   healthPerLevel: 10
   damagePerLevel: 5
   speedPerLevel: 0.5
+--- !u!114 &520873427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 520873420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 505358415
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &612223449
 GameObject:
   m_ObjectHideFlags: 0
@@ -1498,6 +1691,7 @@ GameObject:
   - component: {fileID: 700564534}
   - component: {fileID: 700564538}
   - component: {fileID: 700564539}
+  - component: {fileID: 700564540}
   m_Layer: 0
   m_Name: Player (1)
   m_TagString: Player
@@ -1635,8 +1829,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8681d013f7333ce489a520c437d3aac0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   currentExp: 0
@@ -1645,6 +1842,23 @@ MonoBehaviour:
   healthPerLevel: 10
   damagePerLevel: 5
   speedPerLevel: 0.5
+--- !u!114 &700564540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700564533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 1166545749
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &766462730
 GameObject:
   m_ObjectHideFlags: 0
@@ -1691,6 +1905,8 @@ GameObject:
   - component: {fileID: 806783113}
   - component: {fileID: 806783112}
   - component: {fileID: 806783111}
+  - component: {fileID: 806783116}
+  - component: {fileID: 806783115}
   m_Layer: 0
   m_Name: Orc
   m_TagString: Untagged
@@ -1724,7 +1940,7 @@ Animator:
   m_GameObject: {fileID: 806783108}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 1b1c0636a9064e88bf6df6272afee809, type: 3}
-  m_Controller: {fileID: 9100000, guid: 7cddcfa7ebba46acb81b53474fdc677e, type: 2}
+  m_Controller: {fileID: 22100000, guid: 28d0870cffa8e3f46b5a578ff1a7f2eb, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1825,8 +2041,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   attackObjs: []
@@ -1836,6 +2055,57 @@ MonoBehaviour:
   damagePopupPrefab: {fileID: 0}
   popupSpawnPoint: {fileID: 0}
   worldCamera: {fileID: 0}
+--- !u!114 &806783115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 806783108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb803efbe62c34d7baece46c9ffebad9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 806783109}
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChangeCorrectionMultiplier: 2
+  useFixedUpdate: 0
+  rotationSensitivity: 0.01
+  positionPrecision: 0.01
+  scalePrecision: 0.01
+--- !u!114 &806783116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 806783108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 2176286311
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &823186979
 GameObject:
   m_ObjectHideFlags: 0
@@ -2210,6 +2480,8 @@ GameObject:
   - component: {fileID: 1282444365}
   - component: {fileID: 1282444364}
   - component: {fileID: 1282444363}
+  - component: {fileID: 1282444368}
+  - component: {fileID: 1282444367}
   m_Layer: 0
   m_Name: Slime
   m_TagString: Untagged
@@ -2243,7 +2515,7 @@ Animator:
   m_GameObject: {fileID: 1282444360}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: b6a309eaf67f407c8b502e0a2e43faf9, type: 3}
-  m_Controller: {fileID: 9100000, guid: 9d132128829c4a4e962cef5de570a08f, type: 2}
+  m_Controller: {fileID: 22100000, guid: a492b97657257454494faf0f29bc7265, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -2344,8 +2616,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   attackObjs: []
@@ -2355,6 +2630,57 @@ MonoBehaviour:
   damagePopupPrefab: {fileID: 0}
   popupSpawnPoint: {fileID: 0}
   worldCamera: {fileID: 0}
+--- !u!114 &1282444367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282444360}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb803efbe62c34d7baece46c9ffebad9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 1282444361}
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChangeCorrectionMultiplier: 2
+  useFixedUpdate: 0
+  rotationSensitivity: 0.01
+  positionPrecision: 0.01
+  scalePrecision: 0.01
+--- !u!114 &1282444368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282444360}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 2286193210
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &1299711222
 GameObject:
   m_ObjectHideFlags: 0
@@ -2475,6 +2801,8 @@ GameObject:
   - component: {fileID: 1305562292}
   - component: {fileID: 1305562291}
   - component: {fileID: 1305562290}
+  - component: {fileID: 1305562295}
+  - component: {fileID: 1305562294}
   m_Layer: 0
   m_Name: TurtleShell
   m_TagString: Untagged
@@ -2508,10 +2836,10 @@ Animator:
   m_GameObject: {fileID: 1305562287}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 54759a2e38874121b0125eb73bbbe4f6, type: 3}
-  m_Controller: {fileID: 9100000, guid: 1aad8362519e42b8b92255924e21edb1, type: 2}
+  m_Controller: {fileID: 22100000, guid: 77670a87b30998d469eabd6afd9ffd35, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
-  m_ApplyRootMotion: 0
+  m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -2609,8 +2937,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   attackObjs: []
@@ -2620,6 +2951,57 @@ MonoBehaviour:
   damagePopupPrefab: {fileID: 0}
   popupSpawnPoint: {fileID: 0}
   worldCamera: {fileID: 0}
+--- !u!114 &1305562294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1305562287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb803efbe62c34d7baece46c9ffebad9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 1305562288}
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChangeCorrectionMultiplier: 2
+  useFixedUpdate: 0
+  rotationSensitivity: 0.01
+  positionPrecision: 0.01
+  scalePrecision: 0.01
+--- !u!114 &1305562295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1305562287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 2010843164
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &1448336895
 GameObject:
   m_ObjectHideFlags: 0
@@ -2634,6 +3016,8 @@ GameObject:
   - component: {fileID: 1448336900}
   - component: {fileID: 1448336899}
   - component: {fileID: 1448336898}
+  - component: {fileID: 1448336903}
+  - component: {fileID: 1448336902}
   m_Layer: 0
   m_Name: Golem
   m_TagString: Untagged
@@ -2667,7 +3051,7 @@ Animator:
   m_GameObject: {fileID: 1448336895}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: da17702f68754f39868928b8199ce9e7, type: 3}
-  m_Controller: {fileID: 9100000, guid: 3e17259f711047829ec9735c0c5d317b, type: 2}
+  m_Controller: {fileID: 22100000, guid: 43faa2fc43aa64d47868c6f8875165f8, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -2768,8 +3152,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   attackObjs: []
@@ -2779,6 +3166,57 @@ MonoBehaviour:
   damagePopupPrefab: {fileID: 0}
   popupSpawnPoint: {fileID: 0}
   worldCamera: {fileID: 0}
+--- !u!114 &1448336902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1448336895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb803efbe62c34d7baece46c9ffebad9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 1448336896}
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChangeCorrectionMultiplier: 2
+  useFixedUpdate: 0
+  rotationSensitivity: 0.01
+  positionPrecision: 0.01
+  scalePrecision: 0.01
+--- !u!114 &1448336903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1448336895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 3791325316
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &1517244883
 GameObject:
   m_ObjectHideFlags: 0
@@ -2793,6 +3231,7 @@ GameObject:
   - component: {fileID: 1517244884}
   - component: {fileID: 1517244888}
   - component: {fileID: 1517244889}
+  - component: {fileID: 1517244890}
   m_Layer: 0
   m_Name: Player (2)
   m_TagString: Player
@@ -2930,8 +3369,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8681d013f7333ce489a520c437d3aac0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   currentExp: 0
@@ -2940,6 +3382,23 @@ MonoBehaviour:
   healthPerLevel: 10
   damagePerLevel: 5
   speedPerLevel: 0.5
+--- !u!114 &1517244890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1517244883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 190460142
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &1527136390
 GameObject:
   m_ObjectHideFlags: 0
@@ -3009,6 +3468,8 @@ GameObject:
   - component: {fileID: 1540504969}
   - component: {fileID: 1540504968}
   - component: {fileID: 1540504967}
+  - component: {fileID: 1540504972}
+  - component: {fileID: 1540504971}
   m_Layer: 0
   m_Name: Bat
   m_TagString: Untagged
@@ -3042,7 +3503,7 @@ Animator:
   m_GameObject: {fileID: 1540504964}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 3f8329e956a44723a06fb682d1021499, type: 3}
-  m_Controller: {fileID: 9100000, guid: 188c3ac4cc354969af20d18d579c50c0, type: 2}
+  m_Controller: {fileID: 22100000, guid: 6b8c047211b450d499d9637c21e04d23, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -3143,8 +3604,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   attackObjs: []
@@ -3154,6 +3618,57 @@ MonoBehaviour:
   damagePopupPrefab: {fileID: 0}
   popupSpawnPoint: {fileID: 0}
   worldCamera: {fileID: 0}
+--- !u!114 &1540504971
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1540504964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb803efbe62c34d7baece46c9ffebad9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 1540504965}
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChangeCorrectionMultiplier: 2
+  useFixedUpdate: 0
+  rotationSensitivity: 0.01
+  positionPrecision: 0.01
+  scalePrecision: 0.01
+--- !u!114 &1540504972
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1540504964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 2375482244
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &1652564210
 GameObject:
   m_ObjectHideFlags: 0
@@ -3168,6 +3683,7 @@ GameObject:
   - component: {fileID: 1652564211}
   - component: {fileID: 1652564215}
   - component: {fileID: 1652564216}
+  - component: {fileID: 1652564217}
   m_Layer: 0
   m_Name: Player (3)
   m_TagString: Player
@@ -3305,8 +3821,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8681d013f7333ce489a520c437d3aac0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   currentExp: 0
@@ -3315,6 +3834,23 @@ MonoBehaviour:
   healthPerLevel: 10
   damagePerLevel: 5
   speedPerLevel: 0.5
+--- !u!114 &1652564217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1652564210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 2167142410
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &1661581075
 GameObject:
   m_ObjectHideFlags: 0
@@ -3329,6 +3865,8 @@ GameObject:
   - component: {fileID: 1661581080}
   - component: {fileID: 1661581079}
   - component: {fileID: 1661581078}
+  - component: {fileID: 1661581083}
+  - component: {fileID: 1661581082}
   m_Layer: 0
   m_Name: Spider
   m_TagString: Untagged
@@ -3362,7 +3900,7 @@ Animator:
   m_GameObject: {fileID: 1661581075}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: a7896f6930b349fd982a1f5a51d2731c, type: 3}
-  m_Controller: {fileID: 9100000, guid: 8e10f0b2b3f24c4091eb24d4a5290efb, type: 2}
+  m_Controller: {fileID: 22100000, guid: d92ea38dcd38b8c489c29dc3040dd385, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -3463,8 +4001,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   attackObjs: []
@@ -3474,6 +4015,57 @@ MonoBehaviour:
   damagePopupPrefab: {fileID: 0}
   popupSpawnPoint: {fileID: 0}
   worldCamera: {fileID: 0}
+--- !u!114 &1661581082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1661581075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb803efbe62c34d7baece46c9ffebad9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 1661581076}
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChangeCorrectionMultiplier: 2
+  useFixedUpdate: 0
+  rotationSensitivity: 0.01
+  positionPrecision: 0.01
+  scalePrecision: 0.01
+--- !u!114 &1661581083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1661581075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 3144776619
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &1666851144
 GameObject:
   m_ObjectHideFlags: 0
@@ -3866,6 +4458,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2055892260}
     m_Modifications:
+    - target: {fileID: -8561552743642524987, guid: 2bade716ce049494d8769bcae20ff410, type: 3}
+      propertyPath: sceneId
+      value: 354174481
+      objectReference: {fileID: 0}
     - target: {fileID: 118189010928055112, guid: 2bade716ce049494d8769bcae20ff410, type: 3}
       propertyPath: m_Name
       value: Mosquito
@@ -3963,6 +4559,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4929883171737432014, guid: fab2ffe5e0338324fab515d8605ef080, type: 3}
+      propertyPath: sceneId
+      value: 1631210194
+      objectReference: {fileID: 0}
     - target: {fileID: 6919168529496773260, guid: fab2ffe5e0338324fab515d8605ef080, type: 3}
       propertyPath: m_Name
       value: Fizz
@@ -4041,6 +4641,8 @@ GameObject:
   - component: {fileID: 2003113720}
   - component: {fileID: 2003113719}
   - component: {fileID: 2003113718}
+  - component: {fileID: 2003113723}
+  - component: {fileID: 2003113722}
   m_Layer: 0
   m_Name: Skeleton
   m_TagString: Untagged
@@ -4074,7 +4676,7 @@ Animator:
   m_GameObject: {fileID: 2003113715}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: b76bf1c8faa444ce8d02f6db4364d2ac, type: 3}
-  m_Controller: {fileID: 9100000, guid: b944050466ca43dc83648f27a6defdb9, type: 2}
+  m_Controller: {fileID: 22100000, guid: 49277637b4f232a478c38a8af1080338, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -4175,8 +4777,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   currentHealth: 0
+  maxHealth: 100
   attackDamage: 20
   moveSpeed: 5
   attackObjs: []
@@ -4186,6 +4791,57 @@ MonoBehaviour:
   damagePopupPrefab: {fileID: 0}
   popupSpawnPoint: {fileID: 0}
   worldCamera: {fileID: 0}
+--- !u!114 &2003113722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2003113715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb803efbe62c34d7baece46c9ffebad9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 2003113716}
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChangeCorrectionMultiplier: 2
+  useFixedUpdate: 0
+  rotationSensitivity: 0.01
+  positionPrecision: 0.01
+  scalePrecision: 0.01
+--- !u!114 &2003113723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2003113715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 457289859
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &2055892259
 GameObject:
   m_ObjectHideFlags: 0
@@ -4406,6 +5062,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2055892260}
     m_Modifications:
+    - target: {fileID: 5710244196311879276, guid: a0b54d70e4e2d724bb6026f1b5ce52a8, type: 3}
+      propertyPath: sceneId
+      value: 2910374602
+      objectReference: {fileID: 0}
     - target: {fileID: 6265206175713501824, guid: a0b54d70e4e2d724bb6026f1b5ce52a8, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
