@@ -21,8 +21,14 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 velocity;
     private WeaponSystem weaponSystem;
 
+<<<<<<< Updated upstream
     void Start()
     {
+=======
+    public override void OnStartAuthority()
+    {
+        base.OnStartAuthority();
+>>>>>>> Stashed changes
         weaponSystem = GetComponent<WeaponSystem>();
     }
 
