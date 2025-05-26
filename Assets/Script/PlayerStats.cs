@@ -32,12 +32,17 @@ public class PlayerStats : CharacterStats
     public override void OnStartServer()
     {
         base.OnStartServer();
-
         SetHealth(maxHealth, maxHealth);
-        UIManager.Instance?.RegisterPlayer(this);
-
         originalSpeed = moveSpeed;
         originalDamage = attackDamage;
+    }
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        if (isOwned)
+        {
+            UIManager.Instance?.RegisterPlayer(this);
+        }
     }
 
     // 경험치를 추가하고, 레벨업 조건을 만족하면 자동으로 상승
