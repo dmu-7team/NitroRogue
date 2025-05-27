@@ -41,10 +41,11 @@ public class RoomInfoUI : MonoBehaviour
         Debug.Log($"[RoomInfoUI] Join 클릭됨 - matchId: {matchId}");
         CustomNetworkManager.matchIdToJoin = matchId;
 
-        var networkManager = NetworkManager.singleton.GetComponent<CustomNetworkManager>();
+        var networkManager = NetworkManager.singleton;
         if (networkManager != null)
         {
-            networkManager.StartClientWithCustomPort();
+            networkManager.networkAddress = "127.0.0.1"; // or server IP
+            networkManager.StartClient();
             Debug.Log($"클라이언트 조인 시도: {matchId}");
         }
         else
@@ -52,4 +53,5 @@ public class RoomInfoUI : MonoBehaviour
             Debug.LogError("CustomNetworkManager를 찾을 수 없습니다.");
         }
     }
+
 }
