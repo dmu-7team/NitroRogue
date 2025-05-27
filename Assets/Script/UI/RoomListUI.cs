@@ -1,4 +1,3 @@
-// 통합 RoomListUI.cs (자동 진입 방지: 메인메뉴 씬에서만 StartHost)
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -27,6 +26,7 @@ public class RoomListUI : MonoBehaviour
 
     private static bool handlerRegistered = false;
     private float refreshInterval = 3f;
+    private bool triedAutoConnect = false;
 
     private void Awake()
     {
@@ -45,8 +45,8 @@ public class RoomListUI : MonoBehaviour
 #if UNITY_EDITOR
         if (currentScene == "MainMenuScene" && !NetworkServer.active && !NetworkClient.active)
         {
-            Debug.Log("[RoomListUI] 메인 메뉴에서만 StartHost() 실행됨");
-            NetworkManager.singleton.GetComponent<CustomNetworkManager>().StartHost();
+            Debug.Log("[RoomListUI] 에디터에서 StartHost() 실행");
+            NetworkManager.singleton.StartHost();
         }
 #else
         string[] args = Environment.GetCommandLineArgs();
@@ -57,7 +57,7 @@ public class RoomListUI : MonoBehaviour
                 if (!NetworkServer.active && !NetworkClient.active)
                 {
                     Debug.Log("[RoomListUI] -host 인자 감지, StartHost() 실행");
-                    NetworkManager.singleton.GetComponent<CustomNetworkManager>().StartHost();
+                    NetworkManager.singleton.StartHost();
                 }
             }
         }
@@ -112,7 +112,7 @@ public class RoomListUI : MonoBehaviour
     {
         if (NetworkServer.active || NetworkClient.active)
         {
-            Debug.LogWarning("[RoomListUI] 이미 서버나 클라이언트가 실행 중이므로 StartHost 생략됨");
+            Debug.LogWarning("[RoomListUI] 이미 실행 중이므로 방 생성 생략됨");
             return;
         }
 
@@ -128,20 +128,11 @@ public class RoomListUI : MonoBehaviour
             return;
         }
 
-        var customManager = manager.GetComponent<CustomNetworkManager>();
-        if (customManager == null)
-        {
-            Debug.LogError("[RoomListUI] CustomNetworkManager를 찾을 수 없습니다.");
-            return;
-        }
-
-        customManager.StartHost();
-        Debug.Log("호스트 시작됨");
+        manager.StartHost();
+        Debug.Log("[RoomListUI] 호스트 시작됨");
 
         createRoomPopup.SetActive(false);
     }
-
-    private bool triedAutoConnect = false;
 
     public void RequestRoomListRefresh()
     {
@@ -149,24 +140,18 @@ public class RoomListUI : MonoBehaviour
 
         if (NetworkClient.isConnected)
         {
-            NetworkClient.Send(new EmptyMessage());
+            NetworkClient.Send(new RoomListRequestMessage());
             Debug.Log("[RoomListUI] 서버에 방 리스트 요청 전송");
         }
         else
         {
-            Debug.LogWarning("[RoomListUI] 클라이언트 연결되지 않음");
-
             if (!triedAutoConnect)
             {
                 triedAutoConnect = true;
                 Debug.Log("[RoomListUI] 자동 연결 시도 중...");
 
-                var net = NetworkManager.singleton.GetComponent<CustomNetworkManager>();
-#if UNITY_EDITOR
-                net.StartClientManual("127.0.0.1", 7777);
-#else
-            net.StartClientWithCustomPort();
-#endif
+                NetworkManager.singleton.networkAddress = "127.0.0.1"; // 또는 서버 IP
+                NetworkManager.singleton.StartClient();
             }
             else
             {
@@ -174,8 +159,6 @@ public class RoomListUI : MonoBehaviour
             }
         }
     }
-
-
 
     private void OnRoomListSyncMessage(RoomListSyncMessage msg)
     {
@@ -187,7 +170,7 @@ public class RoomListUI : MonoBehaviour
     {
         if (contentParent == null || !contentParent.gameObject.activeInHierarchy)
         {
-            Debug.LogWarning("[RoomListUI] contentParent가 파괴되었거나 비활성입니다.");
+            Debug.LogWarning("[RoomListUI] contentParent가 비활성입니다.");
             return;
         }
 
@@ -197,18 +180,10 @@ public class RoomListUI : MonoBehaviour
             return;
         }
 
-        var children = new List<GameObject>();
-        for (int i = 0; i < contentParent.childCount; i++)
+        // 기존 UI 제거
+        foreach (Transform child in contentParent)
         {
-            var child = contentParent.GetChild(i);
-            if (child != null)
-                children.Add(child.gameObject);
-        }
-
-        foreach (var obj in children)
-        {
-            if (obj != null)
-                Destroy(obj);
+            Destroy(child.gameObject);
         }
 
         foreach (var info in list)
@@ -233,26 +208,15 @@ public class RoomListUI : MonoBehaviour
                     Debug.Log($"[RoomListUI] 조인 시도: {info.matchId}");
                     CustomNetworkManager.matchIdToJoin = info.matchId;
 
-                    var net = NetworkManager.singleton.GetComponent<CustomNetworkManager>();
-#if UNITY_EDITOR
-                    if (NetworkClient.active || NetworkServer.active)
+                    if (!NetworkClient.active && !NetworkServer.active)
                     {
-                        Debug.LogWarning("[RoomListUI] 이미 연결된 상태이므로 StartClient 생략");
+                        NetworkManager.singleton.networkAddress = "127.0.0.1"; // 또는 서버 IP
+                        NetworkManager.singleton.StartClient();
                     }
                     else
                     {
-                        net.StartClientManual("127.0.0.1", 7777);
+                        Debug.LogWarning("[RoomListUI] 이미 연결되어 있어 조인 생략");
                     }
-#else
-                    if (NetworkClient.active || NetworkServer.active)
-                    {
-                        Debug.LogWarning("[RoomListUI] 이미 연결된 상태이므로 StartClient 생략");
-                    }
-                    else
-                    {
-                        net.StartClientWithCustomPort();
-                    }
-#endif
                 });
             }
         }
