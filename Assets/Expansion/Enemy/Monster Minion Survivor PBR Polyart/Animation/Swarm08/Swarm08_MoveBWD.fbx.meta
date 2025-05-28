@@ -62,10 +62,17 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
+      - time: 0
+        functionName: OnAnimationEvent
+        data: Fire
+        objectReferenceParameter: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       - time: 1
         functionName: OnAttackAnimationEnd
         data: 
-        objectReferenceParameter: {fileID: 11500000, guid: c2f83b19dc02f954b989d451561f7dd6, type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
