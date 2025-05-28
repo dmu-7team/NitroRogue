@@ -65,14 +65,14 @@ ModelImporter:
       - time: 0.5488433
         functionName: OnAnimationEvent
         data: EnableAttackEntity
-        objectReferenceParameter: {fileID: 11500000, guid: c2f83b19dc02f954b989d451561f7dd6, type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
       - time: 0.7080444
         functionName: OnAnimationEvent
         data: DisableAttackEntity
-        objectReferenceParameter: {fileID: 11500000, guid: c2f83b19dc02f954b989d451561f7dd6, type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
