@@ -1124,12 +1124,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2936a303f21e3fc43a015c115e6fc7cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomUIPrefab: {fileID: 8905104389162583780, guid: bb8fc428f2206c74592343c7054463c1, type: 3}
-  contentParent: {fileID: 1175307831}
+  roomUIPrefab: {fileID: 1175307830}
+  contentParent: {fileID: 1683338046909046402, guid: bb8fc428f2206c74592343c7054463c1, type: 3}
   refreshButton: {fileID: 1710532262}
   createRoomPopup: {fileID: 1940394108}
   roomNameInputField: {fileID: 929676484}
-  createButton: {fileID: 755173541}
+  createButton: {fileID: 0}
   cancelButton: {fileID: 1712440803}
   roomNameText: {fileID: 0}
 --- !u!4 &472352055
@@ -3139,6 +3139,7 @@ MonoBehaviour:
   - {fileID: 9222912982316200897, guid: 312334879c7857f459d7323743bc8e6d, type: 3}
   - {fileID: 7929354656396367374, guid: 0584fe8eda4dd45428f0cfa030e41aad, type: 3}
   - {fileID: 8532805641309439499, guid: 8347f82d268d612469d73647a398bf26, type: 3}
+  - {fileID: 4779435139897670464, guid: 191f9e88e0260bc438b5554213b75030, type: 3}
   - {fileID: 2460976672058901519, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
   - {fileID: 2086602806712532617, guid: 276fd3723b32c284e9f37f9d9ff6863f, type: 3}
   - {fileID: 7153141402127884706, guid: 28e43039a54c12c41ba9184f61ca2de3, type: 3}

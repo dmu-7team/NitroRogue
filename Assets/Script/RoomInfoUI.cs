@@ -1,57 +1,32 @@
 using UnityEngine;
-using TMPro;
 using UnityEngine.UI;
-using Mirror;
-using System;
+using TMPro;
 
 public class RoomInfoUI : MonoBehaviour
 {
-    public TMP_Text roomNameText;
-    public TMP_Text roomStateText;
+    public TextMeshProUGUI roomNameText;
+    public TextMeshProUGUI playerCountText;
     public Button joinButton;
 
     private string matchId;
 
-    public void SetRoomInfo(string matchId, int current, int max, bool isOpen)
+    public void Initialize(string roomName, string matchId, int currentPlayers, int maxPlayers)
     {
         this.matchId = matchId;
 
-        if (roomNameText != null)
-            roomNameText.text = $"Room {matchId.Substring(0, 6)}";
-
-        if (roomStateText != null)
-            roomStateText.text = $"{current}/{max}";
+        if (roomNameText != null) roomNameText.text = roomName;
+        if (playerCountText != null) playerCountText.text = $"{currentPlayers}/{maxPlayers}";
 
         if (joinButton != null)
         {
-            joinButton.interactable = isOpen;
             joinButton.onClick.RemoveAllListeners();
-            joinButton.onClick.AddListener(OnClickJoin);
+            joinButton.onClick.AddListener(OnJoinClicked);
         }
     }
 
-    private void OnClickJoin()
+    private void OnJoinClicked()
     {
-        if (!Guid.TryParse(matchId, out _))
-        {
-            Debug.LogError("[RoomInfoUI] 유효하지 않은 matchId");
-            return;
-        }
-
-        Debug.Log($"[RoomInfoUI] Join 클릭됨 - matchId: {matchId}");
-        CustomNetworkManager.matchIdToJoin = matchId;
-
-        var networkManager = NetworkManager.singleton;
-        if (networkManager != null)
-        {
-            networkManager.networkAddress = "127.0.0.1"; // or server IP
-            networkManager.StartClient();
-            Debug.Log($"클라이언트 조인 시도: {matchId}");
-        }
-        else
-        {
-            Debug.LogError("CustomNetworkManager를 찾을 수 없습니다.");
-        }
+        Debug.Log($"[RoomInfoUI] 참가 버튼 클릭: {matchId}");
+        JoinButtonHandler.JoinWithMatchId(matchId);
     }
-
 }

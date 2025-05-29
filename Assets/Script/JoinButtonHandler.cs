@@ -3,7 +3,6 @@ using Mirror;
 
 public class JoinButtonHandler : MonoBehaviour
 {
-    // 외부에서 matchId로 참가할 수 있게 static 메서드 제공
     public static void JoinWithMatchId(string matchId)
     {
         if (!NetworkClient.active && !NetworkServer.active)

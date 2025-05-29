@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 public class RoomListUI : MonoBehaviour
 {
     public static RoomListUI Instance;
+    public static string matchIdToJoin;
 
     [Header("방 리스트 UI")]
     public GameObject roomUIPrefab;
@@ -27,6 +28,7 @@ public class RoomListUI : MonoBehaviour
     private static bool handlerRegistered = false;
     private float refreshInterval = 3f;
     private bool triedAutoConnect = false;
+    
 
     private void Awake()
     {
@@ -37,6 +39,7 @@ public class RoomListUI : MonoBehaviour
         }
         Instance = this;
     }
+    
 
     private void Start()
     {
@@ -150,7 +153,7 @@ public class RoomListUI : MonoBehaviour
                 triedAutoConnect = true;
                 Debug.Log("[RoomListUI] 자동 연결 시도 중...");
 
-                NetworkManager.singleton.networkAddress = "127.0.0.1"; // 또는 서버 IP
+                NetworkManager.singleton.networkAddress = "127.0.0.1";
                 NetworkManager.singleton.StartClient();
             }
             else
@@ -174,16 +177,15 @@ public class RoomListUI : MonoBehaviour
             return;
         }
 
+        foreach (Transform child in contentParent)
+        {
+            Destroy(child.gameObject);
+        }
+
         if (list == null || list.Count == 0)
         {
             Debug.Log("[RoomListUI] 표시할 방 없음");
             return;
-        }
-
-        // 기존 UI 제거
-        foreach (Transform child in contentParent)
-        {
-            Destroy(child.gameObject);
         }
 
         foreach (var info in list)
@@ -210,7 +212,7 @@ public class RoomListUI : MonoBehaviour
 
                     if (!NetworkClient.active && !NetworkServer.active)
                     {
-                        NetworkManager.singleton.networkAddress = "127.0.0.1"; // 또는 서버 IP
+                        NetworkManager.singleton.networkAddress = "127.0.0.1";
                         NetworkManager.singleton.StartClient();
                     }
                     else
