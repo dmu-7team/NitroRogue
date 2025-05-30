@@ -11,9 +11,8 @@ public class CustomNetworkManager_Server : NetworkManager
     {
         base.Start();
         Debug.Log("[서버] Start() 호출됨");
-        StartServer(); // 이거 안 부르면 아예 서버가 안 열림
+        StartServer();
     }
-
 
     public override void OnStartServer()
     {
@@ -26,21 +25,26 @@ public class CustomNetworkManager_Server : NetworkManager
 
     private void OnJoinMatchMessageReceived(NetworkConnectionToClient conn, JoinMatchMessage msg)
     {
+        Debug.Log($"[서버] JoinMatch 요청: {msg.matchId} / {msg.roomName}");
+
         if (!matchRooms.ContainsKey(msg.matchId))
         {
             matchRooms[msg.matchId] = new List<RoomPlayer>();
         }
 
+        //  RoomPlayer 생성 및 연결
         GameObject playerObj = Instantiate(playerPrefab);
         RoomPlayer roomPlayer = playerObj.GetComponent<RoomPlayer>();
 
-        roomPlayer.matchId = msg.matchId;
-        roomPlayer.roomName = msg.roomName;
-        roomPlayer.maxPlayers = 4;
-        roomPlayer.currentPlayers = matchRooms[msg.matchId].Count + 1;
+        if (roomPlayer != null)
+        {
+            roomPlayer.roomName = msg.roomName;
+            roomPlayer.matchId = msg.matchId;
 
-        NetworkServer.AddPlayerForConnection(conn, playerObj);
-        matchRooms[msg.matchId].Add(roomPlayer);
+            NetworkServer.AddPlayerForConnection(conn, playerObj);
+
+            matchRooms[msg.matchId].Add(roomPlayer); //  이거 추가해야 currentPlayers가 올라감
+        }
 
         JoinResultMessage result = new()
         {
@@ -49,43 +53,38 @@ public class CustomNetworkManager_Server : NetworkManager
             roomName = msg.roomName
         };
         conn.Send(result);
+
+        Debug.Log($"[서버] JoinMatch 완료: {msg.matchId} / 클라에 응답 전송됨");
     }
+
 
     private void OnRoomListRequestMessageReceived(NetworkConnectionToClient conn, RoomListRequestMessage msg)
     {
+        Debug.Log("[서버] 방 리스트 요청 수신됨");
+
         List<RoomInfo> roomInfos = new();
 
         foreach (var pair in matchRooms)
         {
-            if (pair.Value.Count == 0) continue;
-
-            RoomPlayer rp = pair.Value[0];
             roomInfos.Add(new RoomInfo
             {
-                matchId = rp.matchId,
-                roomName = rp.roomName,
+                matchId = pair.Key,
+                roomName = pair.Value.Count > 0 ? pair.Value[0].roomName : "비어있는 방",
                 currentPlayers = pair.Value.Count,
-                maxPlayers = rp.maxPlayers
+                maxPlayers = 4
             });
         }
 
         RoomListSyncMessage syncMsg = new RoomListSyncMessage { roomList = roomInfos };
         conn.Send(syncMsg);
+
+        Debug.Log($"[서버] 방 리스트 전송됨: {roomInfos.Count}개");
     }
 
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
-        if (conn.identity != null)
-        {
-            RoomPlayer player = conn.identity.GetComponent<RoomPlayer>();
-            if (matchRooms.ContainsKey(player.matchId))
-            {
-                matchRooms[player.matchId].Remove(player);
-                if (matchRooms[player.matchId].Count == 0)
-                    matchRooms.Remove(player.matchId);
-            }
-        }
-
         base.OnServerDisconnect(conn);
+        Debug.Log($"[서버] 클라이언트 연결 해제됨: {conn.connectionId}");
+        // 여기선 Player 제거 안 해도 됨 (없으니까)
     }
 }
