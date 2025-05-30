@@ -1,112 +1,99 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
-using System.Collections.Generic;
-using UnityEngine.SceneManagement;
+using NetworkMessages; // 메시지 네임스페이스 사용
 
 public class CustomNetworkManager : NetworkManager
 {
-    [Header("Room Settings")]
-    public string roomSceneName = "RoomScene";
+    // 방 ID와 플레이어 목록 매핑
+    public Dictionary<string, List<RoomPlayer>> matchRooms = new();
+    public static string matchIdToJoin; // 원하는 방에 Join할 때 사용하는 matchId
 
-    //  방 정보 매핑 (matchId → RoomInfo)
-    private Dictionary<string, RoomInfo> roomDict = new Dictionary<string, RoomInfo>();
-
-    // 연결된 클라이언트가 요청한 matchId 기록
-    private Dictionary<NetworkConnectionToClient, string> pendingMatchIds = new Dictionary<NetworkConnectionToClient, string>();
-    public static string matchIdToJoin;
-    public override void Start()
-    {
-#if UNITY_SERVER
-        Debug.Log("[서버] UNITY_SERVER에서 StartServer() 실행");
-        StartServer();
-#endif
-    }
 
     public override void OnStartServer()
     {
         base.OnStartServer();
-        Debug.Log("[서버] Dedicated Server 시작됨");
-
-        NetworkServer.RegisterHandler<JoinRoomMessage>(OnJoinRoomMessageReceived);
+        NetworkServer.RegisterHandler<JoinMatchMessage>(OnJoinMatchMessageReceived);
+        NetworkServer.RegisterHandler<RoomListRequestMessage>(OnRoomListRequestMessageReceived);
     }
 
-    public override void OnServerConnect(NetworkConnectionToClient conn)
+    public override void OnStartClient()
     {
-        Debug.Log($"[서버] 클라이언트 접속됨: {conn.address}");
+        base.OnStartClient();
+        NetworkClient.RegisterHandler<JoinResultMessage>(OnJoinResultMessageReceived);
+        NetworkClient.RegisterHandler<RoomListSyncMessage>(msg => RoomListUI.Instance.OnRoomListSyncMessageReceived(msg));
     }
 
-    public override void OnServerAddPlayer(NetworkConnectionToClient conn)
+    private void OnJoinMatchMessageReceived(NetworkConnectionToClient conn, JoinMatchMessage msg)
     {
-        string currentScene = SceneManager.GetActiveScene().name;
-        if (currentScene != roomSceneName)
+        if (!matchRooms.ContainsKey(msg.matchId))
         {
-            Debug.LogWarning("[서버] RoomScene이 아니므로 플레이어를 생성하지 않음");
-            return;
+            matchRooms[msg.matchId] = new List<RoomPlayer>();
         }
 
-        if (!pendingMatchIds.TryGetValue(conn, out string matchId) || string.IsNullOrEmpty(matchId))
+        GameObject playerObj = Instantiate(playerPrefab);
+        RoomPlayer roomPlayer = playerObj.GetComponent<RoomPlayer>();
+
+        roomPlayer.matchId = msg.matchId;
+        roomPlayer.roomName = msg.roomName;
+        roomPlayer.maxPlayers = 4;
+        roomPlayer.currentPlayers = matchRooms[msg.matchId].Count + 1;
+
+        NetworkServer.AddPlayerForConnection(conn, playerObj);
+        matchRooms[msg.matchId].Add(roomPlayer);
+
+        JoinResultMessage result = new()
         {
-            Debug.LogWarning("[서버] matchId 정보가 없어 플레이어를 할당하지 않음");
-            return;
-        }
-
-        GameObject player = Instantiate(playerPrefab);
-        NetworkServer.AddPlayerForConnection(conn, player);
-
-        Debug.Log($"[서버] 플레이어 입장. Match ID: {matchId}");
-
-        pendingMatchIds.Remove(conn);
+            success = true,
+            matchId = msg.matchId,
+            roomName = msg.roomName
+        };
+        conn.Send(result);
     }
 
-    public override void OnStopServer()
+    private void OnJoinResultMessageReceived(JoinResultMessage msg)
     {
-        base.OnStopServer();
-        pendingMatchIds.Clear();
-        roomDict.Clear();
+        if (msg.success)
+            Debug.Log($"[Client] 방 참가 성공: {msg.roomName} ({msg.matchId})");
+        else
+            Debug.LogWarning("[Client] 방 참가 실패");
     }
 
-    public override void OnClientConnect()
+    private void OnRoomListRequestMessageReceived(NetworkConnectionToClient conn, RoomListRequestMessage msg)
     {
-        base.OnClientConnect();
-        Debug.Log("[클라이언트] 서버에 연결됨");
+        List<RoomInfo> roomInfos = new();
 
-        if (!string.IsNullOrEmpty(RoomListUI.matchIdToJoin))
+        foreach (var pair in matchRooms)
         {
-            JoinRoomMessage msg = new JoinRoomMessage
+            if (pair.Value.Count == 0) continue;
+
+            RoomPlayer rp = pair.Value[0];
+            roomInfos.Add(new RoomInfo
             {
-                matchId = RoomListUI.matchIdToJoin
-            };
-            NetworkClient.Send(msg);
-            Debug.Log($"[클라이언트] 요청하는 Match ID: {msg.matchId}");
+                matchId = rp.matchId,
+                roomName = rp.roomName,
+                currentPlayers = pair.Value.Count,
+                maxPlayers = rp.maxPlayers
+            });
         }
+
+        RoomListSyncMessage syncMsg = new RoomListSyncMessage { roomList = roomInfos };
+        conn.Send(syncMsg);
     }
 
-    public override void OnClientDisconnect()
+    public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
-        Debug.LogWarning("[클라이언트] 서버와의 연결 끊김");
-        base.OnClientDisconnect();
-    }
-
-    private void OnJoinRoomMessageReceived(NetworkConnectionToClient conn, JoinRoomMessage msg)
-    {
-        Debug.Log($"[서버] 클라이언트가 JoinRoom 요청: {msg.matchId}");
-
-        if (!pendingMatchIds.ContainsKey(conn))
-            pendingMatchIds.Add(conn, msg.matchId);
-
-        //  matchId가 유효할 때만 씬 전환
-        if (!string.IsNullOrEmpty(msg.matchId) && SceneManager.GetActiveScene().name != roomSceneName)
+        if (conn.identity != null)
         {
-            Debug.Log("[서버] RoomScene으로 전환 시도");
-            ServerChangeScene(roomSceneName);
+            RoomPlayer player = conn.identity.GetComponent<RoomPlayer>();
+            if (matchRooms.ContainsKey(player.matchId))
+            {
+                matchRooms[player.matchId].Remove(player);
+                if (matchRooms[player.matchId].Count == 0)
+                    matchRooms.Remove(player.matchId);
+            }
         }
+
+        base.OnServerDisconnect(conn);
     }
-
 }
-
-public struct JoinRoomMessage : NetworkMessage
-{
-    public string matchId;
-}
-
-
