@@ -5,17 +5,19 @@ public class MeleeAttack : AttackBase
 {
     AttackObjectMelee attackObjectMelee;
     List<GameObject> attackEntities = new();
-    List<Hitbox> hitboxes = new();
+    List<UniversalHitbox> hitboxes = new();
+    protected GameObject cachedCaster;
+
     public override bool Execute(GameObject caster, GameObject target)
     {
         if (target == null) return false;
         if (attackEntities.Count == 0) return false;
         Vector3 direction = (target.transform.position - caster.transform.position).normalized;
         caster.transform.forward = direction;
-
+        cachedCaster = caster;
         foreach (var hitbox in hitboxes)
         {
-            hitbox.Initialize(attackObj.damage, caster);
+            hitbox.Initialize(attackObj.damage, 0f,caster);
         }
 
         return true;
@@ -26,20 +28,19 @@ public class MeleeAttack : AttackBase
         attackEntities.Clear();
         hitboxes.Clear();
 
-        var allHitboxes = caster.GetComponentsInChildren<Hitbox>(true);
+        var allHitboxes = caster.GetComponentsInChildren<UniversalHitbox>(true);
         foreach (var name in attackObjectMelee.hitboxName)
         {
-            foreach (var hb in allHitboxes)
+            foreach (var ub in allHitboxes)
             {
-                if (hb.name == name)
+                if (ub.name == name)
                 {
-                    attackEntities.Add(hb.gameObject);
-                    hitboxes.Add(hb);
+                    attackEntities.Add(ub.gameObject);
+                    hitboxes.Add(ub);
                     break;
                 }
             }
         }
-
         if (hitboxes.Count == 0)
         {
             Debug.LogWarning("MeleeAttack: 히트박스를 하나도 찾지 못했습니다.");
@@ -48,16 +49,15 @@ public class MeleeAttack : AttackBase
 
     public override void OnAnimationEvent(string eventName)
     {
+        if (attackEntities.Count == 0) return;
         if (eventName == "EnableAttackEntity")
         {
-            if (attackEntities.Count == 0) return;
             foreach (var entity in attackEntities)
             {
                 entity.SetActive(true);
             }
         } else if (eventName == "DisableAttackEntity")
         {
-            if (attackEntities.Count == 0) return;
             foreach (var entity in attackEntities)
             {
                 entity.SetActive(false);

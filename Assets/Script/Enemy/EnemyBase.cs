@@ -13,10 +13,19 @@ public class EnemyBase : CharacterStats
     public AttackObjectBase[] attackObjs;
     private List<AttackBase> attacks = new List<AttackBase>();
     private AttackBase currentAttack;
+    [SerializeField] private GameObject bodyRoot;
+
+    [SerializeField] private float _attackDamage = 10f;
+    [SerializeField] private float _moveSpeed = 3f;
+
+    public override float AttackDamage => _attackDamage;
+    public override float MoveSpeed => _moveSpeed;
+
 
     [Header("애니메이션/AI")]
     private Animator animator;
     private BehaviorGraphAgent behavior;
+    private NavMeshAgent navMeshAgent;
     public bool isAttacking = false;
 
     [Header("체력바 UI")]
@@ -48,11 +57,23 @@ public class EnemyBase : CharacterStats
     //몬스터 공격 범위 표시해주는 테스트 코드 밸런스 잡을때 필요해요
     void OnDrawGizmosSelected()
     {
+        if (bodyRoot == null) return;
         for (int i = 0; i < attackObjs.Length; i++)
         {
             Gizmos.color = colors[i];
-            Gizmos.DrawWireSphere(transform.position, attackObjs[i].range);
+            Gizmos.DrawWireSphere(bodyRoot.transform.position, attackObjs[i].range);
         }
+    }
+
+    private void Awake()
+    {
+        animator = GetComponent<Animator>();
+    }
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        if (worldCamera == null) worldCamera = Camera.main;
     }
 
     public override void OnStartServer()
@@ -60,12 +81,9 @@ public class EnemyBase : CharacterStats
         base.OnStartServer();
 
         behavior = GetComponent<BehaviorGraphAgent>();
-        animator = GetComponent<Animator>();
+        navMeshAgent = GetComponent<NavMeshAgent>();
 
-        if (worldCamera == null)
-        {
-            worldCamera = Camera.main;
-        }
+        navMeshAgent.speed = MoveSpeed;
 
         foreach (var attackObj in attackObjs)
         {
@@ -81,9 +99,10 @@ public class EnemyBase : CharacterStats
     [Server]
     public virtual void UseAllAttack(GameObject target)
     {
+        if (bodyRoot == null) return;
         for (int i = 0; i < attacks.Count; i++)
         {
-            if (attacks[i].IsReadyToExecute(gameObject, target))
+            if (attacks[i].IsReadyToExecute(bodyRoot, target))
             {
                 currentAttack = attacks[i];
                 attacks[i].Execute(gameObject, target);
@@ -106,15 +125,20 @@ public class EnemyBase : CharacterStats
 
     public void OnAttackAnimationEnd()
     {
+        if (!isServer) return;
         isAttacking = false;
         behavior?.SetVariableValue("IsAttacking", isAttacking);
 
         currentAttack?.ForceCooldownStart();
     }
 
+    //EnableAttackEntity
+    //DisableAttackEntity
     public void OnAnimationEvent(string eventName)
     {
+        if (!isServer) return;
         if (currentAttack == null) return;
+
         currentAttack.OnAnimationEvent(eventName);
     }
 
