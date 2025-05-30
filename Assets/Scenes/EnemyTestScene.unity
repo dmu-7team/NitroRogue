@@ -2944,7 +2944,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 1631210194
-  _assetId: 561247308
+  _assetId: 0
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
@@ -3615,7 +3615,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 354174481
-  _assetId: 1700155432
+  _assetId: 0
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
