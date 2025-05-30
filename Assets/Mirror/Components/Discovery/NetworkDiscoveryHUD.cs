@@ -63,7 +63,7 @@ namespace Mirror.Discovery
             if (GUILayout.Button("Start Host"))
             {
                 discoveredServers.Clear();
-                NetworkManager.singleton.StartHost();
+                //NetworkManager.singleton.StartHost();
                 networkDiscovery.AdvertiseServer();
             }
 

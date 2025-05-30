@@ -87,21 +87,35 @@ public class RoomListUI : MonoBehaviour
 
     public void OnCreateRoomConfirm()
     {
-        if (NetworkServer.active || NetworkClient.active)
+        if (!NetworkClient.isConnected)
         {
-            Debug.LogWarning("[RoomListUI] 이미 실행 중이므로 방 생성 생략됨");
+            Debug.LogWarning("[RoomListUI] 아직 서버에 연결되지 않음. 연결 후 시도하세요.");
+            return;
+        }
+
+        string roomName = roomNameInputField.text;
+        if (string.IsNullOrWhiteSpace(roomName))
+        {
+            Debug.LogWarning("[RoomListUI] 방 이름이 비어 있습니다.");
             return;
         }
 
         string newMatchId = Guid.NewGuid().ToString();
         matchIdToJoin = newMatchId;
 
-        NetworkManager.singleton.networkAddress = "127.0.0.1";
-        NetworkManager.singleton.StartHost();
+        // 서버에 방 생성 요청 전송
+        JoinMatchMessage msg = new JoinMatchMessage
+        {
+            matchId = newMatchId,
+            roomName = roomName
+        };
 
+        NetworkClient.Send(msg);
         createRoomPopup.SetActive(false);
-        Debug.Log($"[RoomListUI] 새 호스트로 방 생성: {newMatchId}");
+
+        Debug.Log($"[RoomListUI] 방 생성 요청 전송: {roomName} ({newMatchId})");
     }
+
 
     public void RequestRoomListRefresh()
     {

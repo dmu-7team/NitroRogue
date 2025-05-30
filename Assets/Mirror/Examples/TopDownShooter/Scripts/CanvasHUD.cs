@@ -126,7 +126,7 @@ namespace Mirror.Examples.TopDownShooter
         private void OnClickStartHostButton()
         {
             canvasTopDown.PlaySoundButtonUI();
-            NetworkManager.singleton.StartHost();
+            //NetworkManager.singleton.StartHost();
         }
 
         private void OnClickStartServerButton()

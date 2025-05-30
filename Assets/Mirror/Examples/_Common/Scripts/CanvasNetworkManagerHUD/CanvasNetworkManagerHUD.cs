@@ -138,7 +138,7 @@ namespace Mirror.Examples.Common
 
         private void OnClickStartHostButton()
         {
-            NetworkManager.singleton.StartHost();
+           // NetworkManager.singleton.StartHost();
         }
 
         private void OnClickStartServerButton()

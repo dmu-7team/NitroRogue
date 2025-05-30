@@ -1,27 +1,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
-using NetworkMessages; // 메시지 네임스페이스 사용
+using NetworkMessages;
 
-public class CustomNetworkManager : NetworkManager
+public class CustomNetworkManager_Server : NetworkManager
 {
-    // 방 ID와 플레이어 목록 매핑
     public Dictionary<string, List<RoomPlayer>> matchRooms = new();
-    public static string matchIdToJoin; // 원하는 방에 Join할 때 사용하는 matchId
+
+    public override void Start()
+    {
+        base.Start();
+        Debug.Log("[서버] Start() 호출됨");
+        StartServer(); // 이거 안 부르면 아예 서버가 안 열림
+    }
 
 
     public override void OnStartServer()
     {
         base.OnStartServer();
+        Debug.Log("[서버] OnStartServer 진입 완료");
+
         NetworkServer.RegisterHandler<JoinMatchMessage>(OnJoinMatchMessageReceived);
         NetworkServer.RegisterHandler<RoomListRequestMessage>(OnRoomListRequestMessageReceived);
-    }
-
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-        NetworkClient.RegisterHandler<JoinResultMessage>(OnJoinResultMessageReceived);
-        NetworkClient.RegisterHandler<RoomListSyncMessage>(msg => RoomListUI.Instance.OnRoomListSyncMessageReceived(msg));
     }
 
     private void OnJoinMatchMessageReceived(NetworkConnectionToClient conn, JoinMatchMessage msg)
@@ -49,14 +49,6 @@ public class CustomNetworkManager : NetworkManager
             roomName = msg.roomName
         };
         conn.Send(result);
-    }
-
-    private void OnJoinResultMessageReceived(JoinResultMessage msg)
-    {
-        if (msg.success)
-            Debug.Log($"[Client] 방 참가 성공: {msg.roomName} ({msg.matchId})");
-        else
-            Debug.LogWarning("[Client] 방 참가 실패");
     }
 
     private void OnRoomListRequestMessageReceived(NetworkConnectionToClient conn, RoomListRequestMessage msg)

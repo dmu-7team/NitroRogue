@@ -182,8 +182,87 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2992765098056076, guid: 6e86584e1f350c04f8b7fc7a6820ebd5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1951663345}
   m_SourcePrefab: {fileID: 100100000, guid: 6e86584e1f350c04f8b7fc7a6820ebd5, type: 3}
+--- !u!1 &1951663343 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2992765098056076, guid: 6e86584e1f350c04f8b7fc7a6820ebd5, type: 3}
+  m_PrefabInstance: {fileID: 1951663342}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1951663344 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6974907184813945497, guid: 6e86584e1f350c04f8b7fc7a6820ebd5, type: 3}
+  m_PrefabInstance: {fileID: 1951663342}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1951663343}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7424c1070fad4ba2a7a96b02fbeb4bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1951663345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1951663343}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 694418cf06a3f1943a2908dc7a95a1da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dontDestroyOnLoad: 1
+  runInBackground: 1
+  headlessStartMode: 0
+  editorAutoStart: 0
+  sendRate: 60
+  offlineScene: 
+  onlineScene: 
+  offlineSceneLoadDelay: 0
+  transport: {fileID: 1951663344}
+  networkAddress: localhost
+  maxConnections: 100
+  disconnectInactiveConnections: 0
+  disconnectInactiveTimeout: 60
+  authenticator: {fileID: 0}
+  playerPrefab: {fileID: 8269937752400224285, guid: 8820f04a47cbf7c4cbfa857b2c107186, type: 3}
+  autoCreatePlayer: 1
+  playerSpawnMethod: 0
+  spawnPrefabs:
+  - {fileID: 839224178500407364, guid: 2e85b9f5bcc94f2448d106859125dfd7, type: 3}
+  - {fileID: 235673213667241877, guid: 6c4ffb140e19fe6439d7075e4941926d, type: 3}
+  - {fileID: 6919168529496773260, guid: fab2ffe5e0338324fab515d8605ef080, type: 3}
+  - {fileID: 118189010928055112, guid: 2bade716ce049494d8769bcae20ff410, type: 3}
+  - {fileID: 7078556089362761334, guid: 759068f362928494392c923c831e1701, type: 3}
+  - {fileID: 9222912982316200897, guid: 312334879c7857f459d7323743bc8e6d, type: 3}
+  - {fileID: 7929354656396367374, guid: 0584fe8eda4dd45428f0cfa030e41aad, type: 3}
+  - {fileID: 8269937752400224285, guid: 8820f04a47cbf7c4cbfa857b2c107186, type: 3}
+  - {fileID: 4779435139897670464, guid: 191f9e88e0260bc438b5554213b75030, type: 3}
+  - {fileID: 8532805641309439499, guid: 8347f82d268d612469d73647a398bf26, type: 3}
+  - {fileID: 2460976672058901519, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
+  - {fileID: 2086602806712532617, guid: 276fd3723b32c284e9f37f9d9ff6863f, type: 3}
+  - {fileID: 7153141402127884706, guid: 28e43039a54c12c41ba9184f61ca2de3, type: 3}
+  - {fileID: 845490078162693129, guid: e01977033274b7f4d8b7d76d80fdf06b, type: 3}
+  - {fileID: 6753617674297473082, guid: a0b54d70e4e2d724bb6026f1b5ce52a8, type: 3}
+  exceptionsDisconnect: 1
+  snapshotSettings:
+    bufferTimeMultiplier: 2
+    bufferLimit: 32
+    catchupNegativeThreshold: -1
+    catchupPositiveThreshold: 1
+    catchupSpeed: 0.019999999552965164
+    slowdownSpeed: 0.03999999910593033
+    driftEmaDuration: 1
+    dynamicAdjustment: 1
+    dynamicAdjustmentTolerance: 1
+    deliveryTimeEmaDuration: 2
+  evaluationMethod: 0
+  evaluationInterval: 3
+  timeInterpolationGui: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

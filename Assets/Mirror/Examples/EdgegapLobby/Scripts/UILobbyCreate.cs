@@ -35,7 +35,7 @@ namespace Mirror.Examples.EdgegapLobby
             {
                 gameObject.SetActive(false);
                 _transport.SetServerLobbyParams(LobbyName.text, (int)SlotSlider.value);
-                NetworkManager.singleton.StartHost();
+               // NetworkManager.singleton.StartHost();
             });
             ServerButton.onClick.AddListener(() =>
             {
