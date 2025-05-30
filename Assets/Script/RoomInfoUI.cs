@@ -45,11 +45,22 @@ public class RoomInfoUI : MonoBehaviour
         {
             NetworkManager.singleton.networkAddress = "127.0.0.1";
             NetworkManager.singleton.StartClient();
+
+            // 연결 완료 후 OnClientConnect에서 JoinMatchMessage 보내야 함
         }
         else
         {
             Debug.LogWarning("[RoomInfoUI] 이미 네트워크 연결 중이므로 클라이언트 시작 생략");
+
+            // 이거 추가해야 함
+            NetworkClient.Send(new JoinMatchMessage
+            {
+                matchId = matchId,
+                roomName = roomNameText.text
+            });
+            Debug.Log($"[Client] JoinMessage 보냄 (RoomInfoUI): {matchId}, {roomNameText.text}");
         }
     }
+
 }
 

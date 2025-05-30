@@ -32,25 +32,44 @@ public class RoomListUI : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log("[RoomListUI] Awake 실행");
+
         if (Instance != null && Instance != this)
         {
+            Debug.LogWarning("[RoomListUI] 중복 인스턴스 발견 -> 파괴됨");
             Destroy(gameObject);
             return;
         }
+
+        Debug.Log("[RoomListUI] Singleton 인스턴스 등록 완료");
         Instance = this;
     }
 
+
+    private static bool listenersRegistered = false; // 리스너 중복 방지
+
     private void Start()
     {
+        Debug.Log("[RoomListUI] Start 호출됨");
         if (!handlerRegistered)
         {
             NetworkClient.RegisterHandler<RoomListSyncMessage>(OnRoomListSyncMessageReceived);
             handlerRegistered = true;
         }
 
-        createButton?.onClick.AddListener(OnCreateRoomConfirm);
-        cancelButton?.onClick.AddListener(HideCreateRoomPopup);
-        refreshButton?.onClick.AddListener(RequestRoomListRefresh);
+        if (!listenersRegistered)
+        {
+            createButton?.onClick.RemoveAllListeners();
+            cancelButton?.onClick.RemoveAllListeners();
+            refreshButton?.onClick.RemoveAllListeners();
+
+            createButton?.onClick.AddListener(OnCreateRoomConfirm);
+            cancelButton?.onClick.AddListener(HideCreateRoomPopup);
+            refreshButton?.onClick.AddListener(RequestRoomListRefresh);
+
+            listenersRegistered = true;
+            Debug.Log("[RoomListUI] 버튼 리스너 최초 등록");
+        }
 
         createRoomPopup?.SetActive(false);
 
@@ -61,6 +80,7 @@ public class RoomListUI : MonoBehaviour
                 roomNameText.text = player.roomName;
         }
     }
+
 
     private void OnEnable()
     {
@@ -114,6 +134,8 @@ public class RoomListUI : MonoBehaviour
         createRoomPopup.SetActive(false);
 
         Debug.Log($"[RoomListUI] 방 생성 요청 전송: {roomName} ({newMatchId})");
+        Debug.LogError("[RoomListUI]  OnCreateRoomConfirm() 호출됨", this);
+        Debug.Log(Environment.StackTrace); // 호출 경로 로그 찍기
     }
 
 
@@ -122,7 +144,7 @@ public class RoomListUI : MonoBehaviour
         if (NetworkClient.isConnected)
         {
             Debug.Log("[RoomListUI] 서버에 방 리스트 요청 전송 (자동)");
-            // 서버가 알아서 RoomListSyncMessage 보내므로 별도 요청 생략 가능
+            NetworkClient.Send(new RoomListRequestMessage());
         }
         else
         {
@@ -131,11 +153,15 @@ public class RoomListUI : MonoBehaviour
                 triedAutoConnect = true;
                 Debug.Log("[RoomListUI] 서버에 자동 연결 시도 중...");
 
+                // 1. 먼저 연결 시도
                 NetworkManager.singleton.networkAddress = "127.0.0.1";
                 NetworkManager.singleton.StartClient();
+
+                // 2. 연결 완료 후 요청 보내도록 따로 처리해야 함 (예: OnClientConnect에서)
             }
         }
     }
+
 
     // 메시지 수신 후 리스트 처리
     // 메시지 수신 후 리스트 처리
@@ -186,4 +212,14 @@ public class RoomListUI : MonoBehaviour
                 infoUI.SetRoomInfo(info.roomName, info.matchId, info.currentPlayers, info.maxPlayers);
         }
     }
+    
+    public TextMeshProUGUI playerCountText;
+    public Button joinButton;
+
+    
+    private string roomName;
+
+    
+
+   
 }

@@ -682,5 +682,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roomNameText: {fileID: 5291401588083422089}
-  roomStateText: {fileID: 803352157553033204}
+  playerCountText: {fileID: 803352157553033204}
   joinButton: {fileID: 6133959451304780452}
