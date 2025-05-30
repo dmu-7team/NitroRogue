@@ -1,9 +1,10 @@
 using UnityEngine;
+using TMPro;
+using Mirror;
 using UnityEngine.SceneManagement;
 
 public class MainMenuUI : MonoBehaviour
 {
-    // 게임 시작 버튼에 연결
     public void StartGame()
     {
         // 게임 시작 시 로비 선택 시험을 위해 다음 시센으로 이동
@@ -32,5 +33,33 @@ public class MainMenuUI : MonoBehaviour
     public void Test()
     {
         SceneManager.LoadScene("WoojinScene"); // 씬 이름 정확히 입력
+    }
+    public TMP_InputField inputFieldMatchId;
+    public void OnClickJoin()
+    {
+        if (NetworkClient.active || NetworkServer.active)
+        {
+            Debug.LogWarning("[MainMenuUI] 이미 네트워크 동작 중, Join 생략");
+            return;
+        }
+
+        string matchId = inputFieldMatchId.text;
+        if (string.IsNullOrWhiteSpace(matchId))
+        {
+            Debug.LogWarning("[MainMenuUI] 입력된 matchId 없음");
+            return;
+        }
+
+        RoomListUI.matchIdToJoin = matchId;
+
+        NetworkManager.singleton.networkAddress = "127.0.0.1";
+        NetworkManager.singleton.StartClient();
+
+        Debug.Log($"[MainMenuUI] 서버 연결 및 Join 시도: {matchId}");
+    }
+
+    public void OnClickCreateRoom()
+    {
+        RoomListUI.Instance?.ShowCreateRoomPopup();
     }
 }

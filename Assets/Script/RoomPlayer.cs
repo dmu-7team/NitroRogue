@@ -6,6 +6,9 @@ public class RoomPlayer : NetworkBehaviour
     [SyncVar] public string matchId;
     [SyncVar] public string roomName;
 
+    [SyncVar] public int currentPlayers; // 추가
+    [SyncVar] public int maxPlayers;     // 추가
+
     public override void OnStartServer()
     {
         base.OnStartServer();
@@ -23,10 +26,10 @@ public class RoomPlayer : NetworkBehaviour
         matchId = id;
         roomName = "Room-" + id.Substring(0, 4);
     }
+
     [Command]
     public void CmdSetReady(bool isReady)
     {
         Debug.Log($"[RoomPlayer] Ready 상태 설정: {isReady}");
-        // 예시: 여기선 아무 동작 안 하지만, 서버에서 체크할 수도 있음
     }
 }
