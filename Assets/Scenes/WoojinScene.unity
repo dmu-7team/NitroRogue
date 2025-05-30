@@ -845,6 +845,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player_ver.RBM2
       objectReference: {fileID: 0}
+    - target: {fileID: 2543631903229549781, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
+      propertyPath: ammoText
+      value: 
+      objectReference: {fileID: 2118406097431767073}
+    - target: {fileID: 2543631903229549781, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
+      propertyPath: crosshair
+      value: 
+      objectReference: {fileID: 1287859936581441408}
+    - target: {fileID: 2543631903229549781, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
+      propertyPath: weaponType
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2543631903229549781, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
+      propertyPath: scopeOverlay
+      value: 
+      objectReference: {fileID: 565796498325797362}
     - target: {fileID: 2929232651688778293, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.66
@@ -27655,7 +27671,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  enemyPrefab: {fileID: 6919168529496773260, guid: fab2ffe5e0338324fab515d8605ef080, type: 3}
+  enemyPrefab: {fileID: 4921877257883508352, guid: 03acb33812c5ec341b2246e3fca17a10, type: 3}
   spawnInterval: 9999
   spawnPoints:
   - {fileID: 1679209264}
@@ -79519,7 +79535,7 @@ PrefabInstance:
       objectReference: {fileID: 2460976672058901519, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
     - target: {fileID: 4842265540763995225, guid: ae77112ad2f87cb4a95cbe83af25fdd1, type: 3}
       propertyPath: spawnPrefabs.Array.size
-      value: 12
+      value: 29
       objectReference: {fileID: 0}
     - target: {fileID: 4842265540763995225, guid: ae77112ad2f87cb4a95cbe83af25fdd1, type: 3}
       propertyPath: 'spawnPrefabs.Array.data[0]'
@@ -79568,7 +79584,7 @@ PrefabInstance:
     - target: {fileID: 4842265540763995225, guid: ae77112ad2f87cb4a95cbe83af25fdd1, type: 3}
       propertyPath: 'spawnPrefabs.Array.data[11]'
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 7962604100564841400, guid: d0fc9fb3ee062e541a88de96af92e8c1, type: 3}
     - target: {fileID: 4842265540763995225, guid: ae77112ad2f87cb4a95cbe83af25fdd1, type: 3}
       propertyPath: 'spawnPrefabs.Array.data[12]'
       value: 
