@@ -77,7 +77,7 @@ namespace Mirror.Examples.AutoLANClientController
                 // NetworkManager.singleton.onlineScene = SceneManager.GetActiveScene().name;
                 if (runAsPlayerHost == true)
                 {
-                    NetworkManager.singleton.StartHost();
+                    //NetworkManager.singleton.StartHost();
                 }
                 else
                 {
@@ -105,7 +105,7 @@ namespace Mirror.Examples.AutoLANClientController
             SetupInfoText("Starting as host");
             discoveredServers.Clear();
             //NetworkManager.singleton.onlineScene = SceneManager.GetActiveScene().name;
-            NetworkManager.singleton.StartHost();
+           // NetworkManager.singleton.StartHost();
             networkDiscovery.AdvertiseServer();
 
         }
