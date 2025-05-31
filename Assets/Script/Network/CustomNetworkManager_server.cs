@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using NetworkMessages;
+using UnityEditor.EditorTools;
+
 
 public class CustomNetworkManager_Server : NetworkManager
 {
@@ -27,12 +29,18 @@ public class CustomNetworkManager_Server : NetworkManager
     {
         Debug.Log($"[서버] JoinMatch 요청: {msg.matchId} / {msg.roomName}");
 
+        // 기존 플레이어 오브젝트가 존재하면 제거
+        if (conn.identity != null)
+        {
+            Debug.LogWarning("[서버] 기존 플레이어 오브젝트 제거");
+            NetworkServer.Destroy(conn.identity.gameObject);
+        }
+
         if (!matchRooms.ContainsKey(msg.matchId))
         {
             matchRooms[msg.matchId] = new List<RoomPlayer>();
         }
 
-        //  RoomPlayer 생성 및 연결
         GameObject playerObj = Instantiate(playerPrefab);
         RoomPlayer roomPlayer = playerObj.GetComponent<RoomPlayer>();
 
@@ -41,9 +49,10 @@ public class CustomNetworkManager_Server : NetworkManager
             roomPlayer.roomName = msg.roomName;
             roomPlayer.matchId = msg.matchId;
 
+            //  중복 방지: 이 전에 반드시 AddPlayerForConnection 하기
             NetworkServer.AddPlayerForConnection(conn, playerObj);
 
-            matchRooms[msg.matchId].Add(roomPlayer); //  이거 추가해야 currentPlayers가 올라감
+            matchRooms[msg.matchId].Add(roomPlayer); //  방 인원수 반영
         }
 
         JoinResultMessage result = new()
@@ -56,6 +65,8 @@ public class CustomNetworkManager_Server : NetworkManager
 
         Debug.Log($"[서버] JoinMatch 완료: {msg.matchId} / 클라에 응답 전송됨");
     }
+
+
 
 
     private void OnRoomListRequestMessageReceived(NetworkConnectionToClient conn, RoomListRequestMessage msg)
@@ -81,10 +92,45 @@ public class CustomNetworkManager_Server : NetworkManager
         Debug.Log($"[서버] 방 리스트 전송됨: {roomInfos.Count}개");
     }
 
+
+    // 예시: CustomNetworkManager_Server.cs
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
         base.OnServerDisconnect(conn);
         Debug.Log($"[서버] 클라이언트 연결 해제됨: {conn.connectionId}");
-        // 여기선 Player 제거 안 해도 됨 (없으니까)
+
+        if (conn.identity != null)
+        {
+            var player = conn.identity.GetComponent<RoomPlayer>();
+            if (player != null && matchRooms.ContainsKey(player.matchId))
+            {
+                matchRooms[player.matchId].Remove(player);
+
+                Debug.Log($"[서버] 플레이어 퇴장 처리 완료: {player.matchId} / 남은 인원 {matchRooms[player.matchId].Count}");
+
+                // 클라이언트들에게 최신 방 리스트 전송
+                List<RoomInfo> roomInfos = new();
+
+                foreach (var pair in matchRooms)
+                {
+                    if (pair.Value.Count > 0)
+                    {
+                        roomInfos.Add(new RoomInfo
+                        {
+                            matchId = pair.Key,
+                            roomName = pair.Value[0].roomName,
+                            currentPlayers = pair.Value.Count,
+                            maxPlayers = 4
+                        });
+                    }
+                }
+
+                RoomListSyncMessage syncMsg = new RoomListSyncMessage { roomList = roomInfos };
+                NetworkServer.SendToAll(syncMsg);
+            }
+        }
     }
+
+
+
 }
