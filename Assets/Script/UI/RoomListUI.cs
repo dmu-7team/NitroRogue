@@ -32,24 +32,27 @@ public class RoomListUI : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("[RoomListUI] Awake 실행");
 
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("[RoomListUI] 중복 인스턴스 발견 -> 파괴됨");
             Destroy(gameObject);
             return;
         }
 
-        Debug.Log("[RoomListUI] Singleton 인스턴스 등록 완료");
         Instance = this;
+        Debug.Log($"[RoomListUI] 현재 인스턴스 ID: {GetInstanceID()}");
+
+        // DontDestroyOnLoad(gameObject);  이거 제거!
     }
+
+
 
 
     private static bool listenersRegistered = false; // 리스너 중복 방지
 
     private void Start()
     {
+
         Debug.Log("[RoomListUI] Start 호출됨");
         if (!handlerRegistered)
         {
@@ -59,17 +62,20 @@ public class RoomListUI : MonoBehaviour
 
         if (!listenersRegistered)
         {
-            createButton?.onClick.RemoveAllListeners();
-            cancelButton?.onClick.RemoveAllListeners();
-            refreshButton?.onClick.RemoveAllListeners();
+            Debug.Log($"[RoomListUI] 리스너 등록 시도, 인스턴스 ID: {GetInstanceID()}");
 
-            createButton?.onClick.AddListener(OnCreateRoomConfirm);
-            cancelButton?.onClick.AddListener(HideCreateRoomPopup);
-            refreshButton?.onClick.AddListener(RequestRoomListRefresh);
+            createButton.onClick.RemoveAllListeners();
+            cancelButton.onClick.RemoveAllListeners();
+            refreshButton.onClick.RemoveAllListeners();
+
+            createButton.onClick.AddListener(OnCreateRoomConfirm);
+            cancelButton.onClick.AddListener(HideCreateRoomPopup);
+            refreshButton.onClick.AddListener(RequestRoomListRefresh);
 
             listenersRegistered = true;
-            Debug.Log("[RoomListUI] 버튼 리스너 최초 등록");
         }
+
+
 
         createRoomPopup?.SetActive(false);
 
@@ -84,8 +90,10 @@ public class RoomListUI : MonoBehaviour
 
     private void OnEnable()
     {
+
         if (!NetworkServer.active && !NetworkClient.active)
             InvokeRepeating(nameof(RequestRoomListRefresh), 1f, refreshInterval);
+        Debug.Log($"[RoomListUI] OnEnable: {GetInstanceID()} in scene {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
     }
 
     private void OnDisable()
@@ -136,6 +144,8 @@ public class RoomListUI : MonoBehaviour
         Debug.Log($"[RoomListUI] 방 생성 요청 전송: {roomName} ({newMatchId})");
         Debug.LogError("[RoomListUI]  OnCreateRoomConfirm() 호출됨", this);
         Debug.Log(Environment.StackTrace); // 호출 경로 로그 찍기
+        Debug.Log($"[RoomListUI] 리스너 실행됨 - 인스턴스 ID: {GetInstanceID()}");
+
     }
 
 
@@ -167,6 +177,12 @@ public class RoomListUI : MonoBehaviour
     // 메시지 수신 후 리스트 처리
     public void OnRoomListSyncMessageReceived(RoomListSyncMessage msg)
     {
+        if (contentParent == null || contentParent.gameObject == null)
+        {
+            Debug.LogWarning("[RoomListUI] contentParent 없음 -> 방 리스트 갱신 무시");
+            return;
+        }
+
         ClearRoomList();
 
         foreach (RoomInfo info in msg.roomList)
@@ -178,12 +194,25 @@ public class RoomListUI : MonoBehaviour
         }
     }
 
+
+
     //  기존 리스트 제거
     private void ClearRoomList()
     {
+        if (contentParent == null || contentParent.gameObject == null)
+        {
+            Debug.LogWarning("[RoomListUI] contentParent가 null이거나 Destroy됨");
+            return;
+        }
+
         foreach (Transform child in contentParent)
-            Destroy(child.gameObject);
+        {
+            if (child != null)
+                Destroy(child.gameObject);
+        }
     }
+
+
 
     // 예전 함수 유지
     public void RenderRoomList(List<RoomInfo> list)
