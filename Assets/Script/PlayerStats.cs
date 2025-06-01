@@ -42,14 +42,14 @@ public class PlayerStats : CharacterStats
         base.OnStartClient();
         originalSpeed = syncedMoveSpeed;
         originalDamage = syncedAttackDamage;
+        if (!isLocalPlayer) return;
+        UIManager.Instance?.RegisterPlayer(this);
     }
 
     public override void OnStartServer()
     {
         base.OnStartServer();
         SetHealth(maxHealth, maxHealth);
-        UIManager.Instance?.RegisterPlayer(this);
-
         originalSpeed = syncedMoveSpeed;
         originalDamage = syncedAttackDamage;
     }
@@ -75,8 +75,16 @@ public class PlayerStats : CharacterStats
     {
         currentHealth -= damage;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        RpcUpdate(currentHealth, maxHealth);
         if (currentHealth <= 0)
             Die();
+    }
+    [ClientRpc]
+    public void RpcUpdate(float current, float max)
+    {
+        if (!isLocalPlayer) return;
+        Debug.Log("이거됨?");
+        OnHealthChanged?.Invoke(current, max);
     }
 
     public void Heal(float amount)
