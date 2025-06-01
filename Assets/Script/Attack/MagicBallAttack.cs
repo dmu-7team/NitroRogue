@@ -1,3 +1,5 @@
+using System.Security.Principal;
+using Mirror;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static Unity.VisualScripting.Metadata;
@@ -67,10 +69,14 @@ public class MagicBallAttack : AttackBase
         Quaternion spawnRot = Quaternion.LookRotation(cachedDirection);
 
         GameObject obj = GameObject.Instantiate(attackEntity, spawnPos, spawnRot);
-        Debug.DrawRay(obj.transform.position, obj.transform.forward * 3f, Color.red, 2f);
+        NetworkServer.Spawn(obj);
 
         if (MagicBallObj.followSpawner && spawnPoint != null)
-            obj.transform.SetParent(spawnPoint, true);
+        {
+            NetworkIdentity identity = obj.GetComponent<NetworkIdentity>();
+            uint netId = identity.netId;
+            cachedCaster.GetComponent<AttackManager>().RpcSetParent(netId, MagicBallObj.spawnPoint);
+        }
 
         if (obj.TryGetComponent(out UniversalHitbox ub))
             ub.Initialize(attackObj.damage, MagicBallObj.duration, cachedCaster);

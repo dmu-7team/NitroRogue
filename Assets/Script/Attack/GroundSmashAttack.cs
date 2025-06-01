@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -41,6 +43,7 @@ public class GroundSmashAttack : MeleeAttack
         if (spawnPoint == null) return;
 
         GameObject effect = GameObject.Instantiate(attackObjectGroundSmash.groundEffect, spawnPoint.position, Quaternion.identity);
+        NetworkServer.Spawn(effect);
         GameObject.Destroy(effect, 2f);
     }
 }
