@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using Mirror;
 using NetworkMessages;
+using UnityEngine.UI; // ← 버튼 포함한 UI 컴포넌트용
 
 public class RoomUIManager : MonoBehaviour
 {
@@ -156,6 +157,76 @@ public class RoomUIManager : MonoBehaviour
         }
     }
 
+    public Button[] characterButtons;
+    public TextMeshProUGUI[] characterButtonTexts;
 
+
+    public void UpdateCharacterSelection(int index, string playerName)
+    {
+        if (index < 0 || index >= characterButtons.Length) return;
+
+        var text = characterButtons[index].GetComponentInChildren<TextMeshProUGUI>();
+        text.text = $"{playerName} 선택함";
+        characterButtons[index].interactable = false;
+    }
+
+    public void SetupCharacterButtons(RoomPlayer localPlayer)
+    {
+        for (int i = 0; i < characterButtons.Length; i++)
+        {
+            int idx = i; // for closure
+            characterButtons[i].onClick.RemoveAllListeners();
+            characterButtons[i].onClick.AddListener(() =>
+            {
+                localPlayer.CmdSelectCharacter(idx);
+            });
+        }
+    }
+
+    public void UpdateCharacterButtonStates()
+    {
+        for (int i = 0; i < characterButtons.Length; i++)
+        {
+            var btn = characterButtons[i];
+            var txt = characterButtonTexts[i];
+
+            bool isTaken = false;
+
+            foreach (var p in FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None))
+            {
+                if (p.selectedCharacter == i)
+                {
+                    isTaken = true;
+                    txt.text = $"{p.playerName} 선택됨";
+                    btn.interactable = !isTaken || p.isLocalPlayer;
+                    // 본인이면 다시 선택 가능
+                    break;
+                }
+            }
+
+            if (!isTaken)
+            {
+                txt.text = "선택 안됨";
+                btn.interactable = true;
+            }
+        }
+    }
+    public void OnCharacterButtonClicked(int index)
+    {
+        var player = NetworkClient.connection.identity.GetComponent<RoomPlayer>();
+
+        // 중복 체크
+        foreach (var p in FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None))
+        {
+            if (p.selectedCharacter == index && !p.isLocalPlayer)
+            {
+                Debug.Log("이미 선택된 캐릭터입니다.");
+                return;
+            }
+        }
+
+        player.CmdSelectCharacter(index);
+        UpdateCharacterButtonStates();
+    }
 
 }

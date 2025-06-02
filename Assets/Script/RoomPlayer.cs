@@ -2,6 +2,7 @@ using Mirror;
 using Mirror.Examples.MultipleMatch;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -23,6 +24,17 @@ public class RoomPlayer : NetworkBehaviour
         public bool isLeader;
         public bool isMe;
     }
+    [SyncVar(hook = nameof(OnCharacterChanged))]
+    public int selectedCharacter = -1;
+
+    void OnCharacterChanged(int oldIndex, int newIndex)
+    {
+        if (isLocalPlayer && RoomUIManager.Instance != null)
+        {
+            RoomUIManager.Instance.UpdateCharacterButtonStates();
+        }
+    }
+
 
     public override void OnStartClient()
     {
@@ -142,6 +154,38 @@ public class RoomPlayer : NetworkBehaviour
         {
             RoomUIManager.Instance.AddPlayerToList(info.name, info.isLeader, info.isMe);
         }
+    }
+    [Command]
+    public void CmdSelectCharacter(int index)
+    {
+        // 이미 다른 플레이어가 선택한 캐릭터인지 확인
+        var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
+        foreach (var p in players)
+        {
+            if (p != this && p.selectedCharacter == index)
+                return; // 중복 선택 불가
+        }
+
+        // 본인의 기존 선택 무시하고 새로 선택
+        selectedCharacter = index;
+    }
+
+
+    public void OnStartGameButtonClicked()
+    {
+        var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
+
+        foreach (var p in players)
+        {
+            if (p.selectedCharacter == -1)
+            {
+                Debug.Log("모든 플레이어가 캐릭터를 선택해야 합니다.");
+                return;
+            }
+        }
+
+        // 모든 조건 충족
+        players.First(p => p.isLeader).CmdStartGame();
     }
 
 }
