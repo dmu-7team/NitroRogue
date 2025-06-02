@@ -64,12 +64,20 @@ public class RoomUIManager : MonoBehaviour
     {
         Debug.Log("[RoomUIManager] 방 나가기 버튼 클릭됨");
 
-        // 방에서 나가는 로직 (예: 서버에 LeaveMatchMessage 보내기 등)
-        NetworkClient.Disconnect();  // 가장 간단한 처리: 서버 연결 종료
+        // 서버 연결 종료
+        NetworkClient.Disconnect();
 
-        // UI 전환
-        ShowMainMenu();
+        // 자동 재접속 관련 값 리셋
+        RoomListUI.matchIdToJoin = "";
+        RoomListUI.enableAutoJoin = false;
+        RoomListUI.triedAutoConnect = false;
+
+        // UI 전환 및 새로고침
+        RoomUIManager.Instance.ShowMainMenu();
+        RoomListUI.Instance.RequestRoomListRefresh();
     }
+
+
     private void OnJoinResultMessageReceived(JoinResultMessage msg)
     {
         if (msg.success)

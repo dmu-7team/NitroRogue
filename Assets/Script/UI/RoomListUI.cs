@@ -30,7 +30,7 @@ public class RoomListUI : MonoBehaviour
     private static bool handlerRegistered = false;
     private static bool listenersRegistered = false;
     private float refreshInterval = 3f;
-    private bool triedAutoConnect = false;
+    public static bool triedAutoConnect = false;
 
     private void Awake()
     {
@@ -42,6 +42,12 @@ public class RoomListUI : MonoBehaviour
         createRoomPopup?.SetActive(false);
         Instance = this;
         Debug.Log($"[RoomListUI] 현재 인스턴스 ID: {GetInstanceID()}");
+        if (!handlerRegistered)
+        {
+            NetworkClient.RegisterHandler<RoomListSyncMessage>(OnRoomListSyncMessageReceived);
+            handlerRegistered = true;
+            Debug.Log("[RoomListUI] RoomListSyncMessage 핸들러 등록 완료");
+        }
     }
 
     private void Start()
@@ -135,6 +141,7 @@ public class RoomListUI : MonoBehaviour
         NetworkClient.Send(msg);
         createRoomPopup.SetActive(false);
 
+        RoomUIManager.Instance.ShowRoom(roomName);
         Debug.Log($"[RoomListUI] 방 생성 요청 전송: {roomName} ({newMatchId})");
     }
 
@@ -164,13 +171,18 @@ public class RoomListUI : MonoBehaviour
 
         ClearRoomList();
 
+   
         foreach (RoomInfo info in msg.roomList)
         {
+            if (info.currentPlayers <= 0)
+                continue; // 방에 플레이어가 없으면 표시하지 않음
+
             GameObject roomItem = Instantiate(roomUIPrefab, contentParent);
             RoomInfoUI ui = roomItem.GetComponent<RoomInfoUI>();
             if (ui != null)
-                ui.SetInfo(info);  // 여기만 수정됨
+                ui.SetInfo(info);
         }
+
     }
 
     private void ClearRoomList()
