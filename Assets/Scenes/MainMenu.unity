@@ -330,6 +330,8 @@ MonoBehaviour:
   roomPanel: {fileID: 1764243660}
   roomNameText: {fileID: 1085316673}
   startButton: {fileID: 714037508}
+  playerListParent: {fileID: 854981406}
+  playerListItemPrefab: {fileID: 8905104389162583780, guid: d5350815f6bfe8b49aac37839768c99a, type: 3}
 --- !u!4 &144376961
 Transform:
   m_ObjectHideFlags: 0
