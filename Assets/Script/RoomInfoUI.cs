@@ -1,66 +1,51 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine.UI;
 using Mirror;
-using NetworkMessages; // RoomInfo 구조체를 위해 필요
+using NetworkMessages;
 
 public class RoomInfoUI : MonoBehaviour
 {
-    [Header("UI 컴포넌트")]
     public TextMeshProUGUI roomNameText;
-    public TextMeshProUGUI playerCountText;
+    public TextMeshProUGUI playerCountText; // 새로 추가
     public Button joinButton;
 
     private string matchId;
+    private string roomName;
 
-    public void SetRoomInfo(string roomName, string matchId, int currentPlayers, int maxPlayers)
+    public void SetInfo(RoomInfo info)
     {
-        this.matchId = matchId;
+        matchId = info.matchId;
+        roomName = info.roomName;
 
         if (roomNameText != null)
             roomNameText.text = roomName;
 
         if (playerCountText != null)
-            playerCountText.text = $"{currentPlayers} / {maxPlayers}";
+            playerCountText.text = $"{info.currentPlayers}/{info.maxPlayers}";
 
-        if (joinButton != null)
-        {
-            joinButton.onClick.RemoveAllListeners();
-            joinButton.onClick.AddListener(JoinRoom);
-        }
+        joinButton.onClick.RemoveAllListeners();
+        joinButton.onClick.AddListener(OnJoinClicked);
     }
 
-    //  RoomInfo를 받는 버전
-    public void SetInfo(RoomInfo info)
+    private void OnJoinClicked()
     {
-        SetRoomInfo(info.roomName, info.matchId, info.currentPlayers, info.maxPlayers);
-    }
-
-    private void JoinRoom()
-    {
-        Debug.Log($"[RoomInfoUI] 참가 시도 - matchId: {matchId}");
-        CustomNetworkManager.matchIdToJoin = matchId;
-
-        if (!NetworkClient.active && !NetworkServer.active)
+        if (!NetworkClient.isConnected)
         {
-            NetworkManager.singleton.networkAddress = "127.0.0.1";
-            NetworkManager.singleton.StartClient();
-
-            // 연결 완료 후 OnClientConnect에서 JoinMatchMessage 보내야 함
+            Debug.LogWarning("[RoomInfoUI] 클라이언트가 서버에 연결되어 있지 않습니다.");
+            return;
         }
-        else
+
+        RoomListUI.matchIdToJoin = matchId;
+        RoomListUI.enableAutoJoin = true;
+
+        JoinMatchMessage msg = new JoinMatchMessage
         {
-            Debug.LogWarning("[RoomInfoUI] 이미 네트워크 연결 중이므로 클라이언트 시작 생략");
+            matchId = matchId,
+            roomName = roomName
+        };
 
-            // 이거 추가해야 함
-            NetworkClient.Send(new JoinMatchMessage
-            {
-                matchId = matchId,
-                roomName = roomNameText.text
-            });
-            Debug.Log($"[Client] JoinMessage 보냄 (RoomInfoUI): {matchId}, {roomNameText.text}");
-        }
+        NetworkClient.Send(msg);
+        Debug.Log($"[RoomInfoUI] 참가 요청 전송됨: {roomName} ({matchId})");
     }
-
 }
-

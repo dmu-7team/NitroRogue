@@ -22,19 +22,22 @@ public class CustomNetworkManager : NetworkManager
     {
         base.OnClientConnect();
 
-        if (!joinSent && !string.IsNullOrEmpty(matchIdToJoin))
+        if (!string.IsNullOrEmpty(RoomListUI.matchIdToJoin))
         {
-            joinSent = true;
-            Debug.Log($"[Client] OnClientConnect → 자동 참가 요청: {matchIdToJoin}");
-
-            NetworkClient.Send(new JoinMatchMessage
+            Debug.Log($"[Client] OnClientConnect → 자동 참가 요청: {RoomListUI.matchIdToJoin}");
+            var joinMsg = new JoinMatchMessage
             {
-                matchId = matchIdToJoin,
-                roomName = "자동참가"
-            });
-            Debug.Log($"[Client] JoinMessage 보냄 (OnClientConnect): {matchIdToJoin}");
+                matchId = RoomListUI.matchIdToJoin,
+                roomName = RoomListUI.matchIdToJoin
+            };
+            NetworkClient.Send(joinMsg);
+        }
+        else
+        {
+            Debug.Log("[Client] matchIdToJoin이 비어 있음 → 자동 참가 생략");
         }
     }
+
 
 
     private void OnJoinResultMessageReceived(JoinResultMessage msg)
@@ -42,7 +45,7 @@ public class CustomNetworkManager : NetworkManager
         if (msg.success)
         {
             Debug.Log($"[Client] 방 참가 성공: {msg.roomName} ({msg.matchId})");
-            SceneManager.LoadScene("room");
+            RoomUIManager.Instance.ShowRoom(msg.roomName);
         }
         else
         {
