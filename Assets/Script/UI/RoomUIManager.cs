@@ -13,6 +13,12 @@ public class RoomUIManager : MonoBehaviour
     public TextMeshProUGUI roomNameText;
     public GameObject startButton;
 
+    [Header("플레이어 리스트 UI")]
+    public Transform playerListParent;
+    public GameObject playerListItemPrefab;
+
+
+
     private void Awake()
     {
         Debug.Log("[RoomUIManager] Awake 호출됨");
@@ -76,6 +82,25 @@ public class RoomUIManager : MonoBehaviour
         RoomUIManager.Instance.ShowMainMenu();
         RoomListUI.Instance.RequestRoomListRefresh();
     }
+    public void AddPlayerToList(string name, bool isLeader, bool isMe)
+    {
+        if (playerListItemPrefab == null || playerListParent == null)
+        {
+            Debug.LogWarning("[RoomUIManager] 플레이어 리스트 UI가 설정되지 않음");
+            return;
+        }
+
+        GameObject item = Instantiate(playerListItemPrefab, playerListParent);
+        var text = item.GetComponentInChildren<TextMeshProUGUI>();
+
+        string label = name;
+        if (isLeader) label += " (방장)";
+        if (isMe) label += " (본인)";
+
+        text.text = label;
+    }
+
+
 
 
     private void OnJoinResultMessageReceived(JoinResultMessage msg)
@@ -107,6 +132,28 @@ public class RoomUIManager : MonoBehaviour
         }
 
         RoomUIManager.Instance.ShowRoom(roomName);
+    }
+
+    public void ClearPlayerList()
+    {
+        foreach (Transform child in playerListParent)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+
+
+    public void RebuildPlayerList()
+    {
+        ClearPlayerList();
+
+        var players = Object.FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
+        foreach (var p in players)
+        {
+            bool isMe = p.isLocalPlayer; // 본인인지 체크
+            AddPlayerToList(p.playerName, p.isLeader, isMe);
+        }
     }
 
 

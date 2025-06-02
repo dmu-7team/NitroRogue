@@ -23,6 +23,7 @@ public class CustomNetworkManager_Server : NetworkManager
 
         NetworkServer.RegisterHandler<JoinMatchMessage>(OnJoinMatchMessageReceived);
         NetworkServer.RegisterHandler<RoomListRequestMessage>(OnRoomListRequestMessageReceived);
+
     }
 
     private void OnJoinMatchMessageReceived(NetworkConnectionToClient conn, JoinMatchMessage msg)
@@ -43,7 +44,7 @@ public class CustomNetworkManager_Server : NetworkManager
         RoomPlayer roomPlayer = playerObj.GetComponent<RoomPlayer>();
         roomPlayer.matchId = msg.matchId;
         roomPlayer.roomName = msg.roomName;
-
+        roomPlayer.playerName = $"플레이어{matchRooms[msg.matchId].Count + 1}";
         if (matchRooms[msg.matchId].Count == 0)
         {
             roomPlayer.isLeader = true;
@@ -59,6 +60,8 @@ public class CustomNetworkManager_Server : NetworkManager
             roomName = msg.roomName
         };
         conn.Send(result);
+        BroadcastPlayerList(msg.matchId);
+
     }
 
     private void OnRoomListRequestMessageReceived(NetworkConnectionToClient conn, RoomListRequestMessage msg)
@@ -82,25 +85,38 @@ public class CustomNetworkManager_Server : NetworkManager
 
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
+        string matchId = null;
+
         if (conn.identity != null)
         {
             RoomPlayer player = conn.identity.GetComponent<RoomPlayer>();
             if (player != null && matchRooms.ContainsKey(player.matchId))
             {
-                matchRooms[player.matchId].Remove(player);
-                if (matchRooms[player.matchId].Count == 0)
+                matchId = player.matchId; // 저장해두기
+
+                matchRooms[matchId].Remove(player);
+                if (matchRooms[matchId].Count == 0)
                 {
-                    matchRooms.Remove(player.matchId);
+                    matchRooms.Remove(matchId);
                 }
                 else if (player.isLeader)
                 {
-                    matchRooms[player.matchId][0].isLeader = true;
+                    matchRooms[matchId][0].isLeader = true;
                 }
+
                 SendRoomListToAllClients();
             }
         }
+
+        //  base 전에 matchId 기준으로 브로드캐스트
+        if (!string.IsNullOrEmpty(matchId))
+        {
+            BroadcastPlayerList(matchId);
+        }
+
         base.OnServerDisconnect(conn);
     }
+
 
     private void SendRoomListToAllClients()
     {
@@ -134,4 +150,29 @@ public class CustomNetworkManager_Server : NetworkManager
             player.TargetLoadGameScene();
         }
     }
+    public void BroadcastPlayerList(string matchId)
+    {
+        if (!matchRooms.ContainsKey(matchId)) return;
+
+        foreach (var player in matchRooms[matchId])
+        {
+            List<RoomPlayer.PlayerInfo> infoList = new();
+
+            foreach (var p in matchRooms[matchId])
+            {
+                infoList.Add(new RoomPlayer.PlayerInfo
+                {
+                    name = p.playerName,
+                    isLeader = p.isLeader,
+                    isMe = p == player
+                });
+            }
+
+            player.TargetRebuildPlayerList(infoList);
+        }
+    }
+
+
+
+
 }

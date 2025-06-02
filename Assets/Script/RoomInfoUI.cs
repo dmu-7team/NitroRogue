@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine.UI;
 using Mirror;
 using NetworkMessages;
+using System;
 
 public class RoomInfoUI : MonoBehaviour
 {
@@ -48,4 +49,8 @@ public class RoomInfoUI : MonoBehaviour
         NetworkClient.Send(msg);
         Debug.Log($"[RoomInfoUI] 참가 요청 전송됨: {roomName} ({matchId})");
     }
+    
+
+
+
 }
