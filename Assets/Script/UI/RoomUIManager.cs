@@ -1,0 +1,241 @@
+using UnityEngine;
+using TMPro;
+using Mirror;
+using NetworkMessages;
+using UnityEngine.UI; // ← 버튼 포함한 UI 컴포넌트용
+
+public class RoomUIManager : MonoBehaviour
+{
+    public static RoomUIManager Instance;
+
+    [Header("UI References")]
+    public GameObject mainMenuPanel;
+    public GameObject roomPanel;
+    public TextMeshProUGUI roomNameText;
+    public GameObject startButton;
+
+    [Header("플레이어 리스트 UI")]
+    public Transform playerListParent;
+    public GameObject playerListItemPrefab;
+
+
+
+    private void Awake()
+    {
+        Debug.Log("[RoomUIManager] Awake 호출됨");
+
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
+        mainMenuPanel.SetActive(true);
+        roomPanel.SetActive(false);
+    }
+
+
+
+    public void ShowRoom(string roomName = "")
+    {
+        mainMenuPanel.SetActive(false);
+        roomPanel.SetActive(true);
+        roomNameText.text = $"방 이름: {roomName}";
+    }
+
+    public void ShowMainMenu()
+    {
+        mainMenuPanel.SetActive(true);
+        roomPanel.SetActive(false);
+    }
+
+    public void ShowStartButton(bool show)
+    {
+        if (startButton != null)
+            startButton.SetActive(show);
+    }
+    public void UpdateRoomName(string newName)
+    {
+        if (roomNameText != null)
+            roomNameText.text = $"방 이름: {newName}";
+    }
+
+
+    public void UpdatePlayerReadyStatus(RoomPlayer player, bool isReady)
+    {
+        Debug.Log($"[RoomUIManager] {player.roomName} 플레이어 준비 상태: {isReady}");
+
+        // 실제로는 playerName, roomName 등을 이용해서 UI 요소 업데이트해야 함
+        // 예시:
+        // var uiElement = 플레이어 UI 리스트에서 player 식별;
+        // uiElement.readyIcon.SetActive(isReady);
+    }
+    public void OnLeaveRoomButtonClicked()
+    {
+        Debug.Log("[RoomUIManager] 방 나가기 버튼 클릭됨");
+
+        // 서버 연결 종료
+        NetworkClient.Disconnect();
+
+        // 자동 재접속 관련 값 리셋
+        RoomListUI.matchIdToJoin = "";
+        RoomListUI.enableAutoJoin = false;
+        RoomListUI.triedAutoConnect = false;
+
+        // UI 전환 및 새로고침
+        RoomUIManager.Instance.ShowMainMenu();
+        RoomListUI.Instance.RequestRoomListRefresh();
+    }
+    public void AddPlayerToList(string name, bool isLeader, bool isMe)
+    {
+        if (playerListItemPrefab == null || playerListParent == null)
+        {
+            Debug.LogWarning("[RoomUIManager] 플레이어 리스트 UI가 설정되지 않음");
+            return;
+        }
+
+        GameObject item = Instantiate(playerListItemPrefab, playerListParent);
+        var text = item.GetComponentInChildren<TextMeshProUGUI>();
+
+        string label = name;
+        if (isLeader) label += " (방장)";
+        if (isMe) label += " (본인)";
+
+        text.text = label;
+    }
+
+
+    public void OnClickGameStart()
+    {
+        var localPlayer = NetworkClient.connection.identity?.GetComponent<RoomPlayer>();
+        if (localPlayer != null && localPlayer.isLeader)
+        {
+            Debug.Log("[RoomUIManager] 게임 시작 버튼 눌림");
+            localPlayer.CmdStartGame(); // 여기서 안 부르면 아무 일도 안 생김
+        }
+    }
+
+
+    private void OnJoinResultMessageReceived(JoinResultMessage msg)
+    {
+        if (msg.success)
+        {
+            Debug.Log($"[Client] 방 참가 성공: {msg.roomName} ({msg.matchId})");
+
+            if (RoomUIManager.Instance == null)
+            {
+                Debug.LogError("[Client] RoomUIManager.Instance 가 null입니다.");
+            }
+            else
+            {
+                RoomUIManager.Instance.ShowRoom(msg.roomName); //  여기서 방 UI 띄움
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[Client] 방 참가 실패");
+        }
+    }
+    public void UpdateRoomUI(string roomName)
+    {
+        if (RoomUIManager.Instance == null)
+        {
+            Debug.LogError("[RoomPlayer] RoomUIManager.Instance가 null입니다!");
+            return;
+        }
+
+        RoomUIManager.Instance.ShowRoom(roomName);
+    }
+
+    public void ClearPlayerList()
+    {
+        foreach (Transform child in playerListParent)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+
+
+    public void RebuildPlayerList()
+    {
+        ClearPlayerList();
+
+        var players = Object.FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
+        foreach (var p in players)
+        {
+            bool isMe = p.isLocalPlayer; // 본인인지 체크
+            AddPlayerToList(p.playerName, p.isLeader, isMe);
+        }
+    }
+
+    public Button[] characterButtons;
+    public TextMeshProUGUI[] characterButtonTexts;
+
+
+    public void UpdateCharacterSelection(int index, string playerName)
+    {
+        if (index < 0 || index >= characterButtons.Length) return;
+
+        var text = characterButtons[index].GetComponentInChildren<TextMeshProUGUI>();
+        text.text = $"{playerName} 선택함";
+        characterButtons[index].interactable = false;
+    }
+
+    public void SetupCharacterButtons(RoomPlayer localPlayer)
+    {
+        for (int i = 0; i < characterButtons.Length; i++)
+        {
+            int idx = i; // for closure
+            characterButtons[i].onClick.RemoveAllListeners();
+            characterButtons[i].onClick.AddListener(() =>
+            {
+                localPlayer.CmdSelectCharacter(idx);
+            });
+        }
+    }
+
+    public void UpdateCharacterButtonStates()
+    {
+        for (int i = 0; i < characterButtons.Length; i++)
+        {
+            var btn = characterButtons[i];
+            var txt = characterButtonTexts[i];
+
+            bool isTaken = false;
+
+            foreach (var p in FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None))
+            {
+                if (p.selectedCharacter == i)
+                {
+                    isTaken = true;
+                    txt.text = $"{p.playerName} 선택됨";
+                    btn.interactable = !isTaken || p.isLocalPlayer;
+                    // 본인이면 다시 선택 가능
+                    break;
+                }
+            }
+
+            if (!isTaken)
+            {
+                txt.text = "선택 안됨";
+                btn.interactable = true;
+            }
+        }
+    }
+    public void OnCharacterButtonClicked(int index)
+    {
+        var player = NetworkClient.connection.identity.GetComponent<RoomPlayer>();
+
+        // 중복 체크
+        foreach (var p in FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None))
+        {
+            if (p.selectedCharacter == index && !p.isLocalPlayer)
+            {
+                Debug.Log("이미 선택된 캐릭터입니다.");
+                return;
+            }
+        }
+
+        player.CmdSelectCharacter(index);
+        UpdateCharacterButtonStates();
+    }
+
+}

@@ -5,6 +5,16 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuUI : MonoBehaviour
 {
+    public GameObject roomListUIPrefab;
+
+    private void Start()
+    {
+        if (RoomListUI.Instance == null)
+        {
+            Instantiate(roomListUIPrefab);
+            Debug.Log("[MainMenuUI] RoomListUI 프리팹 Instantiate됨");
+        }
+    }
     public void StartGame()
     {
         // 게임 시작 시 로비 선택 시험을 위해 다음 시센으로 이동

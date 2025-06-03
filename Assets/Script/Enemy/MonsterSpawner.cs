@@ -2,13 +2,14 @@ using UnityEngine;
 using Mirror;
 using System.Collections;
 using UnityEngine.AI;
+using System;
 
 public class MonsterSpawner : NetworkBehaviour
 {
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private float spawnInterval = 10f;
     [SerializeField] private Transform[] spawnPoints;
-
+    [HideInInspector] public string matchId;
     public override void OnStartServer()
     {
         StartCoroutine(SpawnLoop());
@@ -32,12 +33,22 @@ public class MonsterSpawner : NetworkBehaviour
             return;
         }
 
-        Transform point = spawnPoints[Random.Range(0, spawnPoints.Length)];
+        Transform point = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)];
 
-        // NavMesh 위인지 확인
         if (NavMesh.SamplePosition(point.position, out NavMeshHit hit, 5f, NavMesh.AllAreas))
         {
             GameObject enemy = Instantiate(enemyPrefab, hit.position, Quaternion.identity);
+
+            // matchId 설정
+            if (enemy.TryGetComponent(out NetworkMatch match))
+            {
+                match.matchId = Guid.Parse(matchId); // string → Guid
+            }
+            else
+            {
+                Debug.LogWarning("[MonsterSpawner] NetworkMatch가 enemy에 없음");
+            }
+
             NetworkServer.Spawn(enemy);
             Debug.Log($"[MonsterSpawner] 몬스터 스폰 완료: {enemy.name}");
         }

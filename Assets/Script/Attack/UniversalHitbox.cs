@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 
 /// <summary>
 /// 단발/지속 피해, 전진/정지/유도, 파괴 여부를 모두 커버하는 범용 히트박스
 /// </summary>
-public class UniversalHitbox : MonoBehaviour
+public class UniversalHitbox : NetworkBehaviour
 {
     // 데미지, 지속 시간, 틱 간격
     private float damage;
@@ -37,60 +38,76 @@ public class UniversalHitbox : MonoBehaviour
     [SerializeField] private bool rotate = false;
     [SerializeField] private float rotateAmount = 45f;
 
-    private void Start()
+    public override void OnStartServer()
     {
         rb = GetComponent<Rigidbody>();
+        if (rb == null)
+            Debug.LogError($"UniversalHitbox(OnStartServer): Rigidbody가 없습니다! ({gameObject.name})");
+        // Collider는 반드시 isTrigger = true로 설정되어 있어야 함
+    }
+    public override void OnStartClient()
+    {
+        if (muzzlePrefab == null) return;
 
-        // 생성 시 총구 이펙트 출력
-        if (muzzlePrefab != null)
+        var muzzleVFX = Instantiate(muzzlePrefab, transform.position, transform.rotation);
+        muzzleVFX.transform.forward = transform.forward;
+
+        var ps = muzzleVFX.GetComponentInChildren<ParticleSystem>();
+        if (ps != null)
         {
-            var muzzleVFX = Instantiate(muzzlePrefab, transform.position, Quaternion.identity);
-            muzzleVFX.transform.forward = transform.forward;
-
-            var ps = muzzleVFX.GetComponent<ParticleSystem>();
-            if (ps != null)
-                Destroy(muzzleVFX, ps.main.duration);
-            else
-            {
-                var psChild = muzzleVFX.transform.GetChild(0).GetComponent<ParticleSystem>();
-                Destroy(muzzleVFX, psChild.main.duration);
-            }
+            Destroy(muzzleVFX, ps.main.duration);
+        }
+        else
+        {
+            Debug.LogWarning("UniversalHitbox: muzzlePrefab에 ParticleSystem 컴포넌트가 없습니다.");
+            Destroy(muzzleVFX, 2f);
         }
     }
+
 
     /// <summary>
     /// 범용 히트박스 초기화
     /// </summary>
+    [Server]
     public void Initialize(float dmg, float dur, GameObject ownerObj, GameObject tgt = null)
     {
+        if (IsInvoking(nameof(Cleanup)))
+            CancelInvoke(nameof(Cleanup));
         damage = dmg;
         duration = dur;
         owner = ownerObj;
         target = tgt;
         initialized = true;
-        
+
+        tickTimes.Clear();
+
         if (autoDestroy)
-            Destroy(gameObject, duration);
+            Invoke(nameof(Cleanup), duration);
     }
 
     private void FixedUpdate()
     {
-        if (!initialized) return;
+        if (!initialized || isStatic) return;
+        if (rb == null) return;
 
         // 이동 처리
-        if (!isStatic && rb != null)
-        {
-            Vector3 moveDir = isHoming && target != null
-                ? (target.transform.position - transform.position).normalized
-                : transform.forward;
+        Vector3 moveDir = isHoming && target != null
+            ? (target.transform.position - transform.position).normalized
+            : transform.forward;
 
-            rb.MovePosition(rb.position + moveDir * speed * Time.deltaTime);
-            transform.forward = moveDir;
-        }
+        rb.MovePosition(rb.position + moveDir * speed * Time.deltaTime);
+        transform.forward = moveDir;
 
         // 자전 효과
         if (rotate)
             transform.Rotate(0, 0, rotateAmount * Time.deltaTime, Space.Self);
+    }
+    private bool ShouldIgnoreCollision(Collider other)
+    {
+        if (!isServer || !initialized) return true;
+        if (other.gameObject == owner) return true;
+        if (!other.CompareTag("Player")) return true;
+        return false;
     }
 
     /// <summary>
@@ -98,8 +115,7 @@ public class UniversalHitbox : MonoBehaviour
     /// </summary>
     private void OnTriggerStay(Collider other)
     {
-        if (!initialized || other.gameObject == owner) return;
-        if (!other.CompareTag("Player")) return;
+        if (ShouldIgnoreCollision(other)) return;
 
         // 틱 간격마다 피해 적용
         if (tickInterval > 0f)
@@ -109,11 +125,25 @@ public class UniversalHitbox : MonoBehaviour
 
             if (Time.time >= tickTimes[other.gameObject])
             {
-                Debug.Log("지속공격");
-                other.GetComponent<PlayerStats>()?.TakeDamage(damage);
+                var playerStats = other.GetComponent<PlayerStats>();
+                if (playerStats != null)
+                    playerStats.TakeDamage(damage);
+                else
+                    Debug.LogWarning($"UniversalHitbox: {other.gameObject.name}에 PlayerStats 컴포넌트가 없습니다.");
+
                 tickTimes[other.gameObject] = Time.time + tickInterval;
             }
         }
+    }
+
+    /// <summary>
+    /// 지속 피해 대상 범위 이탈 시 tickTimes에서 제거
+    /// </summary>
+    private void OnTriggerExit(Collider other)
+    {
+        if (!isServer) return;
+        if (tickTimes.ContainsKey(other.gameObject))
+            tickTimes.Remove(other.gameObject);
     }
 
     /// <summary>
@@ -121,15 +151,19 @@ public class UniversalHitbox : MonoBehaviour
     /// </summary>
     private void OnTriggerEnter(Collider other)
     {
-        if (!initialized || other.gameObject == owner) return;
-        if (!other.CompareTag("Player")) return;
+        if (ShouldIgnoreCollision(other)) return;
 
         // 단발 피해일 경우 즉시 데미지 및 종료 처리
         if (tickInterval <= 0f)
         {
-            Debug.Log("단일공격");
-            other.GetComponent<PlayerStats>()?.TakeDamage(damage);
-            DoHitEffect();
+            var playerStats = other.GetComponent<PlayerStats>();
+            if (playerStats != null)
+                playerStats.TakeDamage(damage);
+            else
+                Debug.LogWarning($"UniversalHitbox: {other.gameObject.name}에 PlayerStats 컴포넌트가 없습니다.");
+
+            // 충돌 이펙트 RPC 호출 (서버→클라이언트)
+            RpcPlayHitEffect();
             Cleanup();
         }
     }
@@ -137,19 +171,19 @@ public class UniversalHitbox : MonoBehaviour
     /// <summary>
     /// 충돌 이펙트 및 궤적 정리
     /// </summary>
-    private void DoHitEffect()
+    [ClientRpc]
+    private void RpcPlayHitEffect()
     {
         // 충돌 이펙트 출력
         if (hitPrefab != null)
         {
             var hitVFX = Instantiate(hitPrefab, transform.position, transform.rotation);
-            var ps = hitVFX.GetComponent<ParticleSystem>();
+            var ps = hitVFX.GetComponentInChildren<ParticleSystem>();
             if (ps != null)
                 Destroy(hitVFX, ps.main.duration);
             else
             {
-                var psChild = hitVFX.transform.GetChild(0).GetComponent<ParticleSystem>();
-                Destroy(hitVFX, psChild.main.duration);
+                Destroy(hitVFX, 1f);
             }
         }
 
@@ -165,22 +199,45 @@ public class UniversalHitbox : MonoBehaviour
                 {
                     ps.Stop();
                     Destroy(ps.gameObject, ps.main.duration + ps.main.startLifetime.constantMax);
+                } else
+                {
+                    Destroy(trail, 1f);
                 }
             }
         }
     }
 
     /// <summary>
-    /// 히트박스 정리 (삭제 or 비활성화)
+    /// 히트박스 정리 (삭제 or 비활성화) - 서버 전용
     /// </summary>
+    [Server]
     private void Cleanup()
     {
-        if (autoDestroy) {
+        if (autoDestroy)
+        {
             if (rb != null) rb.isKinematic = true;
-            speed = 0;
-            Destroy(gameObject);
+            speed = 0f;
+            NetworkServer.Destroy(gameObject);
         }
         else
-            gameObject.SetActive(false); // 재사용 구조 대응
+        {
+            initialized = false;
+            if (IsInvoking(nameof(Cleanup)))
+                CancelInvoke(nameof(Cleanup));
+
+            speed = 0f;
+            if (rb != null) rb.isKinematic = true;
+            tickTimes.Clear();
+
+            gameObject.SetActive(false);
+            RpcDeactivate();
+        }
+    }
+
+    [ClientRpc]
+    private void RpcDeactivate()
+    {
+        if (autoDestroy) return;
+        gameObject.SetActive(false);
     }
 }
