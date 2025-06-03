@@ -280,6 +280,11 @@ MonoBehaviour:
   evaluationMethod: 0
   evaluationInterval: 3
   timeInterpolationGui: 0
+  characterPrefabs: []
+  spawnPoints: []
+  playerPrefab_EF: {fileID: 8269937752400224285, guid: 8820f04a47cbf7c4cbfa857b2c107186, type: 3}
+  playerPrefab_RBM: {fileID: 8532805641309439499, guid: 8347f82d268d612469d73647a398bf26, type: 3}
+  playerPrefab_RBM2: {fileID: 2460976672058901519, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
   roomPlayerPrefab: {fileID: 2086602806712532617, guid: 276fd3723b32c284e9f37f9d9ff6863f, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
