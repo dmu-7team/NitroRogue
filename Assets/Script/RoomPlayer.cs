@@ -13,9 +13,13 @@ public class RoomPlayer : NetworkBehaviour
     [SyncVar(hook = nameof(OnRoomNameChanged))] public string roomName;
     [SyncVar] public int currentPlayers;
     [SyncVar] public int maxPlayers;
-    [SyncVar] public bool isLeader = false;
+    
     [SyncVar(hook = nameof(OnReadyChanged))] public bool isReady = false;
     [SyncVar] public string playerName = "플레이어";
+    [SyncVar(hook = nameof(OnLeaderChanged))]
+    public bool isLeader = false;
+
+
 
     [System.Serializable]
     public class PlayerInfo
@@ -47,12 +51,10 @@ public class RoomPlayer : NetworkBehaviour
         if (isLocalPlayer)
         {
             Invoke(nameof(UpdateRoomUI), 0.3f);
+            RoomUIManager.Instance?.ShowStartButton(isLeader);
         }
 
-        if (isLeader && RoomUIManager.Instance != null)
-        {
-            RoomUIManager.Instance.ShowStartButton(true);
-        }
+      
 
         gameObject.hideFlags = HideFlags.HideInHierarchy;
         gameObject.name = $"[RoomPlayer:{roomName}]";
@@ -70,7 +72,14 @@ public class RoomPlayer : NetworkBehaviour
             Debug.Log($"[RoomPlayer] 방 이름 변경됨: {newName}");
         }
     }
-    
+    private void OnLeaderChanged(bool oldVal, bool newVal)
+    {
+        if (isLocalPlayer && RoomUIManager.Instance != null)
+        {
+            RoomUIManager.Instance.ShowStartButton(newVal);
+        }
+    }
+
 
     private void OnReadyChanged(bool oldReady, bool newReady)
     {
