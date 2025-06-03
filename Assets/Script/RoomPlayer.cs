@@ -18,8 +18,17 @@ public class RoomPlayer : NetworkBehaviour
     [SyncVar] public string playerName = "플레이어";
     [SyncVar(hook = nameof(OnLeaderChanged))]
     public bool isLeader = false;
+    [SyncVar(hook = nameof(OnCharacterSelected))]
+    public int selectedCharacter = -1;
 
-
+    private void OnCharacterSelected(int oldValue, int newValue)
+    {
+        Debug.Log($"[RoomPlayer] 캐릭터 선택 변경됨: {oldValue} → {newValue}");
+        if (isLocalPlayer && RoomUIManager.Instance != null)
+        {
+            RoomUIManager.Instance.UpdateCharacterButtonStates();
+        }
+    }
 
     [System.Serializable]
     public class PlayerInfo
@@ -28,8 +37,7 @@ public class RoomPlayer : NetworkBehaviour
         public bool isLeader;
         public bool isMe;
     }
-    [SyncVar(hook = nameof(OnCharacterChanged))]
-    public int selectedCharacter = -1;
+
 
     void OnCharacterChanged(int oldIndex, int newIndex)
     {
@@ -40,6 +48,11 @@ public class RoomPlayer : NetworkBehaviour
     }
 
 
+    [TargetRpc]
+    public void TargetUpdateCharacterButtons()
+    {
+        RoomUIManager.Instance?.UpdateCharacterButtonStates();
+    }
     public override void OnStartClient()
     {
         base.OnStartClient();
@@ -117,13 +130,25 @@ public class RoomPlayer : NetworkBehaviour
             return;
         }
 
+        // 모든 플레이어가 캐릭터를 선택했는지 확인
+        var players = UnityEngine.Object.FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
+        foreach (var p in players)
+        {
+            if (p.selectedCharacter < 0)
+            {
+                Debug.LogWarning($"[RoomPlayer] {p.playerName} 캐릭터 미선택");
+                return; // 한 명이라도 선택 안 했으면 중단
+            }
+        }
+
         Debug.Log("[RoomPlayer] 게임 시작 요청");
 
         if (NetworkManager.singleton is CustomNetworkManager_Server manager && manager.matchRooms.ContainsKey(matchId))
         {
-            manager.StartGame(matchId);
+            manager.StartGame(matchId); // 게임 시작
         }
     }
+
 
     [TargetRpc]
     public void TargetLoadGameScene()

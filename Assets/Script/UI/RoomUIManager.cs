@@ -102,6 +102,15 @@ public class RoomUIManager : MonoBehaviour
     }
 
 
+    public void OnClickGameStart()
+    {
+        var localPlayer = NetworkClient.connection.identity?.GetComponent<RoomPlayer>();
+        if (localPlayer != null && localPlayer.isLeader)
+        {
+            Debug.Log("[RoomUIManager] 게임 시작 버튼 눌림");
+            localPlayer.CmdStartGame(); // 여기서 안 부르면 아무 일도 안 생김
+        }
+    }
 
 
     private void OnJoinResultMessageReceived(JoinResultMessage msg)
