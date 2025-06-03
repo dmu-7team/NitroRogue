@@ -55,6 +55,12 @@ public class WeaponSystemRBM : NetworkBehaviour
     private bool isScoped = false;
     private float defaultFOV;
     private PlayerStats stats;
+
+    // 추가: 발사 제어용 변수
+    private float lastFireTime = 0f;
+    private float smgFireInterval = 60f / 800f;
+    private Coroutine burstCoroutine;
+
     void Start()
     {
         if (!isLocalPlayer) return;
@@ -63,6 +69,12 @@ public class WeaponSystemRBM : NetworkBehaviour
         defaultFOV = playerCamera.fieldOfView;
         scopeOverlay?.SetActive(false);
         crosshair?.SetActive(true);
+
+        // 무기별 조준 모드 고정
+        if (weaponType == WeaponType.Sniper || weaponType == WeaponType.DMR)
+            aimMode = AimMode.Scope;
+        else
+            aimMode = AimMode.Zoom;
     }
 
     void Update()
@@ -70,18 +82,91 @@ public class WeaponSystemRBM : NetworkBehaviour
         if (!isLocalPlayer) return;
 
         HandleAim();
-    }
 
+        if (Input.GetMouseButton(0) && !animator.GetBool("isRunning") && !isReloading && currentAmmo > 0)
+        {
+            if (weaponType == WeaponType.SMG)
+                TryFireSMG();
+        }
+
+        if (Input.GetMouseButtonDown(0) && !animator.GetBool("isRunning") && !isReloading && currentAmmo > 0)
+        {
+            if (weaponType == WeaponType.AR)
+                TryFireBurst();
+            else if (weaponType != WeaponType.SMG)
+                FireSingleShot();
+        }
+    }
     public void HandleFire()
     {
-        if (!isLocalPlayer) return;
-        if (!Input.GetMouseButtonDown(0) || animator.GetBool("isRunning") || currentAmmo <= 0 || isReloading)
+        if (!isLocalPlayer || animator.GetBool("isRunning") || isReloading || currentAmmo <= 0)
             return;
 
+        switch (weaponType)
+        {
+            case WeaponType.SMG:
+                if (Input.GetMouseButton(0) && Time.time - lastFireTime >= smgFireInterval)
+                {
+                    lastFireTime = Time.time;
+                    FireSingleShot();
+                }
+                break;
+
+            case WeaponType.AR:
+                if (Input.GetMouseButtonDown(0) && burstCoroutine == null)
+                    burstCoroutine = StartCoroutine(FireBurst());
+                break;
+
+            default:
+                if (Input.GetMouseButtonDown(0))
+                    FireSingleShot();
+                break;
+        }
+    }
+
+
+    void TryFireSMG()
+    {
+        if (Time.time - lastFireTime >= smgFireInterval)
+        {
+            lastFireTime = Time.time;
+            FireSingleShot();
+        }
+    }
+
+    void TryFireBurst()
+    {
+        if (burstCoroutine == null)
+            burstCoroutine = StartCoroutine(FireBurst());
+    }
+
+    IEnumerator FireBurst()
+    {
+        int shots = Mathf.Min(3, currentAmmo);
+        for (int i = 0; i < shots; i++)
+        {
+            FireSingleShot();
+            yield return new WaitForSeconds(0.1f); // 탕 탕 탕 간격
+        }
+        burstCoroutine = null;
+    }
+
+    void FireSingleShot()
+    {
         currentAmmo--;
         UpdateAmmoUI();
-        animator.SetTrigger("Shoot");
-
+        switch (weaponType)
+        {
+            case WeaponType.SMG:
+                animator.SetTrigger("AutoShoot");
+                break;
+            case WeaponType.AR:
+                animator.SetTrigger("BurstShoot");
+                break;
+            default:
+                animator.SetTrigger("Shoot");
+                break;
+        }
         FireBulletBasedOnType();
     }
 
