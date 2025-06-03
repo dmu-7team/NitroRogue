@@ -8,6 +8,7 @@ public class PlayerControllerRBM : NetworkBehaviour
 {
     private PlayerMovementRBM movement;
     private WeaponSystemRBM weaponSystem;
+    public GameObject cameraObject;
 
     public override void OnStartAuthority()
     {
@@ -18,6 +19,9 @@ public class PlayerControllerRBM : NetworkBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        Debug.Log("왜 안됨");
+        cameraObject.SetActive(true);
     }
 
     void Update()

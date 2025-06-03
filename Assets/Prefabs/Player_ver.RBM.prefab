@@ -27552,7 +27552,7 @@ Transform:
   m_GameObject: {fileID: 8532805641309439499}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.66, y: 0, z: -11}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -27681,7 +27681,7 @@ MonoBehaviour:
   syncInterval: 0
   weaponType: 4
   muzzle: {fileID: 5315169888042317356}
-  bulletPrefab: {fileID: 0}
+  bulletPrefab: {fileID: 7841963988429107884, guid: a0d4757442a469c43a553966959f328d, type: 3}
   bulletForce: 100
   weaponDamage: 5
   currentAmmo: 30
@@ -27721,6 +27721,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  cameraObject: {fileID: 0}
 --- !u!114 &-6205578058028679697
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27738,8 +27739,6 @@ MonoBehaviour:
   syncInterval: 0
   currentHealth: 0
   maxHealth: 100
-  attackDamage: 10
-  moveSpeed: 5
   currentExp: 0
   expToLevelUp: 100
   level: 1
@@ -27778,6 +27777,13 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   matchId: 
+  roomName: 
+  currentPlayers: 0
+  maxPlayers: 0
+  isReady: 0
+  playerName: "\uD50C\uB808\uC774\uC5B4"
+  isLeader: 0
+  selectedCharacter: -1
 --- !u!114 &2247020808676157813
 MonoBehaviour:
   m_ObjectHideFlags: 0

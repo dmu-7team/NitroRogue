@@ -1136,7 +1136,7 @@ Transform:
   m_GameObject: {fileID: 2460976672058901519}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.66, y: 0, z: -11}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1306,6 +1306,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  cameraObject: {fileID: 1286632924222334147}
 --- !u!114 &2004939687484650014
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1364,6 +1365,13 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   matchId: 
+  roomName: 
+  currentPlayers: 0
+  maxPlayers: 0
+  isReady: 0
+  playerName: "\uD50C\uB808\uC774\uC5B4"
+  isLeader: 0
+  selectedCharacter: -1
 --- !u!114 &270284341521021411
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1377,7 +1385,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 0
-  _assetId: 2213187946
+  _assetId: 568371127
   serverOnly: 0
   visibility: 0
   hasSpawned: 0

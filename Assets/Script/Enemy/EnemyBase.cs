@@ -118,7 +118,6 @@ public class EnemyBase : CharacterStats
     [ClientRpc]
     void RpcPlayAttackAnimation(int index)
     {
-        currentAttack = attacks[index];
         animator.SetInteger("attackIndex", index);
         animator.SetTrigger("doAttack");
     }
