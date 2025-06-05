@@ -75,6 +75,18 @@ public class WeaponSystemRBM : NetworkBehaviour
             aimMode = AimMode.Scope;
         else
             aimMode = AimMode.Zoom;
+        
+
+   
+        if (scopeOverlay != null)
+            scopeOverlay.SetActive(false);
+        else
+            Debug.LogWarning("[WeaponSystemRBM] scopeOverlay ¿¬°á ¾È µÊ");
+
+        if (crosshair != null)
+            crosshair.SetActive(true);
+        else
+            Debug.LogWarning("[WeaponSystemRBM] crosshair ¿¬°á ¾È µÊ");
     }
 
     void Update()

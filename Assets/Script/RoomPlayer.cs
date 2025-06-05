@@ -1,5 +1,4 @@
-using Mirror;
-using Mirror.Examples.MultipleMatch;
+Ôªøusing Mirror;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,22 +12,11 @@ public class RoomPlayer : NetworkBehaviour
     [SyncVar(hook = nameof(OnRoomNameChanged))] public string roomName;
     [SyncVar] public int currentPlayers;
     [SyncVar] public int maxPlayers;
-    
-    [SyncVar(hook = nameof(OnReadyChanged))] public bool isReady = false;
-    [SyncVar] public string playerName = "«√∑π¿ÃæÓ";
-    [SyncVar(hook = nameof(OnLeaderChanged))]
-    public bool isLeader = false;
-    [SyncVar(hook = nameof(OnCharacterSelected))]
-    public int selectedCharacter = -1;
 
-    private void OnCharacterSelected(int oldValue, int newValue)
-    {
-        Debug.Log($"[RoomPlayer] ƒ≥∏Ø≈Õ º±≈√ ∫Ø∞Êµ : {oldValue} °Ê {newValue}");
-        if (isLocalPlayer && RoomUIManager.Instance != null)
-        {
-            RoomUIManager.Instance.UpdateCharacterButtonStates();
-        }
-    }
+    [SyncVar(hook = nameof(OnReadyChanged))] public bool isReady = false;
+    [SyncVar] public string playerName = "ÌîåÎ†àÏù¥Ïñ¥";
+    [SyncVar(hook = nameof(OnLeaderChanged))] public bool isLeader = false;
+    [SyncVar(hook = nameof(OnCharacterSelected))] public int selectedCharacter = -1;
 
     [System.Serializable]
     public class PlayerInfo
@@ -38,42 +26,26 @@ public class RoomPlayer : NetworkBehaviour
         public bool isMe;
     }
 
-
-    void OnCharacterChanged(int oldIndex, int newIndex)
-    {
-        if (isLocalPlayer && RoomUIManager.Instance != null)
-        {
-            RoomUIManager.Instance.UpdateCharacterButtonStates();
-        }
-    }
-
-
-    [TargetRpc]
-    public void TargetUpdateCharacterButtons()
-    {
-        RoomUIManager.Instance?.UpdateCharacterButtonStates();
-    }
     public override void OnStartClient()
     {
         base.OnStartClient();
-        if (RoomUIManager.Instance != null)
-        {
-            RoomUIManager.Instance.AddPlayerToList(playerName, isLeader, true);  // ∂«¥¬ false
 
-        }
         if (isLocalPlayer)
         {
             Invoke(nameof(UpdateRoomUI), 0.3f);
             RoomUIManager.Instance?.ShowStartButton(isLeader);
+            CmdNotifyUpdateList();
         }
-
-      
 
         gameObject.hideFlags = HideFlags.HideInHierarchy;
         gameObject.name = $"[RoomPlayer:{roomName}]";
-        if (isLocalPlayer)
+    }
+
+    private void UpdateRoomUI()
+    {
+        if (RoomUIManager.Instance != null)
         {
-            CmdNotifyUpdateList(); // ¿⁄Ω≈¿Ã ¿‘¿Â«ﬂ¿ª ∂ß º≠πˆø°∞‘ ¿¸√º UI ∞ªΩ≈ ø‰√ª
+            RoomUIManager.Instance.ShowRoom(roomName);
         }
     }
 
@@ -82,37 +54,196 @@ public class RoomPlayer : NetworkBehaviour
         if (isLocalPlayer && RoomUIManager.Instance != null)
         {
             RoomUIManager.Instance.UpdateRoomName(newName);
-            Debug.Log($"[RoomPlayer] πÊ ¿Ã∏ß ∫Ø∞Êµ : {newName}");
-        }
-    }
-    private void OnLeaderChanged(bool oldVal, bool newVal)
-    {
-        if (isLocalPlayer && RoomUIManager.Instance != null)
-        {
-            RoomUIManager.Instance.ShowStartButton(newVal);
         }
     }
 
+    private void OnLeaderChanged(bool oldVal, bool newVal)
+    {
+        if (isLocalPlayer)
+        {
+            RoomUIManager.Instance?.ShowStartButton(newVal);
+        }
+    }
 
     private void OnReadyChanged(bool oldReady, bool newReady)
     {
-        if (RoomUIManager.Instance != null)
+        RoomUIManager.Instance?.UpdatePlayerReadyStatus(this, newReady);
+    }
+
+    private void OnCharacterSelected(int oldVal, int newVal)
+    {
+        if (isLocalPlayer)
         {
-            RoomUIManager.Instance.UpdatePlayerReadyStatus(this, newReady);
+            RoomUIManager.Instance?.UpdateCharacterButtonStates();
         }
     }
 
-    private void UpdateRoomUI()
+    [Command]
+    public void CmdSetReady(bool isReady)
     {
-        if (RoomUIManager.Instance != null)
+        this.isReady = isReady;
+    }
+
+    [Command]
+    public void CmdNotifyUpdateList()
+    {
+        if (NetworkManager.singleton is CustomNetworkManager_Server manager)
         {
-            RoomUIManager.Instance.ShowRoom(roomName);
-            Debug.Log($"[RoomPlayer] ∑Î UI ∞ªΩ≈µ : {roomName}");
+            manager.BroadcastPlayerList(matchId);
         }
-        else
+    }
+
+    [TargetRpc]
+    public void TargetRebuildPlayerList(List<PlayerInfo> players)
+    {
+        RoomUIManager.Instance.ClearPlayerList();
+        foreach (var info in players)
         {
-            Debug.LogWarning("[RoomPlayer] RoomUIManager ¿ŒΩ∫≈œΩ∫∏¶ √£¿ª ºˆ æ¯¿Ω");
+            RoomUIManager.Instance.AddPlayerToList(info.name, info.isLeader, info.isMe);
         }
+    }
+
+    [ClientRpc]
+    public void RpcUpdatePlayerList()
+    {
+        RoomUIManager.Instance?.RebuildPlayerList();
+    }
+
+    [Command]
+    public void CmdSelectCharacter(int index)
+    {
+        var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
+        foreach (var p in players)
+        {
+            if (p != this && p.selectedCharacter == index)
+                return; // Ï§ëÎ≥µ ÏÑ†ÌÉù Î∂àÍ∞Ä
+        }
+
+        selectedCharacter = index;
+    }
+
+    public void OnStartGameButtonClicked()
+    {
+        var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
+        foreach (var p in players)
+        {
+            if (p.selectedCharacter == -1)
+            {
+                Debug.Log("Î™®Îì† ÌîåÎ†àÏù¥Ïñ¥Í∞Ä Ï∫êÎ¶≠ÌÑ∞Î•º ÏÑ†ÌÉùÌï¥Ïïº Ìï©ÎãàÎã§.");
+                return;
+            }
+        }
+
+        players.First(p => p.isLeader).CmdStartGame();
+    }
+
+    [Command]
+    public void CmdStartGame()
+    {
+        if (!isLeader) return;
+
+        var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
+        foreach (var p in players)
+        {
+            if (p.selectedCharacter < 0) return;
+        }
+
+        var netManager = NetworkManager.singleton as CustomNetworkManager_Server;
+        if (netManager != null && netManager.matchRooms.ContainsKey(matchId))
+        {
+            netManager.StartGame(matchId);
+        }
+    }
+
+    [TargetRpc]
+    public void TargetStartGame(NetworkConnection target, int characterIndex, string matchId)
+    {
+        Debug.Log($"[ÌÅ¥ÎùºÏù¥Ïñ∏Ìä∏] TargetStartGame Ìò∏Ï∂úÎê® - Ï∫êÎ¶≠ÌÑ∞: {characterIndex}, Îß§ÏπòID: {matchId}");
+
+        // Î©îÏù∏Î©îÎâ¥-Î£∏ UI ÎπÑÌôúÏÑ±Ìôî Î∞è Ïù∏Í≤åÏûÑ UI Ï†ÑÌôò
+        RoomUIManager.Instance?.SwitchToGameUI();
+
+        // Ïä§Ìè∞ Ï≤òÎ¶¨Îßå ÏßÑÌñâ
+        SpawnLocalPlayerCharacter(characterIndex);
+    }
+
+    private void SpawnLocalPlayerCharacter(int characterIndex)
+    {
+        // ÌîÑÎ¶¨Ìåπ Ïù¥Î¶Ñ Í≤∞Ï†ï
+        string prefabName = characterIndex switch
+        {
+            0 => "Player_ver_EF",
+            1 => "Player_ver_RBM",
+            2 => "Player_ver_RBM2",
+            _ => null
+        };
+
+        if (prefabName == null)
+        {
+            Debug.LogError($"[ÌÅ¥ÎùºÏù¥Ïñ∏Ìä∏] ÏûòÎ™ªÎêú Ï∫êÎ¶≠ÌÑ∞ Ïù∏Îç±Ïä§: {characterIndex}");
+            return;
+        }
+
+        GameObject prefab = Resources.Load<GameObject>(prefabName);
+        if (prefab == null)
+        {
+            Debug.LogError($"[ÌÅ¥ÎùºÏù¥Ïñ∏Ìä∏] ResourcesÏóêÏÑú ÌîÑÎ¶¨Ìåπ {prefabName} Î°úÎìú Ïã§Ìå®");
+            return;
+        }
+
+        // Ïä§Ìè∞ ÏúÑÏπò
+        GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag("PlayerSpawnPoint");
+        if (spawnPoints.Length == 0)
+        {
+            Debug.LogWarning("[ÌÅ¥ÎùºÏù¥Ïñ∏Ìä∏] PlayerSpawnPoint ÌÉúÍ∑∏ Ïò§Î∏åÏ†ùÌä∏ ÏóÜÏùå");
+            return;
+        }
+
+        // Ïù¥Î¶Ñ Í∏∞Ï§Ä Ï†ïÎ†¨ ÌõÑ Ïù∏Îç±Ïä§Î°ú ÏÑ†ÌÉù
+        var sortedPoints = spawnPoints.OrderBy(go => go.name).ToArray();
+        Vector3 spawnPos = sortedPoints[Mathf.Clamp(characterIndex, 0, sortedPoints.Length - 1)].transform.position;
+
+        // Ïù∏Ïä§ÌÑ¥Ïä§ ÏÉùÏÑ± (Ï£ºÏùò: Ïù¥Í±¥ ÌÅ¥ÎùºÏù¥Ïñ∏Ìä∏ÏóêÏÑúÎßå ÏÇ¨Ïö©. ÏÑúÎ≤ÑÏôÄ Î≥ÑÍ∞ú)
+        GameObject character = Instantiate(prefab, spawnPos, Quaternion.identity);
+        Debug.Log($"[ÌÅ¥ÎùºÏù¥Ïñ∏Ìä∏] Ï∫êÎ¶≠ÌÑ∞ '{prefabName}' Ïù∏Ïä§ÌÑ¥Ïä§ ÏÉùÏÑ± ÏôÑÎ£å at {spawnPos}");
+
+        // Ïπ¥Î©îÎùºÎÇò UI Ïó∞Í≤∞ÏùÄ Ïó¨Í∏∞ÏÑú Ï∂îÍ∞ÄÎ°ú Ìï¥ÎèÑ Îê®
+    }
+
+
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        if (scene.name != "Game") return;
+
+        RoomPlayer localPlayer = NetworkClient.connection.identity?.GetComponent<RoomPlayer>();
+        if (localPlayer == null) return;
+
+        int characterIndex = localPlayer.selectedCharacter;
+        string prefabName = characterIndex switch
+        {
+            0 => "Player_ver_EF",
+            1 => "Player_ver_RBM",
+            2 => "Player_ver_RBM2",
+            _ => null
+        };
+
+        GameObject prefab = Resources.Load<GameObject>(prefabName);
+        if (prefab == null) return;
+
+        GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag("PlayerSpawnPoint");
+        Vector3 spawnPos = Vector3.zero;
+
+        if (spawnPoints.Length > 0)
+        {
+            var sorted = spawnPoints.OrderBy(sp => sp.name).ToArray();
+            int index = Array.IndexOf(sorted, sorted.FirstOrDefault(sp => sp.name.Contains(localPlayer.playerName)));
+            spawnPos = sorted[Mathf.Clamp(index, 0, sorted.Length - 1)].transform.position;
+        }
+
+        GameObject character = Instantiate(prefab, spawnPos, Quaternion.identity);
+        Debug.Log($"[ÌÅ¥ÎùºÏù¥Ïñ∏Ìä∏] Ï∫êÎ¶≠ÌÑ∞ {prefabName} ÏÉùÏÑ± ÏôÑÎ£å");
     }
 
     public void SetMatchInfo(string id, string name)
@@ -121,105 +252,25 @@ public class RoomPlayer : NetworkBehaviour
         roomName = name;
     }
 
-    [Command]
-    public void CmdStartGame()
+    public GameObject GetPrefabForCharacter(int index)
     {
-        if (!isLeader)
+        string prefabName = index switch
         {
-            Debug.LogWarning("[RoomPlayer] πÊ¿Â¿Ã æ∆¥œπ«∑Œ ∞‘¿” Ω√¿€ ∫“∞°");
-            return;
-        }
+            0 => "Player_ver_EF",
+            1 => "Player_ver_RBM",
+            2 => "Player_ver_RBM2",
+            _ => null
+        };
 
-        // ∏µÁ «√∑π¿ÃæÓ∞° ƒ≥∏Ø≈Õ∏¶ º±≈√«ﬂ¥¬¡ˆ »Æ¿Œ
-        var players = UnityEngine.Object.FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
-        foreach (var p in players)
-        {
-            if (p.selectedCharacter < 0)
-            {
-                Debug.LogWarning($"[RoomPlayer] {p.playerName} ƒ≥∏Ø≈Õ πÃº±≈√");
-                return; // «— ∏Ì¿Ã∂Ûµµ º±≈√ æ» «ﬂ¿∏∏È ¡ﬂ¥‹
-            }
-        }
+        var prefab = NetworkManager.singleton.spawnPrefabs
+            .FirstOrDefault(go => go.name == prefabName);
 
-        Debug.Log("[RoomPlayer] ∞‘¿” Ω√¿€ ø‰√ª");
-
-        if (NetworkManager.singleton is CustomNetworkManager_Server manager && manager.matchRooms.ContainsKey(matchId))
-        {
-            manager.StartGame(matchId); // ∞‘¿” Ω√¿€
-        }
+        return prefab;
     }
-
 
     [TargetRpc]
-    public void TargetLoadGameScene()
+    public void TargetUpdateCharacterButtons()
     {
-        Debug.Log("[RoomPlayer] ≈¨∂Û¿Ãæ∆Æø°º≠ ∞‘¿” æ¿¿∏∑Œ ¿¸»Ø");
-        SceneManager.LoadScene("GameScene");
+        RoomUIManager.Instance?.UpdateCharacterButtonStates();
     }
-
-    [Command]
-    public void CmdSetReady(bool isReady)
-    {
-        Debug.Log($"[RoomPlayer] Ready ªÛ≈¬ º≥¡§: {isReady}");
-        this.isReady = isReady;
-    }
-
-    [ClientRpc]
-    public void RpcUpdatePlayerList()
-    {
-        if (RoomUIManager.Instance == null) return;
-
-        RoomUIManager.Instance.RebuildPlayerList();
-    }
-    [Command]
-    void CmdNotifyUpdateList()
-    {
-        if (NetworkManager.singleton is CustomNetworkManager_Server manager)
-        {
-            manager.BroadcastPlayerList(matchId);
-        }
-    }
-    [TargetRpc]
-    public void TargetRebuildPlayerList(List<PlayerInfo> players)
-    {
-        RoomUIManager.Instance.ClearPlayerList();
-
-        foreach (var info in players)
-        {
-            RoomUIManager.Instance.AddPlayerToList(info.name, info.isLeader, info.isMe);
-        }
-    }
-    [Command]
-    public void CmdSelectCharacter(int index)
-    {
-        // ¿ÃπÃ ¥Ÿ∏• «√∑π¿ÃæÓ∞° º±≈√«— ƒ≥∏Ø≈Õ¿Œ¡ˆ »Æ¿Œ
-        var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
-        foreach (var p in players)
-        {
-            if (p != this && p.selectedCharacter == index)
-                return; // ¡ﬂ∫π º±≈√ ∫“∞°
-        }
-
-        // ∫ª¿Œ¿« ±‚¡∏ º±≈√ π´Ω√«œ∞Ì ªı∑Œ º±≈√
-        selectedCharacter = index;
-    }
-
-
-    public void OnStartGameButtonClicked()
-    {
-        var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
-
-        foreach (var p in players)
-        {
-            if (p.selectedCharacter == -1)
-            {
-                Debug.Log("∏µÁ «√∑π¿ÃæÓ∞° ƒ≥∏Ø≈Õ∏¶ º±≈√«ÿæﬂ «’¥œ¥Ÿ.");
-                return;
-            }
-        }
-
-        // ∏µÁ ¡∂∞« √Ê¡∑
-        players.First(p => p.isLeader).CmdStartGame();
-    }
-
 }

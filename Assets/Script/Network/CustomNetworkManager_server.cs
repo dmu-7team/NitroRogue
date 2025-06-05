@@ -1,108 +1,87 @@
-using Mirror;
+Ôªøusing Mirror;
 using UnityEngine;
 using System.Collections.Generic;
-using NetworkMessages;
 using System.Linq;
 using System;
+using UnityEngine.SceneManagement;
+using NetworkMessages;
 
 public class CustomNetworkManager_Server : NetworkManager
 {
     public GameObject[] characterPrefabs;
-    public Transform[] spawnPoints;
+    public GameObject roomPlayerPrefab;
     public Dictionary<string, List<RoomPlayer>> matchRooms = new();
-    public GameObject playerPrefab_EF;
-    public GameObject playerPrefab_RBM;
-    public GameObject playerPrefab_RBM2;
-    private Transform[] runtimeSpawnPoints;
-
-    [SerializeField] private GameObject roomPlayerPrefab;
+    private Dictionary<int, string> characterPrefabMap = new()
+    {
+        { 0, "Player_ver_EF" },
+        { 1, "Player_ver_RBM" },
+        { 2, "Player_ver_RBM2" }
+    };
+    private Transform[] spawnPoints;
 
     public override void Start()
     {
         base.Start();
-        Debug.Log("[º≠πˆ] Start() »£√‚µ ");
+        Debug.Log("[ÏÑúÎ≤Ñ] Start() Ìò∏Ï∂úÎê®");
         StartServer();
     }
 
     public override void OnStartServer()
     {
         base.OnStartServer();
-        Debug.Log("[º≠πˆ] OnStartServer ¡¯¿‘ øœ∑·");
+        Debug.Log("[ÏÑúÎ≤Ñ] OnStartServer ÏßÑÏûÖ ÏôÑÎ£å");
 
-        // Ω∫∆˘∆˜¿Œ∆Æ ¡˜¡¢ ª˝º∫
-        spawnPoints = new Transform[3];
-        spawnPoints[0] = CreateSpawnPoint(new Vector3(0f, 0f, 0f));
-        spawnPoints[1] = CreateSpawnPoint(new Vector3(2f, 0f, 0f));
-        spawnPoints[2] = CreateSpawnPoint(new Vector3(-2f, 0f, 0f));
+        // Îü∞ÌÉÄÏûÑ Ïä§Ìè∞Ìè¨Ïù∏Ìä∏ ÏûêÎèô ÌÉêÏÉâ
+        spawnPoints = GameObject.FindGameObjectsWithTag("PlayerSpawnPoint")
+                                .OrderBy(go => go.name)
+                                .Select(go => go.transform)
+                                .ToArray();
 
         NetworkServer.RegisterHandler<JoinMatchMessage>(OnJoinMatchMessageReceived);
         NetworkServer.RegisterHandler<RoomListRequestMessage>(OnRoomListRequestMessageReceived);
     }
 
-
-    // ∫Û GameObject∑Œ Ω∫∆˘∆˜¿Œ∆Æ ª˝º∫
-    private Transform CreateSpawnPoint(Vector3 position)
-    {
-        GameObject go = new GameObject("SpawnPoint");
-        go.transform.position = position;
-        return go.transform;
-    }
-
     private void OnJoinMatchMessageReceived(NetworkConnectionToClient conn, JoinMatchMessage msg)
     {
-        Debug.Log($"[º≠πˆ] JoinMatch ø‰√ª: {msg.matchId} / {msg.roomName}");
+        Debug.Log($"[ÏÑúÎ≤Ñ] JoinMatch ÏöîÏ≤≠: {msg.matchId} / {msg.roomName}");
 
         if (conn.identity != null)
-        {
             NetworkServer.Destroy(conn.identity.gameObject);
-        }
 
         if (!matchRooms.ContainsKey(msg.matchId))
-        {
             matchRooms[msg.matchId] = new List<RoomPlayer>();
-        }
 
         GameObject playerObj = Instantiate(roomPlayerPrefab);
         RoomPlayer roomPlayer = playerObj.GetComponent<RoomPlayer>();
         roomPlayer.matchId = msg.matchId;
         roomPlayer.roomName = msg.roomName;
-        roomPlayer.playerName = $"«√∑π¿ÃæÓ{matchRooms[msg.matchId].Count + 1}";
-        if (matchRooms[msg.matchId].Count == 0)
-        {
-            roomPlayer.isLeader = true;
-        }
+        roomPlayer.playerName = $"ÌîåÎ†àÏù¥Ïñ¥{matchRooms[msg.matchId].Count + 1}";
+        roomPlayer.isLeader = matchRooms[msg.matchId].Count == 0;
 
         NetworkServer.AddPlayerForConnection(conn, playerObj);
         matchRooms[msg.matchId].Add(roomPlayer);
 
-        JoinResultMessage result = new()
+        conn.Send(new JoinResultMessage
         {
             success = true,
             matchId = msg.matchId,
             roomName = msg.roomName
-        };
-        conn.Send(result);
-        BroadcastPlayerList(msg.matchId);
+        });
 
+        BroadcastPlayerList(msg.matchId);
     }
 
     private void OnRoomListRequestMessageReceived(NetworkConnectionToClient conn, RoomListRequestMessage msg)
     {
-        List<RoomInfo> roomInfos = new();
-
-        foreach (var pair in matchRooms)
+        List<RoomInfo> roomInfos = matchRooms.Select(pair => new RoomInfo
         {
-            roomInfos.Add(new RoomInfo
-            {
-                matchId = pair.Key,
-                roomName = pair.Value.Count > 0 ? pair.Value[0].roomName : "∫ÒæÓ¿÷¥¬ πÊ",
-                currentPlayers = pair.Value.Count,
-                maxPlayers = 4
-            });
-        }
+            matchId = pair.Key,
+            roomName = pair.Value.FirstOrDefault()?.roomName ?? "ÎπÑÏñ¥ÏûàÎäî Î∞©",
+            currentPlayers = pair.Value.Count,
+            maxPlayers = 4
+        }).ToList();
 
-        RoomListSyncMessage syncMsg = new RoomListSyncMessage { roomList = roomInfos };
-        conn.Send(syncMsg);
+        conn.Send(new RoomListSyncMessage { roomList = roomInfos });
     }
 
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
@@ -114,153 +93,71 @@ public class CustomNetworkManager_Server : NetworkManager
             RoomPlayer player = conn.identity.GetComponent<RoomPlayer>();
             if (player != null && matchRooms.ContainsKey(player.matchId))
             {
-                matchId = player.matchId; // ¿˙¿Â«ÿµŒ±‚
-
+                matchId = player.matchId;
                 matchRooms[matchId].Remove(player);
                 if (matchRooms[matchId].Count == 0)
-                {
                     matchRooms.Remove(matchId);
-                }
                 else if (player.isLeader)
-                {
                     matchRooms[matchId][0].isLeader = true;
-                }
 
                 SendRoomListToAllClients();
+                BroadcastPlayerList(matchId);
             }
-        }
-
-        //  base ¿¸ø° matchId ±‚¡ÿ¿∏∑Œ ∫Í∑ŒµÂƒ≥Ω∫∆Æ
-        if (!string.IsNullOrEmpty(matchId))
-        {
-            BroadcastPlayerList(matchId);
         }
 
         base.OnServerDisconnect(conn);
     }
 
-
-    private void SendRoomListToAllClients()
-    {
-        List<RoomInfo> roomInfos = new();
-        foreach (var pair in matchRooms)
-        {
-            roomInfos.Add(new RoomInfo
-            {
-                matchId = pair.Key,
-                roomName = pair.Value.Count > 0 ? pair.Value[0].roomName : "",
-                currentPlayers = pair.Value.Count,
-                maxPlayers = 4
-            });
-        }
-        RoomListSyncMessage msg = new RoomListSyncMessage { roomList = roomInfos };
-        NetworkServer.SendToAll(msg);
-    }
-
-    public bool HasMatch(string matchId)
-    {
-        return matchRooms.ContainsKey(matchId);
-    }
-
     public void StartGame(string matchId)
     {
-        Debug.Log($"[º≠πˆ] ∞‘¿” Ω√¿€: {matchId}");
+        Debug.Log($"[ÏÑúÎ≤Ñ] Í≤åÏûÑ ÏãúÏûë ÏöîÏ≤≠: {matchId}");
 
-        if (!matchRooms.ContainsKey(matchId)) return;
-
-        // æ¿ ¿¸»Ø (æ¿ ¿Ã∏ß¿∫ ¡§»Æ»˜ ∫ÙµÂ ºº∆√ø° µÓ∑œµ» ¿Ã∏ß)
-        ServerChangeScene("Game");
-    }
-    public override void OnServerSceneChanged(string sceneName)
-    {
-        if (sceneName != "Game") return;
-
-        // 1. ∑±≈∏¿”ø° Ω∫∆˘ ∆˜¿Œ∆Æ ºˆ¡˝
-        runtimeSpawnPoints = GameObject.FindGameObjectsWithTag("PlayerSpawnPoint")
-            .OrderBy(go => go.name)
-            .Select(go => go.transform)
-            .ToArray();
-
-        foreach (var kvp in matchRooms)
+        if (!matchRooms.TryGetValue(matchId, out var players))
         {
-            string matchId = kvp.Key;
-            List<RoomPlayer> roomPlayers = kvp.Value;
-
-            for (int i = 0; i < roomPlayers.Count; i++)
-            {
-                RoomPlayer player = roomPlayers[i];
-
-                GameObject prefab = GetPrefabForCharacter(player.selectedCharacter);
-                if (prefab == null)
-                {
-                    Debug.LogError($"[º≠πˆ] º±≈√µ» ƒ≥∏Ø≈Õ {player.selectedCharacter} «¡∏Æ∆’ æ¯¿Ω");
-                    continue;
-                }
-
-                Vector3 spawnPos;
-                if (runtimeSpawnPoints != null && runtimeSpawnPoints.Length > i)
-                    spawnPos = runtimeSpawnPoints[i].position;
-                else
-                    spawnPos = new Vector3(i * 2f, 0f, 0f);
-
-                GameObject gamePlayer = Instantiate(prefab, spawnPos, Quaternion.identity);
-
-                if (gamePlayer.TryGetComponent(out NetworkMatch match))
-                {
-                    match.matchId = Guid.Parse(matchId);
-                }
-
-                NetworkServer.AddPlayerForConnection(player.connectionToClient, gamePlayer);
-            }
-
-            // √ﬂ∞°: æ¿ ≥ª MonsterSpawner √£æ∆º≠ matchId ¡ˆ¡§
-            MonsterSpawner spawner = FindFirstObjectByType<MonsterSpawner>();
-            if (spawner != null)
-            {
-                spawner.matchId = matchId;
-                Debug.Log($"[º≠πˆ] MonsterSpawnerø° matchId º≥¡§ øœ∑·: {matchId}");
-            }
-            else
-            {
-                Debug.LogWarning("[º≠πˆ] MonsterSpawner∏¶ √£¿ª ºˆ æ¯Ω¿¥œ¥Ÿ.");
-            }
+            Debug.LogError("[ÏÑúÎ≤Ñ] Îß§Ïπò IDÏóê Ìï¥ÎãπÌïòÎäî Î∞© ÏóÜÏùå");
+            return;
         }
 
-        matchRooms.Clear();
-    }
-
-
-
-
-    private GameObject GetPrefabForCharacter(int index)
-    {
-        switch (index)
+        foreach (var roomPlayer in players)
         {
-            case 0: return playerPrefab_EF;
-            case 1: return playerPrefab_RBM;
-            case 2: return playerPrefab_RBM2;
-            default: return null;
+            var conn = roomPlayer.connectionToClient;
+            int index = roomPlayer.selectedCharacter;
+
+            if (!characterPrefabMap.TryGetValue(index, out var prefabName))
+            {
+                Debug.LogError($"[ÏÑúÎ≤Ñ] Ï∫êÎ¶≠ÌÑ∞ Ïù∏Îç±Ïä§Ïóê Ìï¥ÎãπÌïòÎäî ÌîÑÎ¶¨Ìåπ Ïù¥Î¶Ñ ÏóÜÏùå: {index}");
+                continue;
+            }
+
+            var prefab = spawnPrefabs.FirstOrDefault(p => p != null && p.name == prefabName);
+            if (prefab == null)
+            {
+                Debug.LogError($"[ÏÑúÎ≤Ñ] Ï∫êÎ¶≠ÌÑ∞ ÌîÑÎ¶¨ÌåπÏùÑ Ï∞æÏùÑ Ïàò ÏóÜÏùå: {prefabName}");
+                continue;
+            }
+
+            Vector3 spawnPos = GetSpawnPosition(index);
+            GameObject playerObj = Instantiate(prefab, spawnPos, Quaternion.identity);
+
+            NetworkServer.Spawn(playerObj, conn); // ÌïµÏã¨ Ï∂îÍ∞Ä!
+            NetworkServer.Destroy(roomPlayer.gameObject);
+
+            var replaceOptions = new ReplacePlayerOptions();
+            NetworkServer.ReplacePlayerForConnection(conn, playerObj, replaceOptions);
+
+            var newRoomPlayer = playerObj.GetComponent<RoomPlayer>();
+            if (newRoomPlayer != null)
+                newRoomPlayer.TargetStartGame(conn, index, matchId);
         }
     }
+
     private Vector3 GetSpawnPosition(int index)
     {
-        // πËø≠¿Ã ¿Ø»ø«œ¡ˆ æ ¿∏∏È æ»¿¸«— ±‚∫ª ¿ßƒ° ¡¶∞¯
-        if (spawnPoints == null || spawnPoints.Length == 0)
-        {
-            return new Vector3(index * 2f, 1f, 0f);  // y=1∑Œ ∂ÁøÏ¿⁄
-        }
+        if (spawnPoints == null || spawnPoints.Length == 0 || index >= spawnPoints.Length)
+            return new Vector3(index * 2f, 2f, 0f); // ÎÜíÏù¥ ÏïΩÍ∞Ñ ÎùÑÏõÄ
 
-        if (index >= 0 && index < spawnPoints.Length && spawnPoints[index] != null)
-        {
-            return spawnPoints[index].position;
-        }
-
-        Debug.LogWarning("[º≠πˆ] ¿Ø»ø«œ¡ˆ æ ¿∫ Ω∫∆˘ ¿ßƒ° ø‰√ªµ  °Ê ±‚∫ª ¿ßƒ° ªÁøÎ");
-        return new Vector3(index * 2f, 1f, 0f);
+        return spawnPoints[index].position;
     }
-
-
-
 
     public void BroadcastPlayerList(string matchId)
     {
@@ -268,24 +165,28 @@ public class CustomNetworkManager_Server : NetworkManager
 
         foreach (var player in matchRooms[matchId])
         {
-            List<RoomPlayer.PlayerInfo> infoList = new();
-
-            foreach (var p in matchRooms[matchId])
+            List<RoomPlayer.PlayerInfo> infoList = matchRooms[matchId].Select(p => new RoomPlayer.PlayerInfo
             {
-                infoList.Add(new RoomPlayer.PlayerInfo
-                {
-                    name = p.playerName,
-                    isLeader = p.isLeader,
-                    isMe = p == player
-                });
-            }
+                name = p.playerName,
+                isLeader = p.isLeader,
+                isMe = p == player
+            }).ToList();
 
             player.TargetRebuildPlayerList(infoList);
         }
     }
-   
 
+    private void SendRoomListToAllClients()
+    {
+        var roomInfos = matchRooms.Select(pair => new RoomInfo
+        {
+            matchId = pair.Key,
+            roomName = pair.Value.FirstOrDefault()?.roomName ?? "",
+            currentPlayers = pair.Value.Count,
+            maxPlayers = 4
+        }).ToList();
 
-
-
+        var msg = new RoomListSyncMessage { roomList = roomInfos };
+        NetworkServer.SendToAll(msg);
+    }
 }

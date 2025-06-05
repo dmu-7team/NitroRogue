@@ -1,18 +1,27 @@
 using Mirror;
 using NetworkMessages;
-using UnityEngine.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CustomNetworkManager : NetworkManager
 {
     public static string matchIdToJoin;
-    private static bool joinSent = false; //  중복 방지용
+    private static bool joinSent = false;
+
+    [Header("클라이언트 프리팹 등록")]
+    [SerializeField] private GameObject playerPrefab_EF;
+    [SerializeField] private GameObject playerPrefab_RBM;
+    [SerializeField] private GameObject playerPrefab_RBM2;
 
     public override void OnStartClient()
     {
         base.OnStartClient();
+        joinSent = false;
 
-        joinSent = false; // 클라이언트 재시작 시 초기화
+        //  프리팹 자동 등록
+        if (playerPrefab_EF != null) NetworkClient.RegisterPrefab(playerPrefab_EF);
+        if (playerPrefab_RBM != null) NetworkClient.RegisterPrefab(playerPrefab_RBM);
+        if (playerPrefab_RBM2 != null) NetworkClient.RegisterPrefab(playerPrefab_RBM2);
 
         NetworkClient.RegisterHandler<JoinResultMessage>(OnJoinResultMessageReceived);
         NetworkClient.RegisterHandler<RoomListSyncMessage>(msg => RoomListUI.Instance.OnRoomListSyncMessageReceived(msg));
@@ -37,8 +46,6 @@ public class CustomNetworkManager : NetworkManager
             Debug.Log("[Client] matchIdToJoin이 비어 있음 → 자동 참가 생략");
         }
     }
-
-
 
     private void OnJoinResultMessageReceived(JoinResultMessage msg)
     {

@@ -7,9 +7,9 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
 
-    [Header("슬라이더")]
-    public Slider healthSlider;
-    public Slider expSlider;
+    [Header("게임 HUD 루트")]
+    [SerializeField] private GameObject hudPanel;  // 전체 HUD 오브젝트
+
 
     [Header("메시지")]
     public TextMeshProUGUI msgText;
@@ -254,4 +254,42 @@ public class UIManager : MonoBehaviour
         yield return new WaitForSeconds(duration);
         target.gameObject.SetActive(false);
     }
+    public void ShowInGameHUD()
+    {
+        if (hudPanel != null)
+        {
+            hudPanel.SetActive(true);
+            Debug.Log("[UIManager] 게임 HUD 활성화");
+        }
+    }
+
+    public void HideInGameHUD()
+    {
+        if (hudPanel != null)
+        {
+            hudPanel.SetActive(false);
+            Debug.Log("[UIManager] 게임 HUD 비활성화");
+        }
+    }
+    public void UpdateHealthBar(float current, float max)
+    {
+        if (healthBarImage != null)
+        {
+            float fill = current / max;
+            healthBarImage.fillAmount = fill;
+            healthText.text = $"체력 {current:F0} / {max:F0}";
+        }
+    }
+
+    public void UpdateExpBar(float current, float max)
+    {
+        if (expBarImage != null)
+        {
+            float fill = current / max;
+            expBarImage.fillAmount = fill;
+            expText.text = $"경험치 {current:F0} / {max:F0}";
+        }
+    }
+
+
 }
