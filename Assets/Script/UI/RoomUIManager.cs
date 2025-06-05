@@ -9,6 +9,7 @@ public class RoomUIManager : MonoBehaviour
     public static RoomUIManager Instance;
 
     [Header("UI References")]
+
     public GameObject mainMenuPanel;
     public GameObject roomPanel;
     public TextMeshProUGUI roomNameText;
@@ -17,6 +18,10 @@ public class RoomUIManager : MonoBehaviour
     [Header("플레이어 리스트 UI")]
     public Transform playerListParent;
     public GameObject playerListItemPrefab;
+
+    public GameObject createRoomPanel;  // Panel
+    public GameObject roomUI;           // RoomUI
+    public GameObject background;       // Background
 
 
 
@@ -104,13 +109,51 @@ public class RoomUIManager : MonoBehaviour
 
     public void OnClickGameStart()
     {
-        var localPlayer = NetworkClient.connection.identity?.GetComponent<RoomPlayer>();
-        if (localPlayer != null && localPlayer.isLeader)
+        var conn = NetworkClient.connection;
+        Debug.Log($"[DEBUG] 연결된 클라이언트: {conn}");
+
+        var localPlayer = conn.identity?.GetComponent<RoomPlayer>();
+        if (localPlayer == null)
         {
-            Debug.Log("[RoomUIManager] 게임 시작 버튼 눌림");
-            localPlayer.CmdStartGame(); // 여기서 안 부르면 아무 일도 안 생김
+            Debug.LogWarning("[RoomUIManager] 로컬 플레이어를 찾을 수 없습니다.");
+            return;
+        }
+
+        Debug.Log($"[DEBUG] 현재 플레이어는 리더인가? {localPlayer.isLeader}");
+
+        if (localPlayer.isLeader)
+        {
+            Debug.Log($"[RoomUIManager] 리더 상태 확인됨, matchId: {localPlayer.matchId}");
+            localPlayer.CmdStartGame();
+        }
+        else
+        {
+            Debug.Log("[RoomUIManager] 리더가 아니라 게임 시작 불가");
         }
     }
+
+
+
+    public void SwitchToGameUI()
+    {
+        Debug.Log("[RoomUIManager] SwitchToGameUI() 호출됨");
+
+        if (createRoomPanel != null)
+            createRoomPanel.SetActive(false);
+
+        if (roomUI != null)
+            roomUI.SetActive(false);
+
+        if (background != null)
+            background.SetActive(false);
+
+        if (UIManager.Instance != null)
+            UIManager.Instance.ShowInGameHUD();
+
+        Debug.Log("[RoomUIManager] 모든 Room 관련 UI 비활성화 완료, 게임 UI 활성화됨");
+    }
+
+
 
 
     private void OnJoinResultMessageReceived(JoinResultMessage msg)
@@ -237,5 +280,12 @@ public class RoomUIManager : MonoBehaviour
         player.CmdSelectCharacter(index);
         UpdateCharacterButtonStates();
     }
+    public void HideRoomUI()
+    {
+        roomPanel?.SetActive(false);     // RoomUI: 방 이름/리스트 패널
+        mainMenuPanel?.SetActive(false); // Panel: 방 생성/입장 패널
+        background?.SetActive(false);    // Background: 전체 회색 배경
+    }
+
 
 }

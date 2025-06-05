@@ -26,7 +26,7 @@ public class PlayerControllerRBM : NetworkBehaviour
 
     void Update()
     {
-        if (!isLocalPlayer) return;
+        if (!isLocalPlayer || movement == null || weaponSystem == null) return;
 
         movement.HandleMove();
         movement.HandleLook();
@@ -82,4 +82,24 @@ public class PlayerControllerRBM : NetworkBehaviour
         yield return new WaitForSeconds(delay);
         NetworkServer.Destroy(obj);
     }
+
+    public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+
+        // 꼭 넣어줘야 함
+        movement = GetComponent<PlayerMovementRBM>();
+        weaponSystem = GetComponent<WeaponSystemRBM>();
+
+        if (cameraObject != null)
+            cameraObject.SetActive(true);
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        RoomUIManager.Instance?.SwitchToGameUI();
+
+        Debug.Log("[PlayerController] 내 캐릭터로 전환됨: UI 및 카메라 설정 완료");
+    }
+
 }
