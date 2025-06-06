@@ -14,14 +14,18 @@ public class PlayerStats : CharacterStats
     [SerializeField] private float currentExp = 0f;
     [SerializeField] private float expToLevelUp = 100f;
     [SerializeField] private int level = 1;
+    [SerializeField, SyncVar(hook = nameof(OnAttackDamageChanged))]
+    private float syncedAttackDamage = 10f;
 
+    [SerializeField] private Animator animator;
+    private bool isDead = false;
     public float healthPerLevel = 10f;
     public float damagePerLevel = 5f;
     public float speedPerLevel = 0.5f;
 
     // 🟢 자식에서 직접 동기화
     [SyncVar(hook = nameof(OnMoveSpeedChanged))] private float syncedMoveSpeed = 5f;
-    [SyncVar(hook = nameof(OnAttackDamageChanged))] private float syncedAttackDamage = 10f;
+    
 
     private float originalSpeed;
     private float originalDamage;
@@ -166,9 +170,20 @@ public class PlayerStats : CharacterStats
         OnPowerChanged?.Invoke(syncedAttackDamage);
     }
 
+   
     protected override void Die()
     {
+        if (isDead) return;
+        isDead = true;
+
         Debug.Log("플레이어 사망 처리");
+
+        // 애니메이터 트리거
+        if (animator == null)
+            animator = GetComponent<Animator>();
+
+        animator?.SetTrigger("Die");
+
         base.Die();
     }
 }

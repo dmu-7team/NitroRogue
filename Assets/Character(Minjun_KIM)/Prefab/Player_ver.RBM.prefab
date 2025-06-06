@@ -21586,7 +21586,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  weaponType: 0
+  weaponType: 2
   muzzle: {fileID: 0}
   bulletPrefab: {fileID: 0}
   bulletForce: 100
@@ -21628,6 +21628,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  cameraObject: {fileID: 0}
 --- !u!114 &8954798629446117697
 MonoBehaviour:
   m_ObjectHideFlags: 0

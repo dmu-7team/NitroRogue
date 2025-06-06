@@ -33920,7 +33920,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneId: 2506385243
+  sceneId: 488348517
   _assetId: 0
   serverOnly: 0
   visibility: 0
@@ -90838,7 +90838,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4853706716915207958, guid: 759068f362928494392c923c831e1701, type: 3}
       propertyPath: sceneId
-      value: 3128406933
+      value: 3573309748
       objectReference: {fileID: 0}
     - target: {fileID: 5347417932251279745, guid: 759068f362928494392c923c831e1701, type: 3}
       propertyPath: missionText
@@ -104955,7 +104955,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.5
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: 3882892b33e6bb44f84f10c1a3449576, type: 2}
+  m_NavMeshData: {fileID: 0}
   m_BuildHeightMesh: 0
 --- !u!114 &1534114399
 MonoBehaviour:
@@ -104987,7 +104987,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: 9f70694ccb271e74b8eaf4c1feea6a9d, type: 2}
+  m_NavMeshData: {fileID: 0}
   m_BuildHeightMesh: 0
 --- !u!114 &1534114400
 MonoBehaviour:
@@ -105019,7 +105019,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: 5b492d68a6f5f2c459bfc421f66ce4dd, type: 2}
+  m_NavMeshData: {fileID: 0}
   m_BuildHeightMesh: 0
 --- !u!4 &1534114401
 Transform:
