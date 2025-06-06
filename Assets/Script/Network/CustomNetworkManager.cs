@@ -13,19 +13,34 @@ public class CustomNetworkManager : NetworkManager
     [SerializeField] private GameObject playerPrefab_RBM;
     [SerializeField] private GameObject playerPrefab_RBM2;
 
+    [Header("클라이언트 몬스터 프리팹 등록")]
+    [SerializeField] private GameObject[] monsterPrefabs; // 인스펙터에서 할당
+
     public override void OnStartClient()
     {
         base.OnStartClient();
         joinSent = false;
 
-        //  프리팹 자동 등록
+        // 플레이어 프리팹 등록
         if (playerPrefab_EF != null) NetworkClient.RegisterPrefab(playerPrefab_EF);
         if (playerPrefab_RBM != null) NetworkClient.RegisterPrefab(playerPrefab_RBM);
         if (playerPrefab_RBM2 != null) NetworkClient.RegisterPrefab(playerPrefab_RBM2);
 
+        // 몬스터 프리팹 등록
+        foreach (var monster in monsterPrefabs)
+        {
+            if (monster != null)
+            {
+                Debug.Log($"[Client] 몬스터 프리팹 등록됨: {monster.name}");
+                NetworkClient.RegisterPrefab(monster);
+            }
+        }
+
+        // 메시지 핸들러
         NetworkClient.RegisterHandler<JoinResultMessage>(OnJoinResultMessageReceived);
         NetworkClient.RegisterHandler<RoomListSyncMessage>(msg => RoomListUI.Instance.OnRoomListSyncMessageReceived(msg));
     }
+
 
     public override void OnClientConnect()
     {
