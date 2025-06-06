@@ -19,7 +19,6 @@ public class PlayerStats : CharacterStats
     public float damagePerLevel = 5f;
     public float speedPerLevel = 0.5f;
 
-    // 🟢 자식에서 직접 동기화
     [SyncVar(hook = nameof(OnMoveSpeedChanged))] private float syncedMoveSpeed = 5f;
     [SyncVar(hook = nameof(OnAttackDamageChanged))] private float syncedAttackDamage = 10f;
 
@@ -30,7 +29,6 @@ public class PlayerStats : CharacterStats
     public float ExpToLevelUp => expToLevelUp;
     public int Level => level;
 
-    // 🟢 부모의 속성 override
     public override float MoveSpeed => syncedMoveSpeed;
     public override float AttackDamage => syncedAttackDamage;
 
@@ -79,6 +77,7 @@ public class PlayerStats : CharacterStats
         if (currentHealth <= 0)
             Die();
     }
+
     [ClientRpc]
     public void RpcUpdate(float current, float max)
     {
