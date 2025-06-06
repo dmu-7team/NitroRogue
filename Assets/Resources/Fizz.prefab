@@ -468,7 +468,7 @@ MonoBehaviour:
           m_Value0: 10508235337809877687
           m_Value1: 12089629142269642235
         Name: Target
-        m_Value: {fileID: 8269937752400224285, guid: 8820f04a47cbf7c4cbfa857b2c107186, type: 3}
+        m_Value: {fileID: 0}
 --- !u!54 &685070655638333288
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -491,7 +491,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0

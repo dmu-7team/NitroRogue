@@ -233,34 +233,34 @@ MonoBehaviour:
   autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs:
-  - {fileID: 839224178500407364, guid: 2e85b9f5bcc94f2448d106859125dfd7, type: 3}
-  - {fileID: 235673213667241877, guid: 6c4ffb140e19fe6439d7075e4941926d, type: 3}
-  - {fileID: 7078556089362761334, guid: 759068f362928494392c923c831e1701, type: 3}
-  - {fileID: 9222912982316200897, guid: 312334879c7857f459d7323743bc8e6d, type: 3}
-  - {fileID: 7929354656396367374, guid: 0584fe8eda4dd45428f0cfa030e41aad, type: 3}
-  - {fileID: 4779435139897670464, guid: 191f9e88e0260bc438b5554213b75030, type: 3}
-  - {fileID: 2460976672058901519, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
-  - {fileID: 845490078162693129, guid: e01977033274b7f4d8b7d76d80fdf06b, type: 3}
+  - {fileID: 7962604100564841400, guid: d0fc9fb3ee062e541a88de96af92e8c1, type: 3}
   - {fileID: 2615926316999149427, guid: 91e080080aff5da4c9d01326b9073743, type: 3}
   - {fileID: 7578368588734243847, guid: 974a2fbbae532fa4686ba792d520907e, type: 3}
-  - {fileID: 4309751744975563182, guid: 979b619f5b86679468daab11019484f6, type: 3}
-  - {fileID: 100006, guid: 37fefb19538c00d418188ceb218ebd63, type: 3}
-  - {fileID: 57600035236208194, guid: 06fe970884c172242bfa84bad8747de8, type: 3}
-  - {fileID: 7962604100564841400, guid: d0fc9fb3ee062e541a88de96af92e8c1, type: 3}
+  - {fileID: 839224178500407364, guid: 2e85b9f5bcc94f2448d106859125dfd7, type: 3}
+  - {fileID: 235673213667241877, guid: 6c4ffb140e19fe6439d7075e4941926d, type: 3}
   - {fileID: 4921877257883508352, guid: 03acb33812c5ec341b2246e3fca17a10, type: 3}
+  - {fileID: 2858694302160804754, guid: f2ef809108ef3f443a99f0ac543505de, type: 3}
+  - {fileID: 4309751744975563182, guid: 979b619f5b86679468daab11019484f6, type: 3}
   - {fileID: 2936583146893896946, guid: bc8599d8dac712642ae3bfddd4ccebbe, type: 3}
   - {fileID: 7727047731534598215, guid: 68969f412a9dfca4b9a6747c2eca103a, type: 3}
+  - {fileID: 100006, guid: 37fefb19538c00d418188ceb218ebd63, type: 3}
   - {fileID: 8564916408925930016, guid: fba876c46d78a664a87df074814794bc, type: 3}
   - {fileID: 2732309068803917121, guid: db551a08e2178e34b8141ba6846ffa41, type: 3}
+  - {fileID: 7078556089362761334, guid: 759068f362928494392c923c831e1701, type: 3}
   - {fileID: 3956764888193744923, guid: 1442ca962994c994db7f03b8d7b42d04, type: 3}
+  - {fileID: 9222912982316200897, guid: 312334879c7857f459d7323743bc8e6d, type: 3}
+  - {fileID: 4409139810660609498, guid: 837b1dbc68579ea40b49cc341e990abd, type: 3}
+  - {fileID: 7929354656396367374, guid: 0584fe8eda4dd45428f0cfa030e41aad, type: 3}
+  - {fileID: 4779435139897670464, guid: 191f9e88e0260bc438b5554213b75030, type: 3}
+  - {fileID: 8269937752400224285, guid: 8820f04a47cbf7c4cbfa857b2c107186, type: 3}
+  - {fileID: 8532805641309439499, guid: f78f513e847bdea49b59bca75345027c, type: 3}
+  - {fileID: 2460976672058901519, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
   - {fileID: 558294534666759081, guid: b4c609bc45b58cf49b3cb96b5efd6206, type: 3}
   - {fileID: 1494876547522609141, guid: 78a1ff274864a1043916dc00744e82f1, type: 3}
   - {fileID: 8338668539177126183, guid: e306b286b54e2334ba58eebe8c37b115, type: 3}
+  - {fileID: 845490078162693129, guid: e01977033274b7f4d8b7d76d80fdf06b, type: 3}
   - {fileID: 2493159302187033998, guid: d6efe56b1a2432c47a13ea0d59c5d631, type: 3}
-  - {fileID: 2858694302160804754, guid: f2ef809108ef3f443a99f0ac543505de, type: 3}
-  - {fileID: 4409139810660609498, guid: 837b1dbc68579ea40b49cc341e990abd, type: 3}
-  - {fileID: 8269937752400224285, guid: 8820f04a47cbf7c4cbfa857b2c107186, type: 3}
-  - {fileID: 8532805641309439499, guid: f78f513e847bdea49b59bca75345027c, type: 3}
+  - {fileID: 57600035236208194, guid: 06fe970884c172242bfa84bad8747de8, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2
@@ -276,14 +276,14 @@ MonoBehaviour:
   evaluationMethod: 0
   evaluationInterval: 3
   timeInterpolationGui: 0
+  monsterPrefabs:
+  - {fileID: 4921877257883508352, guid: 03acb33812c5ec341b2246e3fca17a10, type: 3}
+  - {fileID: 2936583146893896946, guid: bc8599d8dac712642ae3bfddd4ccebbe, type: 3}
+  - {fileID: 7727047731534598215, guid: 68969f412a9dfca4b9a6747c2eca103a, type: 3}
   characterPrefabs:
   - {fileID: 8269937752400224285, guid: 8820f04a47cbf7c4cbfa857b2c107186, type: 3}
   - {fileID: 8532805641309439499, guid: f78f513e847bdea49b59bca75345027c, type: 3}
   - {fileID: 2460976672058901519, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
-  spawnPoints: []
-  playerPrefab_EF: {fileID: 8269937752400224285, guid: 8820f04a47cbf7c4cbfa857b2c107186, type: 3}
-  playerPrefab_RBM: {fileID: 8532805641309439499, guid: f78f513e847bdea49b59bca75345027c, type: 3}
-  playerPrefab_RBM2: {fileID: 2460976672058901519, guid: c64aecafed4a9134d94330d28be5aea4, type: 3}
   roomPlayerPrefab: {fileID: 2086602806712532617, guid: 276fd3723b32c284e9f37f9d9ff6863f, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

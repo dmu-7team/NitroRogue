@@ -21,7 +21,6 @@ public class EnemyBase : CharacterStats
     public override float AttackDamage => _attackDamage;
     public override float MoveSpeed => _moveSpeed;
 
-
     [Header("애니메이션/AI")]
     private Animator animator;
     private BehaviorGraphAgent behavior;
@@ -37,37 +36,19 @@ public class EnemyBase : CharacterStats
     [Header("데미지 팝업")]
     public GameObject damagePopupPrefab;
     public Transform popupSpawnPoint;
-    public Camera worldCamera; //  직접 연결하는 카메라
+    public Camera worldCamera;
 
     private bool isDead = false;
-
-    //테스트 용도
-    Color[] colors = new Color[8]
-    {
-        Color.red,
-        Color.yellow,
-        Color.green,
-        Color.cyan,
-        Color.blue,
-        Color.magenta,
-        Color.gray,
-        Color.white
-    };
-
-    //몬스터 공격 범위 표시해주는 테스트 코드 밸런스 잡을때 필요해요
-    void OnDrawGizmosSelected()
-    {
-        if (bodyRoot == null) return;
-        for (int i = 0; i < attackObjs.Length; i++)
-        {
-            Gizmos.color = colors[i];
-            Gizmos.DrawWireSphere(bodyRoot.transform.position, attackObjs[i].range);
-        }
-    }
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
+    }
+
+    [ServerCallback]
+    private void Start()
+    {
+        
     }
 
     public override void OnStartClient()
@@ -83,7 +64,8 @@ public class EnemyBase : CharacterStats
         behavior = GetComponent<BehaviorGraphAgent>();
         navMeshAgent = GetComponent<NavMeshAgent>();
 
-        navMeshAgent.speed = MoveSpeed;
+        if (navMeshAgent != null)
+            navMeshAgent.speed = MoveSpeed;
 
         foreach (var attackObj in attackObjs)
         {
@@ -100,15 +82,14 @@ public class EnemyBase : CharacterStats
     public virtual void UseAllAttack(GameObject target)
     {
         if (bodyRoot == null) return;
-        for (int i = 0; i < attacks.Count; i++)
+        foreach (var attack in attacks)
         {
-            if (attacks[i].IsReadyToExecute(bodyRoot, target))
+            if (attack.IsReadyToExecute(bodyRoot, target))
             {
-                currentAttack = attacks[i];
-                attacks[i].Execute(gameObject, target);
-
+                currentAttack = attack;
+                attack.Execute(gameObject, target);
                 isAttacking = true;
-                RpcPlayAttackAnimation(i);
+                RpcPlayAttackAnimation(attacks.IndexOf(attack));
                 return;
             }
         }
@@ -126,18 +107,13 @@ public class EnemyBase : CharacterStats
     {
         if (!isServer) return;
         isAttacking = false;
-        behavior?.SetVariableValue("IsAttacking", isAttacking);
-
+        behavior?.SetVariableValue("IsAttacking", false);
         currentAttack?.ForceCooldownStart();
     }
 
-    //EnableAttackEntity
-    //DisableAttackEntity
     public void OnAnimationEvent(string eventName)
     {
-        if (!isServer) return;
-        if (currentAttack == null) return;
-
+        if (!isServer || currentAttack == null) return;
         currentAttack.OnAnimationEvent(eventName);
     }
 
@@ -146,7 +122,7 @@ public class EnemyBase : CharacterStats
     {
         currentHealth -= amount;
         RpcUpdateHealthBar(CurrentHealth, MaxHealth);
-        RpcShowDamagePopup((int)amount); //  팝업 호출
+        RpcShowDamagePopup((int)amount);
 
         if (CurrentHealth <= 0)
         {
@@ -158,47 +134,28 @@ public class EnemyBase : CharacterStats
     private void RpcUpdateHealthBar(float current, float max)
     {
         if (healthBarImage != null)
-        {
             healthBarImage.fillAmount = current / max;
-        }
     }
 
     [ClientRpc]
     private void RpcShowDamagePopup(int amount)
     {
-        if (damagePopupPrefab == null)
-        {
-            Debug.LogWarning("[EnemyBase] DamagePopup 프리팹이 연결되지 않았습니다.");
-            return;
-        }
+        if (damagePopupPrefab == null) return;
 
         Vector3 spawnPos = popupSpawnPoint != null ? popupSpawnPoint.position : transform.position + Vector3.up * 1.5f;
-        Debug.Log($"popupSpawnPoint: {popupSpawnPoint}");
-        GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity, popupSpawnPoint);
-        Debug.Log($"[DamagePopup] Showing damage: {amount}");
-
-        // 텍스트 설정
+        GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity);
         TMP_Text text = popup.GetComponentInChildren<TMP_Text>();
         if (text != null)
-        {
             text.text = amount.ToString();
-        }
 
-        // 카메라 방향으로 보이게
         if (worldCamera != null)
         {
             popup.transform.LookAt(worldCamera.transform);
             popup.transform.Rotate(0, 180f, 0);
         }
-        else
-        {
-            Debug.LogWarning("[DamagePopup] worldCamera가 비어있습니다.");
-        }
 
-        // 스케일 및 제거
         popup.transform.localScale = Vector3.one * 0.01f;
-        Destroy(popup, 1.0f);
-
+        Destroy(popup, 1.2f);
     }
 
     [Server]
@@ -208,12 +165,10 @@ public class EnemyBase : CharacterStats
         isDead = true;
 
         behavior?.SetVariableValue("IsDead", true);
-        
         RpcPlayDeathAnimation();
         DropBox();
         StartCoroutine(DelayedDestroy());
-        NetworkMissionManager.Instance.CheckMissionProgress();
-
+        NetworkMissionManager.Instance?.CheckMissionProgress();
     }
 
     [ClientRpc]
@@ -232,15 +187,27 @@ public class EnemyBase : CharacterStats
     [Server]
     private void DropBox()
     {
-        if (boxPrefab != null)
+        if (boxPrefab == null)
         {
-            GameObject box = Instantiate(boxPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
-            NetworkServer.Spawn(box);
-            Debug.Log("[EnemyBase] 박스 드랍 완료");
+            Debug.LogWarning("[EnemyBase] 박스 프리팹이 없습니다.");
+            return;
         }
-        else
+
+        GameObject box = Instantiate(boxPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
+        NetworkServer.Spawn(box);
+        Debug.Log("[EnemyBase] 박스 드랍 완료");
+    }
+
+    // Optional: Debug Range Gizmo
+    void OnDrawGizmosSelected()
+    {
+        if (bodyRoot == null || attackObjs == null) return;
+
+        Color[] debugColors = { Color.red, Color.green, Color.blue, Color.yellow };
+        for (int i = 0; i < attackObjs.Length; i++)
         {
-            Debug.LogWarning("[EnemyBase] 드랍할 박스 프리팹이 없습니다.");
+            Gizmos.color = debugColors[i % debugColors.Length];
+            Gizmos.DrawWireSphere(bodyRoot.transform.position, attackObjs[i].range);
         }
     }
 }
