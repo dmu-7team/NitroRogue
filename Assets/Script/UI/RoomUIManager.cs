@@ -7,6 +7,7 @@ using UnityEngine.UI; // ← 버튼 포함한 UI 컴포넌트용
 public class RoomUIManager : MonoBehaviour
 {
     public static RoomUIManager Instance;
+    
 
     [Header("UI References")]
 
@@ -14,10 +15,11 @@ public class RoomUIManager : MonoBehaviour
     public GameObject roomPanel;
     public TextMeshProUGUI roomNameText;
     public GameObject startButton;
-
+    public GameObject createRoomPopup; // <- 이 줄 추가
     [Header("플레이어 리스트 UI")]
     public Transform playerListParent;
     public GameObject playerListItemPrefab;
+    [SerializeField] private GameObject mainMenuCanvas;
 
     public GameObject createRoomPanel;  // Panel
     public GameObject roomUI;           // RoomUI
@@ -138,20 +140,17 @@ public class RoomUIManager : MonoBehaviour
     {
         Debug.Log("[RoomUIManager] SwitchToGameUI() 호출됨");
 
-        if (createRoomPanel != null)
-            createRoomPanel.SetActive(false);
+        // 메인메뉴 UI 전체 끄기
+        if (mainMenuCanvas != null)
+            mainMenuCanvas.SetActive(false);  // ← Canvas 루트 전체 꺼버림
 
-        if (roomUI != null)
-            roomUI.SetActive(false);
-
-        if (background != null)
-            background.SetActive(false);
-
+        // 게임 내 HUD는 따로 켜기
         if (UIManager.Instance != null)
             UIManager.Instance.ShowInGameHUD();
 
-        Debug.Log("[RoomUIManager] 모든 Room 관련 UI 비활성화 완료, 게임 UI 활성화됨");
+        Debug.Log("[RoomUIManager] 모든 UI 정리 완료, 게임 HUD만 활성화됨");
     }
+
 
 
 

@@ -317,11 +317,11 @@ GameObject:
   - component: {fileID: 5409436088296543680}
   m_Layer: 0
   m_Name: FPSCam
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1643709839442444684
 Transform:
   m_ObjectHideFlags: 0

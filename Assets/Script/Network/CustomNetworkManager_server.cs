@@ -139,17 +139,34 @@ public class CustomNetworkManager_Server : NetworkManager
             Vector3 spawnPos = GetSpawnPosition(index);
             GameObject playerObj = Instantiate(prefab, spawnPos, Quaternion.identity);
 
-            NetworkServer.Spawn(playerObj, conn); // 핵심 추가!
+            // matchId 설정
+            var matchComponent = playerObj.GetComponent<NetworkMatch>();
+            if (matchComponent != null && Guid.TryParse(matchId, out Guid guid))
+            {
+                matchComponent.matchId = guid;
+                Debug.Log($"[서버] MatchId 설정됨: {guid} for {prefabName}");
+            }
+
+            // 기존 RoomPlayer 제거
             NetworkServer.Destroy(roomPlayer.gameObject);
 
-            var replaceOptions = new ReplacePlayerOptions();
+            // 권한 이전 먼저
+            var replaceOptions = new ReplacePlayerOptions(); // 기본 생성
             NetworkServer.ReplacePlayerForConnection(conn, playerObj, replaceOptions);
 
+
+
+
+            // 그 후 Spawn
+            NetworkServer.Spawn(playerObj);
+
+            // Target RPC 전송
             var newRoomPlayer = playerObj.GetComponent<RoomPlayer>();
             if (newRoomPlayer != null)
                 newRoomPlayer.TargetStartGame(conn, index, matchId);
         }
     }
+
 
     private Vector3 GetSpawnPosition(int index)
     {
