@@ -11543,11 +11543,11 @@ GameObject:
   - component: {fileID: 7512964940082764339}
   m_Layer: 0
   m_Name: FPSCam
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8997106707359276443
 Transform:
   m_ObjectHideFlags: 0
@@ -27720,7 +27720,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  cameraObject: {fileID: 0}
+  cameraObject: {fileID: 5699765086256940431}
 --- !u!114 &-6205578058028679697
 MonoBehaviour:
   m_ObjectHideFlags: 0

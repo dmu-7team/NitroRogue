@@ -12,17 +12,38 @@ public class PlayerControllerRBM : NetworkBehaviour
 
     public override void OnStartAuthority()
     {
-        if (!isLocalPlayer) return;
+        // 1. 카메라 충돌 방지 - 모든 FPSCam 끄고 내 것만 켜기
+        foreach (var cam in FindObjectsByType<Camera>(FindObjectsSortMode.None))
+        {
+            if (cam.gameObject.name == "FPSCam")
+                cam.gameObject.SetActive(false);
+        }
 
+        // 2. 내 컴포넌트 설정
         movement = GetComponent<PlayerMovementRBM>();
         weaponSystem = GetComponent<WeaponSystemRBM>();
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        Debug.Log("왜 안됨");
-        cameraObject.SetActive(true);
+        // 3. 내 카메라만 활성화
+        if (cameraObject != null)
+        {
+            cameraObject.SetActive(true);
+            cameraObject.tag = "MainCamera";  // 내 것만 MainCamera 태그
+            Debug.Log("[PlayerController] FPS 카메라 활성화 및 태그 설정 완료");
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerController] cameraObject 연결되지 않음!");
+        }
+
+        // 4. UI 전환
+        RoomUIManager.Instance?.SwitchToGameUI();
+        Debug.Log("[PlayerController] 권한 있는 내 캐릭터로 전환됨: UI 및 카메라 설정 완료");
     }
+
+
 
     void Update()
     {
@@ -33,6 +54,7 @@ public class PlayerControllerRBM : NetworkBehaviour
         weaponSystem.HandleFire();
         weaponSystem.HandleReload();
     }
+
 
     // [WeaponSystemRB]에서 호출되는 Mirror 명령
     [Command]
@@ -83,23 +105,7 @@ public class PlayerControllerRBM : NetworkBehaviour
         NetworkServer.Destroy(obj);
     }
 
-    public override void OnStartLocalPlayer()
-    {
-        base.OnStartLocalPlayer();
+   
 
-        // 꼭 넣어줘야 함
-        movement = GetComponent<PlayerMovementRBM>();
-        weaponSystem = GetComponent<WeaponSystemRBM>();
-
-        if (cameraObject != null)
-            cameraObject.SetActive(true);
-
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
-        RoomUIManager.Instance?.SwitchToGameUI();
-
-        Debug.Log("[PlayerController] 내 캐릭터로 전환됨: UI 및 카메라 설정 완료");
-    }
 
 }
