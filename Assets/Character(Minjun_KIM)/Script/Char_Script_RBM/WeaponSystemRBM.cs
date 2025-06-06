@@ -1,18 +1,15 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using Mirror;
 
 public class WeaponSystemRBM : NetworkBehaviour
 {
-    public enum WeaponType { DMR, SMG, AR, Sniper, SG, GL }
+    public enum WeaponType { DMR, SMG, AR, SG } // GL, Sniper ì œê±°
 
     [Header("Weapon Settings")]
     [SerializeField] private WeaponType weaponType;
     [SerializeField] private Transform muzzle;
-    [SerializeField] public GameObject bulletPrefab;
-    [SerializeField] private float bulletForce = 100f;
-    [SerializeField] private int weaponDamage = 1;
     [SerializeField] private int currentAmmo = 30;
     [SerializeField] private int maxAmmo = 30;
 
@@ -30,9 +27,7 @@ public class WeaponSystemRBM : NetworkBehaviour
     [SerializeField] private float scopedFOV = 30f;
 
     public enum AimMode { Zoom, Scope }
-
-    [Header("Aiming Mode")]
-    [SerializeField] private AimMode aimMode = AimMode.Zoom;
+    [HideInInspector] private AimMode aimMode = AimMode.Zoom;
 
     [Header("Animator")]
     [SerializeField] private Animator animator;
@@ -44,9 +39,7 @@ public class WeaponSystemRBM : NetworkBehaviour
     [SerializeField] private AudioClip smgSound;
     [SerializeField] private AudioClip arSound;
     [SerializeField] private AudioClip dmrSound;
-    [SerializeField] private AudioClip sniperSound;
     [SerializeField] private AudioClip shotgunSound;
-    [SerializeField] private AudioClip glSound;
 
     [Header("Trail Effect")]
     [SerializeField] public GameObject bulletTrailPrefab;
@@ -56,7 +49,6 @@ public class WeaponSystemRBM : NetworkBehaviour
     private float defaultFOV;
     private PlayerStats stats;
 
-    // Ãß°¡: ¹ß»ç Á¦¾î¿ë º¯¼ö
     private float lastFireTime = 0f;
     private float smgFireInterval = 60f / 800f;
     private Coroutine burstCoroutine;
@@ -70,23 +62,11 @@ public class WeaponSystemRBM : NetworkBehaviour
         scopeOverlay?.SetActive(false);
         crosshair?.SetActive(true);
 
-        // ¹«±âº° Á¶ÁØ ¸ðµå °íÁ¤
-        if (weaponType == WeaponType.Sniper || weaponType == WeaponType.DMR)
+        // ë¬´ê¸°ë³„ ì¡°ì¤€ ëª¨ë“œ ê³ ì •
+        if (weaponType == WeaponType.DMR)
             aimMode = AimMode.Scope;
         else
             aimMode = AimMode.Zoom;
-        
-
-   
-        if (scopeOverlay != null)
-            scopeOverlay.SetActive(false);
-        else
-            Debug.LogWarning("[WeaponSystemRBM] scopeOverlay ¿¬°á ¾È µÊ");
-
-        if (crosshair != null)
-            crosshair.SetActive(true);
-        else
-            Debug.LogWarning("[WeaponSystemRBM] crosshair ¿¬°á ¾È µÊ");
     }
 
     void Update()
@@ -109,6 +89,7 @@ public class WeaponSystemRBM : NetworkBehaviour
                 FireSingleShot();
         }
     }
+
     public void HandleFire()
     {
         if (!isLocalPlayer || animator.GetBool("isRunning") || isReloading || currentAmmo <= 0)
@@ -123,19 +104,16 @@ public class WeaponSystemRBM : NetworkBehaviour
                     FireSingleShot();
                 }
                 break;
-
             case WeaponType.AR:
                 if (Input.GetMouseButtonDown(0) && burstCoroutine == null)
                     burstCoroutine = StartCoroutine(FireBurst());
                 break;
-
             default:
                 if (Input.GetMouseButtonDown(0))
                     FireSingleShot();
                 break;
         }
     }
-
 
     void TryFireSMG()
     {
@@ -158,7 +136,7 @@ public class WeaponSystemRBM : NetworkBehaviour
         for (int i = 0; i < shots; i++)
         {
             FireSingleShot();
-            yield return new WaitForSeconds(0.1f); // ÅÁ ÅÁ ÅÁ °£°Ý
+            yield return new WaitForSeconds(0.1f);
         }
         burstCoroutine = null;
     }
@@ -167,18 +145,14 @@ public class WeaponSystemRBM : NetworkBehaviour
     {
         currentAmmo--;
         UpdateAmmoUI();
+
         switch (weaponType)
         {
-            case WeaponType.SMG:
-                animator.SetTrigger("AutoShoot");
-                break;
-            case WeaponType.AR:
-                animator.SetTrigger("BurstShoot");
-                break;
-            default:
-                animator.SetTrigger("Shoot");
-                break;
+            case WeaponType.SMG: animator.SetTrigger("AutoShoot"); break;
+            case WeaponType.AR: animator.SetTrigger("BurstShoot"); break;
+            default: animator.SetTrigger("Shoot"); break;
         }
+
         FireBulletBasedOnType();
     }
 
@@ -212,10 +186,9 @@ public class WeaponSystemRBM : NetworkBehaviour
                     if (ShouldDrawTrail())
                         CreateBulletTrail(muzzle.position, hit.point);
                 }
-                else
+                else if (ShouldDrawTrail())
                 {
-                    if (ShouldDrawTrail())
-                        CreateBulletTrail(muzzle.position, muzzle.position + spreadDir * 100f);
+                    CreateBulletTrail(muzzle.position, muzzle.position + spreadDir * 100f);
                 }
             }
         }
@@ -232,10 +205,9 @@ public class WeaponSystemRBM : NetworkBehaviour
                 if (ShouldDrawTrail())
                     CreateBulletTrail(muzzle.position, hit.point);
             }
-            else
+            else if (ShouldDrawTrail())
             {
-                if (ShouldDrawTrail())
-                    CreateBulletTrail(muzzle.position, muzzle.position + fireDirection * 100f);
+                CreateBulletTrail(muzzle.position, muzzle.position + fireDirection * 100f);
             }
         }
     }
@@ -244,9 +216,7 @@ public class WeaponSystemRBM : NetworkBehaviour
     void CmdDealDamage(GameObject target, float damage)
     {
         if (target.TryGetComponent(out EnemyBase enemy))
-        {
             enemy.TakeDamage(damage, gameObject);
-        }
     }
 
     Vector3 ApplySpread(Vector3 direction, float angle)
@@ -268,15 +238,12 @@ public class WeaponSystemRBM : NetworkBehaviour
             lr.SetPosition(1, end);
         }
 
-        float trailLifetime = (weaponType == WeaponType.Sniper) ? 0.2f : 0.05f;
-        Destroy(trail, trailLifetime);
+        Destroy(trail, 0.05f);
     }
 
     bool ShouldDrawTrail()
     {
-        return weaponType == WeaponType.SMG || weaponType == WeaponType.AR ||
-               weaponType == WeaponType.DMR || weaponType == WeaponType.Sniper ||
-               weaponType == WeaponType.SG;
+        return true;
     }
 
     void PlayMuzzleFlash()
@@ -291,9 +258,7 @@ public class WeaponSystemRBM : NetworkBehaviour
             case WeaponType.SMG: audioSource.PlayOneShot(smgSound); break;
             case WeaponType.AR: audioSource.PlayOneShot(arSound); break;
             case WeaponType.DMR: audioSource.PlayOneShot(dmrSound); break;
-            case WeaponType.Sniper: audioSource.PlayOneShot(sniperSound); break;
             case WeaponType.SG: audioSource.PlayOneShot(shotgunSound); break;
-            case WeaponType.GL: audioSource.PlayOneShot(glSound); break;
         }
     }
 
@@ -329,30 +294,24 @@ public class WeaponSystemRBM : NetworkBehaviour
     {
         bool isAiming = Input.GetMouseButton(1);
 
-        switch (aimMode)
+        if (aimMode == AimMode.Zoom)
         {
-            case AimMode.Zoom:
-                HandleZoom(isAiming);
-                break;
-            case AimMode.Scope:
-                if (isAiming && !isScoped)
-                    StartCoroutine(OnScoped());
-                else if (!isAiming && isScoped)
-                    OnUnscoped();
-                break;
+            Transform target = isAiming ? aimCamPos : defaultCamPos;
+            cameraHolder.position = Vector3.Lerp(cameraHolder.position, target.position, Time.deltaTime * camTransitionSpeed);
+            cameraHolder.rotation = Quaternion.Lerp(cameraHolder.rotation, target.rotation, Time.deltaTime * camTransitionSpeed);
+
+            crosshair?.SetActive(true);
+            scopeOverlay?.SetActive(false);
+            playerCamera.fieldOfView = defaultFOV;
+            isScoped = false;
         }
-    }
-
-    private void HandleZoom(bool isAiming)
-    {
-        Transform target = isAiming ? aimCamPos : defaultCamPos;
-        cameraHolder.position = Vector3.Lerp(cameraHolder.position, target.position, Time.deltaTime * camTransitionSpeed);
-        cameraHolder.rotation = Quaternion.Lerp(cameraHolder.rotation, target.rotation, Time.deltaTime * camTransitionSpeed);
-
-        crosshair?.SetActive(true);
-        scopeOverlay?.SetActive(false);
-        playerCamera.fieldOfView = defaultFOV;
-        isScoped = false;
+        else
+        {
+            if (isAiming && !isScoped)
+                StartCoroutine(OnScoped());
+            else if (!isAiming && isScoped)
+                OnUnscoped();
+        }
     }
 
     IEnumerator OnScoped()
