@@ -13,7 +13,7 @@ public class MiniMapManager : MonoBehaviour
     public Transform iconParent;
     public RectTransform playerIconPrefab;
     public RectTransform enemyIconPrefab;
-
+    public RectTransform playerIconPrefabGray;
     private Dictionary<Transform, RectTransform> trackedIcons = new();
 
     void Start()
@@ -48,15 +48,24 @@ public class MiniMapManager : MonoBehaviour
     {
         foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
         {
-            NetworkIdentity net = player.GetComponent<NetworkIdentity>();
-            if (net != null && net.isLocalPlayer && !trackedIcons.ContainsKey(player.transform))
+            if (!trackedIcons.ContainsKey(player.transform))
             {
-                RectTransform icon = Instantiate(playerIconPrefab, iconParent);
+                NetworkIdentity net = player.GetComponent<NetworkIdentity>();
+                RectTransform icon;
+
+                if (net != null && net.isLocalPlayer)
+                {
+                    icon = Instantiate(playerIconPrefab, iconParent); // 내 아이콘
+                }
+                else
+                {
+                    icon = Instantiate(playerIconPrefabGray, iconParent); // 다른 사람 아이콘
+                }
+
                 icon.gameObject.SetActive(true);
                 trackedIcons.Add(player.transform, icon);
             }
         }
-
         foreach (var enemy in GameObject.FindGameObjectsWithTag("Enemy"))
         {
             if (!trackedIcons.ContainsKey(enemy.transform))
