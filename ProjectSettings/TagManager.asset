@@ -8,6 +8,7 @@ TagManager:
   - Enemy
   - roon
   - PlayerSpawnPoint
+  - EnemySpawnPoint
   layers:
   - Default
   - TransparentFX
