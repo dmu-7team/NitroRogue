@@ -9,23 +9,26 @@ public class CustomNetworkManager : NetworkManager
     private static bool joinSent = false;
 
     [Header("클라이언트 프리팹 등록")]
-    [SerializeField] private GameObject playerPrefab_EF;
-    [SerializeField] private GameObject playerPrefab_RBM;
-    [SerializeField] private GameObject playerPrefab_RBM2;
+    [SerializeField] private GameObject playerPrefab_AR;
+    [SerializeField] private GameObject playerPrefab_DMR;
+    [SerializeField] private GameObject playerPrefab_SG;
+    [SerializeField] private GameObject playerPrefab_SMG;
+
 
     [Header("클라이언트 몬스터 프리팹 등록")]
     [SerializeField] private GameObject[] monsterPrefabs; // 인스펙터에서 할당
-
+    [SerializeField] private GameObject treasureChestPrefab;
     public override void OnStartClient()
     {
         base.OnStartClient();
         joinSent = false;
 
-        // 플레이어 프리팹 등록
-        if (playerPrefab_EF != null) NetworkClient.RegisterPrefab(playerPrefab_EF);
-        if (playerPrefab_RBM != null) NetworkClient.RegisterPrefab(playerPrefab_RBM);
-        if (playerPrefab_RBM2 != null) NetworkClient.RegisterPrefab(playerPrefab_RBM2);
-
+        // 플레이어 프리팹 등록 (신규 직업)
+        if (playerPrefab_AR != null) NetworkClient.RegisterPrefab(playerPrefab_AR);
+        if (playerPrefab_DMR != null) NetworkClient.RegisterPrefab(playerPrefab_DMR);
+        if (playerPrefab_SG != null) NetworkClient.RegisterPrefab(playerPrefab_SG);
+        if (playerPrefab_SMG != null) NetworkClient.RegisterPrefab(playerPrefab_SMG);
+        if (treasureChestPrefab != null)NetworkClient.RegisterPrefab(treasureChestPrefab);
         // 몬스터 프리팹 등록
         foreach (var monster in monsterPrefabs)
         {
@@ -40,6 +43,7 @@ public class CustomNetworkManager : NetworkManager
         NetworkClient.RegisterHandler<JoinResultMessage>(OnJoinResultMessageReceived);
         NetworkClient.RegisterHandler<RoomListSyncMessage>(msg => RoomListUI.Instance.OnRoomListSyncMessageReceived(msg));
     }
+
 
 
     public override void OnClientConnect()

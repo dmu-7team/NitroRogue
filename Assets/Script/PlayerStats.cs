@@ -14,17 +14,30 @@ public class PlayerStats : CharacterStats
     [SerializeField] private float currentExp = 0f;
     [SerializeField] private float expToLevelUp = 100f;
     [SerializeField] private int level = 1;
-    [SerializeField, SyncVar(hook = nameof(OnAttackDamageChanged))]
+
+    [SyncVar(hook = nameof(OnAttackDamageChanged))]
     private float syncedAttackDamage = 10f;
+
+    [SyncVar(hook = nameof(OnMoveSpeedChanged))]
+    private float syncedMoveSpeed = 5f;
+
+    [SyncVar] private int killCount = 0;
+
+    
+    public int KillCount
+    {
+        get => killCount;
+        set => killCount = value;
+    }
+
+    [SyncVar] private float totalDamage = 0f;
 
     [SerializeField] private Animator animator;
     private bool isDead = false;
+
     public float healthPerLevel = 10f;
     public float damagePerLevel = 5f;
     public float speedPerLevel = 0.5f;
-
-    [SyncVar(hook = nameof(OnMoveSpeedChanged))] private float syncedMoveSpeed = 5f;
-    
 
     private float originalSpeed;
     private float originalDamage;
@@ -32,6 +45,14 @@ public class PlayerStats : CharacterStats
     public float CurrentExp => currentExp;
     public float ExpToLevelUp => expToLevelUp;
     public int Level => level;
+
+
+
+    public float TotalDamage
+    {
+        get => totalDamage;
+        set => totalDamage = value;
+    }
 
     public override float MoveSpeed => syncedMoveSpeed;
     public override float AttackDamage => syncedAttackDamage;
@@ -168,7 +189,6 @@ public class PlayerStats : CharacterStats
         OnPowerChanged?.Invoke(syncedAttackDamage);
     }
 
-   
     protected override void Die()
     {
         if (isDead) return;
@@ -176,7 +196,6 @@ public class PlayerStats : CharacterStats
 
         Debug.Log("플레이어 사망 처리");
 
-        // 애니메이터 트리거
         if (animator == null)
             animator = GetComponent<Animator>();
 

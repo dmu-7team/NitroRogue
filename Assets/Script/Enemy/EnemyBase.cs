@@ -93,14 +93,11 @@ public class EnemyBase : CharacterStats
                 PlayAttackAnimation(attacks.IndexOf(attack));
                 RpcPlayAttackAnimation(attacks.IndexOf(attack));
 
-                // 오류 수정: cooldown은 attackObj에서 가져옴
                 StartCoroutine(ResetAttackStateAfterDelay(attack.attackObj.cooldown + 0.5f));
                 return;
             }
         }
     }
-
-
 
     [Server]
     private IEnumerator ResetAttackStateAfterDelay(float delay)
@@ -109,12 +106,12 @@ public class EnemyBase : CharacterStats
         isAttacking = false;
         behavior?.SetVariableValue("IsAttacking", false);
     }
+
     void PlayAttackAnimation(int index)
     {
         animator.SetInteger("attackIndex", index);
         animator.SetTrigger("doAttack");
     }
-
 
     [ClientRpc]
     void RpcPlayAttackAnimation(int index)
@@ -146,7 +143,6 @@ public class EnemyBase : CharacterStats
         RpcUpdateHealthBar(CurrentHealth, MaxHealth);
         RpcShowDamagePopup((int)amount);
 
-        // 딜량 누적
         if (attacker != null && attacker.TryGetComponent<PlayerStats>(out var player))
         {
             player.TotalDamage += amount;
@@ -198,7 +194,6 @@ public class EnemyBase : CharacterStats
         if (isDead) return;
         isDead = true;
 
-        // 킬 집계
         if (killer != null && killer.TryGetComponent<PlayerStats>(out var killerStats))
         {
             killerStats.KillCount++;
