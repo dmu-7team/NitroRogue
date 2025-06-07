@@ -59,8 +59,8 @@ public class WeaponSystemRBM : NetworkBehaviour
         stats = GetComponent<PlayerStats>();
         UpdateAmmoUI();
         defaultFOV = playerCamera.fieldOfView;
-        scopeOverlay?.SetActive(false);
-        crosshair?.SetActive(true);
+        UIManager.Instance.scopeOverlay?.SetActive(false);
+        UIManager.Instance.crosshair?.SetActive(true);
 
         // 무기별 조준 모드 고정
         if (weaponType == WeaponType.DMR)
@@ -284,8 +284,8 @@ public class WeaponSystemRBM : NetworkBehaviour
 
     void UpdateAmmoUI()
     {
-        if (ammoText != null)
-            ammoText.text = currentAmmo + " / " + maxAmmo;
+        if (UIManager.Instance.ammoText != null)
+            UIManager.Instance.ammoText.text = currentAmmo + " / " + maxAmmo;
     }
 
     public bool IsReloading() => isReloading;
@@ -300,8 +300,8 @@ public class WeaponSystemRBM : NetworkBehaviour
             cameraHolder.position = Vector3.Lerp(cameraHolder.position, target.position, Time.deltaTime * camTransitionSpeed);
             cameraHolder.rotation = Quaternion.Lerp(cameraHolder.rotation, target.rotation, Time.deltaTime * camTransitionSpeed);
 
-            crosshair?.SetActive(true);
-            scopeOverlay?.SetActive(false);
+            UIManager.Instance.crosshair?.SetActive(true);
+            UIManager.Instance.scopeOverlay?.SetActive(false);
             playerCamera.fieldOfView = defaultFOV;
             isScoped = false;
         }
@@ -317,8 +317,8 @@ public class WeaponSystemRBM : NetworkBehaviour
     IEnumerator OnScoped()
     {
         yield return new WaitForSeconds(0.1f);
-        scopeOverlay?.SetActive(true);
-        crosshair?.SetActive(false);
+        UIManager.Instance.scopeOverlay?.SetActive(true);
+        UIManager.Instance.crosshair?.SetActive(false);
         playerCamera.fieldOfView = scopedFOV;
         isScoped = true;
 
@@ -329,8 +329,8 @@ public class WeaponSystemRBM : NetworkBehaviour
     void OnUnscoped()
     {
         StopAllCoroutines();
-        scopeOverlay?.SetActive(false);
-        crosshair?.SetActive(true);
+        UIManager.Instance.scopeOverlay?.SetActive(false);
+        UIManager.Instance.crosshair?.SetActive(true);
         playerCamera.fieldOfView = defaultFOV;
         isScoped = false;
 

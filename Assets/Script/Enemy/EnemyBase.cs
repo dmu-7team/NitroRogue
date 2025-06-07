@@ -89,12 +89,19 @@ public class EnemyBase : CharacterStats
                 currentAttack = attack;
                 attack.Execute(gameObject, target);
                 isAttacking = true;
+                PlayAttackAnimation(attacks.IndexOf(attack));
                 RpcPlayAttackAnimation(attacks.IndexOf(attack));
                 return;
             }
         }
         isAttacking = false;
     }
+    void PlayAttackAnimation(int index)
+    {
+        animator.SetInteger("attackIndex", index);
+        animator.SetTrigger("doAttack");
+    }
+
 
     [ClientRpc]
     void RpcPlayAttackAnimation(int index)

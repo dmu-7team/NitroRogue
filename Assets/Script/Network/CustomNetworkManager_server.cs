@@ -262,7 +262,7 @@ public class CustomNetworkManager_Server : NetworkManager
             }
             else
             {
-                spawnPos.y = -5f; // <= 이 줄 추가
+                spawnPos.y = 0f; // <= 이 줄 추가
                 Debug.LogWarning($"[몬스터스폰] NavMesh 보정 실패, 기본 위치로 강제 소환: {spawnPos}");
             }
 
