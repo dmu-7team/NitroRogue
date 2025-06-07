@@ -14320,6 +14320,7 @@ GameObject:
   - component: {fileID: -7172708842487459555}
   - component: {fileID: -9055511703714939367}
   - component: {fileID: -83891048480771725}
+  - component: {fileID: 8732548697254270962}
   m_Layer: 0
   m_Name: IceBall Projectile
   m_TagString: Untagged
@@ -14486,6 +14487,24 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   MatchID: 
+--- !u!114 &8732548697254270962
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100006}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f06e5283acc9279469c84034747a31c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  casterNetId: 0
+  spawnPointName: 
+  followSpawner: 0
 --- !u!1 &100008
 GameObject:
   m_ObjectHideFlags: 0
