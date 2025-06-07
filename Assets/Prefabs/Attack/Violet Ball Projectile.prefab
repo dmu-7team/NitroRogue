@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: -9055062429863038740}
   - component: {fileID: 150878254171716066}
   - component: {fileID: -7043062112851810820}
+  - component: {fileID: 4610094309807157322}
+  - component: {fileID: 4089032983196767728}
   m_Layer: 0
   m_Name: Violet Ball Projectile
   m_TagString: Untagged
@@ -4988,7 +4990,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   tickInterval: 0
-  speed: 10
+  speed: 15
   isHoming: 0
   isStatic: 0
   autoDestroy: 1
@@ -5051,6 +5053,40 @@ MonoBehaviour:
   rotationSensitivity: 0.01
   positionPrecision: 0.01
   scalePrecision: 0.01
+--- !u!114 &4610094309807157322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 57600035236208194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d17e718851449a6879986e45c458fb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  MatchID: 
+--- !u!114 &4089032983196767728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 57600035236208194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f06e5283acc9279469c84034747a31c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  casterNetId: 0
+  spawnPointName: 
+  followSpawner: 0
 --- !u!1 &1966453740933846423
 GameObject:
   m_ObjectHideFlags: 0

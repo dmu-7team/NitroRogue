@@ -48,7 +48,7 @@ public class EnemyBase : CharacterStats
     [ServerCallback]
     private void Start()
     {
-        
+        // 서버에서 필요한 초기화는 OnStartServer에서 처리
     }
 
     public override void OnStartClient()
@@ -81,7 +81,8 @@ public class EnemyBase : CharacterStats
     [Server]
     public virtual void UseAllAttack(GameObject target)
     {
-        if (bodyRoot == null) return;
+        if (bodyRoot == null || isAttacking) return;
+
         foreach (var attack in attacks)
         {
             if (attack.IsReadyToExecute(bodyRoot, target))
@@ -89,16 +90,23 @@ public class EnemyBase : CharacterStats
                 currentAttack = attack;
                 attack.Execute(gameObject, target);
                 isAttacking = true;
+                PlayAttackAnimation(attacks.IndexOf(attack));
                 RpcPlayAttackAnimation(attacks.IndexOf(attack));
                 return;
             }
         }
-        isAttacking = false;
+    }
+
+    void PlayAttackAnimation(int index)
+    {
+        animator.SetInteger("attackIndex", index);
+        animator.SetTrigger("doAttack");
     }
 
     [ClientRpc]
     void RpcPlayAttackAnimation(int index)
     {
+        if (animator == null) return;
         animator.SetInteger("attackIndex", index);
         animator.SetTrigger("doAttack");
     }
@@ -106,6 +114,7 @@ public class EnemyBase : CharacterStats
     public void OnAttackAnimationEnd()
     {
         if (!isServer) return;
+
         isAttacking = false;
         behavior?.SetVariableValue("IsAttacking", false);
         currentAttack?.ForceCooldownStart();
@@ -124,9 +133,14 @@ public class EnemyBase : CharacterStats
         RpcUpdateHealthBar(CurrentHealth, MaxHealth);
         RpcShowDamagePopup((int)amount);
 
+        if (attacker != null && attacker.TryGetComponent<PlayerStats>(out var player))
+        {
+            player.TotalDamage += amount;
+        }
+
         if (CurrentHealth <= 0)
         {
-            Die();
+            Die(attacker);
         }
     }
 
@@ -161,8 +175,19 @@ public class EnemyBase : CharacterStats
     [Server]
     protected override void Die()
     {
+        Die(null);
+    }
+
+    [Server]
+    public void Die(GameObject killer)
+    {
         if (isDead) return;
         isDead = true;
+
+        if (killer != null && killer.TryGetComponent<PlayerStats>(out var killerStats))
+        {
+            killerStats.KillCount++;
+        }
 
         behavior?.SetVariableValue("IsDead", true);
         RpcPlayDeathAnimation();
@@ -194,11 +219,12 @@ public class EnemyBase : CharacterStats
         }
 
         GameObject box = Instantiate(boxPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
+        var match = GetComponent<NetworkMatch>().matchId;
+        box.GetComponent<NetworkMatch>().matchId = match;
         NetworkServer.Spawn(box);
         Debug.Log("[EnemyBase] 박스 드랍 완료");
     }
 
-    // Optional: Debug Range Gizmo
     void OnDrawGizmosSelected()
     {
         if (bodyRoot == null || attackObjs == null) return;

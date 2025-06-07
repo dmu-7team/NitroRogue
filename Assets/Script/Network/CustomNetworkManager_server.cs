@@ -14,12 +14,14 @@ public class CustomNetworkManager_Server : NetworkManager
     public GameObject[] characterPrefabs;
     public GameObject roomPlayerPrefab;
     public Dictionary<string, List<RoomPlayer>> matchRooms = new();
-    private Dictionary<int, string> characterPrefabMap = new()
+   private Dictionary<int, string> characterPrefabMap = new()
     {
-        { 0, "Player_ver_EF" },
-        { 1, "Player_ver_RBM" },
-        { 2, "Player_ver_RBM2" }
+        { 0, "Player_ver_AR" },
+        { 1, "Player_ver_DMR" },
+        { 2, "Player_ver_SG" },
+        { 3, "Player_ver_SMG" }
     };
+
     private Transform[] spawnPoints;
     private Transform[] enemySpawnPoints;
 
@@ -124,60 +126,65 @@ public class CustomNetworkManager_Server : NetworkManager
     {
         Debug.Log($"[서버] StartGame() 호출됨 - matchId: {matchId}");
 
-        if (!matchRooms.TryGetValue(matchId, out var players))
+        if (!matchRooms.TryGetValue(matchId, out var players) || players.Count == 0)
         {
-            Debug.LogError($"[서버] 매치 ID({matchId})에 해당하는 방이 존재하지 않습니다.");
+            Debug.LogError($"[서버] 매치 ID({matchId})에 해당하는 방이 없거나 비어 있음");
             return;
         }
 
-        Debug.Log($"[서버] 총 플레이어 수: {players.Count}");
+        if (!Guid.TryParse(matchId, out var parsedMatchId))
+        {
+            Debug.LogError($"[서버] matchId 파싱 실패: {matchId}");
+            return;
+        }
 
         foreach (var roomPlayer in players)
         {
             var conn = roomPlayer.connectionToClient;
             int index = roomPlayer.selectedCharacter;
 
-            Debug.Log($"[서버] 플레이어 처리 중: {roomPlayer.playerName}, 선택된 캐릭터 인덱스: {index}");
-
-            if (!characterPrefabMap.TryGetValue(index, out var prefabName))
+            if (index < 0 || index >= characterPrefabs.Length)
             {
-                Debug.LogError($"[서버] 선택된 캐릭터 인덱스({index})에 해당하는 프리팹 이름이 없습니다.");
+                Debug.LogError($"[서버] 잘못된 캐릭터 인덱스: {index}");
                 continue;
             }
 
-            var prefab = spawnPrefabs.FirstOrDefault(p => p != null && p.name == prefabName);
+            GameObject prefab = characterPrefabs[index];
             if (prefab == null)
             {
-                Debug.LogError($"[서버] '{prefabName}' 이름의 캐릭터 프리팹이 spawnPrefabs에 등록되지 않았습니다.");
+                Debug.LogError($"[서버] characterPrefabs[{index}]가 null임");
                 continue;
             }
 
+            // 생성 위치
             Vector3 spawnPos = GetSpawnPosition(index);
-            GameObject playerObj = Instantiate(prefab, spawnPos, Quaternion.identity);
-            Debug.Log($"[서버] 플레이어 오브젝트 인스턴스 생성됨: {playerObj.name}");
 
-            var matchComponent = playerObj.GetComponent<NetworkMatch>();
-            if (matchComponent != null && Guid.TryParse(matchId, out Guid guid))
+            // 캐릭터 인스턴스 생성
+            GameObject playerObj = Instantiate(prefab, spawnPos, Quaternion.identity);
+            Debug.Log($"[서버] 캐릭터 인스턴스 생성됨: {playerObj.name}");
+
+            // matchId 설정
+            if (playerObj.TryGetComponent(out NetworkMatch matchComp))
             {
-                matchComponent.matchId = guid;
-                Debug.Log($"[서버] MatchId({guid})가 플레이어 오브젝트에 설정되었습니다.");
+                matchComp.matchId = parsedMatchId;
             }
 
+            // 미리 게임 시작 알림
+            roomPlayer.TargetStartGame(conn, index, matchId);
+            Debug.Log($"[서버] TargetStartGame 호출 완료");
+
+            // 기존 RoomPlayer 제거 → ReplacePlayer 순서 중요!
             NetworkServer.Destroy(roomPlayer.gameObject);
+
+            // 교체 및 스폰
             NetworkServer.ReplacePlayerForConnection(conn, playerObj, new ReplacePlayerOptions());
             NetworkServer.Spawn(playerObj);
-            Debug.Log($"[서버] 플레이어 NetworkServer.Spawn 완료: {playerObj.name}");
-
-            var newRoomPlayer = playerObj.GetComponent<RoomPlayer>();
-            if (newRoomPlayer != null)
-            {
-                newRoomPlayer.TargetStartGame(conn, index, matchId);
-                Debug.Log($"[서버] TargetStartGame 호출 완료");
-            }
+            Debug.Log($"[서버] ReplacePlayer + Spawn 완료: {playerObj.name}");
         }
 
+        // 몬스터 생성 지연
+        StartCoroutine(SpawnEnemiesAfterDelay(matchId, 1f));
         Debug.Log("[서버] 모든 플레이어 처리 완료 → 몬스터 스폰 대기 중...");
-        StartCoroutine(SpawnEnemiesAfterDelay(matchId, 1f)); // 🔥 1초 후 몬스터 스폰
     }
 
     private IEnumerator SpawnEnemiesAfterDelay(string matchId, float delay)
@@ -262,7 +269,7 @@ public class CustomNetworkManager_Server : NetworkManager
             }
             else
             {
-                spawnPos.y = -5f; // <= 이 줄 추가
+                spawnPos.y = 0f; // <= 이 줄 추가
                 Debug.LogWarning($"[몬스터스폰] NavMesh 보정 실패, 기본 위치로 강제 소환: {spawnPos}");
             }
 

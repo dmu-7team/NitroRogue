@@ -8,10 +8,22 @@ public class MonsterSpawner : NetworkBehaviour
 {
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private float spawnInterval = 10f;
-    [SerializeField] private Transform[] spawnPoints;
-    [HideInInspector] public string matchId;
+
+    [SerializeField] private MonsterSpawnPointData spawnData;
+    private Vector3[] spawnPositions;
+
     public override void OnStartServer()
     {
+        base.OnStartServer();
+        if (spawnData == null || spawnData.points == null || spawnData.points.Length == 0)
+        {
+            Debug.LogWarning("[MonsterSpawner] SpawnPointData가 설정되지 않았거나 비어있습니다.");
+            return;
+        }
+        // SO에서 가져온 좌표 배열 복사
+        spawnPositions = spawnData.points;
+
+        // 스폰 루프 시작
         StartCoroutine(SpawnLoop());
     }
 
@@ -27,30 +39,25 @@ public class MonsterSpawner : NetworkBehaviour
     [Server]
     private void SpawnEnemy()
     {
-        if (enemyPrefab == null || spawnPoints.Length == 0)
+        if (enemyPrefab == null || spawnPositions == null || spawnPositions.Length == 0)
         {
-            Debug.LogWarning("[MonsterSpawner] enemyPrefab 또는 spawnPoints가 설정되지 않음");
+            Debug.LogWarning("[MonsterSpawner] enemyPrefab 또는 spawnPositions가 설정되지 않음");
             return;
         }
 
-        Transform point = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)];
+        Vector3 rawPos = spawnPositions[UnityEngine.Random.Range(0, spawnPositions.Length)];
 
-        if (NavMesh.SamplePosition(point.position, out NavMeshHit hit, 5f, NavMesh.AllAreas))
+        // NavMesh 위로 보정
+        if (NavMesh.SamplePosition(rawPos, out NavMeshHit hit, 5f, NavMesh.AllAreas))
         {
             GameObject enemy = Instantiate(enemyPrefab, hit.position, Quaternion.identity);
 
-            // matchId 설정
-            if (enemy.TryGetComponent(out NetworkMatch match))
-            {
-                match.matchId = Guid.Parse(matchId); // string → Guid
-            }
-            else
-            {
-                Debug.LogWarning("[MonsterSpawner] NetworkMatch가 enemy에 없음");
-            }
+            var enemyMatch = enemy.GetComponent<NetworkMatch>();
+            var spawnerMatch = GetComponent<NetworkMatch>();
+            enemyMatch.matchId = spawnerMatch.matchId;
 
             NetworkServer.Spawn(enemy);
-            Debug.Log($"[MonsterSpawner] 몬스터 스폰 완료: {enemy.name}");
+            Debug.Log($"[MonsterSpawner] 몬스터 스폰: {enemy.name} at {hit.position}");
         }
         else
         {
