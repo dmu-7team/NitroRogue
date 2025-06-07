@@ -149,22 +149,38 @@ public class RoomPlayer : NetworkBehaviour
 
         players.First(p => p.isLeader).CmdStartGame();
     }
-
     [Command]
     public void CmdStartGame()
     {
-        if (!isLeader) return;
+        Debug.Log($"[서버] CmdStartGame 호출됨 by {playerName} (리더: {isLeader})");
+
+        if (!isLeader)
+        {
+            Debug.LogWarning("[서버] 리더가 아니라 실행 중단");
+            return;
+        }
 
         var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
         foreach (var p in players)
         {
-            if (p.selectedCharacter < 0) return;
+            Debug.Log($"[서버] {p.playerName} 선택 캐릭터 인덱스: {p.selectedCharacter}");
+
+            if (p.selectedCharacter < 0)
+            {
+                Debug.LogWarning($"[서버] {p.playerName} 캐릭터 미선택 → 게임 시작 중단");
+                return;
+            }
         }
 
         var netManager = NetworkManager.singleton as CustomNetworkManager_Server;
         if (netManager != null && netManager.matchRooms.ContainsKey(matchId))
         {
+            Debug.Log($"[서버] StartGame() 호출 with matchId: {matchId}");
             netManager.StartGame(matchId);
+        }
+        else
+        {
+            Debug.LogError("[서버] StartGame 실패: matchId 불일치");
         }
     }
 
@@ -181,11 +197,13 @@ public class RoomPlayer : NetworkBehaviour
     {
         string prefabName = characterIndex switch
         {
-            0 => "Player_ver_EF",
-            1 => "Player_ver_RBM",
-            2 => "Player_ver_RBM2",
+            0 => "Player_ver_AR",
+            1 => "Player_ver_DMR",
+            2 => "Player_ver_SG",
+            3 => "Player_ver_SMG",
             _ => null
         };
+
 
         if (prefabName == null)
         {
@@ -225,11 +243,13 @@ public class RoomPlayer : NetworkBehaviour
         int characterIndex = localPlayer.selectedCharacter;
         string prefabName = characterIndex switch
         {
-            0 => "Player_ver_EF",
-            1 => "Player_ver_RBM",
-            2 => "Player_ver_RBM2",
+            0 => "Player_ver_AR",
+            1 => "Player_ver_DMR",
+            2 => "Player_ver_SG",
+            3 => "Player_ver_SMG",
             _ => null
         };
+
 
         GameObject prefab = Resources.Load<GameObject>(prefabName);
         if (prefab == null) return;
@@ -258,11 +278,13 @@ public class RoomPlayer : NetworkBehaviour
     {
         string prefabName = index switch
         {
-            0 => "Player_ver_EF",
-            1 => "Player_ver_RBM",
-            2 => "Player_ver_RBM2",
+            0 => "Player_ver_AR",
+            1 => "Player_ver_DMR",
+            2 => "Player_ver_SG",
+            3 => "Player_ver_SMG",
             _ => null
         };
+
 
         var prefab = NetworkManager.singleton.spawnPrefabs
             .FirstOrDefault(go => go.name == prefabName);
