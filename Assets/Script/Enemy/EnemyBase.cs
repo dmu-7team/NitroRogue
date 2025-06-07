@@ -92,19 +92,9 @@ public class EnemyBase : CharacterStats
                 isAttacking = true;
                 PlayAttackAnimation(attacks.IndexOf(attack));
                 RpcPlayAttackAnimation(attacks.IndexOf(attack));
-
-                StartCoroutine(ResetAttackStateAfterDelay(attack.attackObj.cooldown + 0.5f));
                 return;
             }
         }
-    }
-
-    [Server]
-    private IEnumerator ResetAttackStateAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        isAttacking = false;
-        behavior?.SetVariableValue("IsAttacking", false);
     }
 
     void PlayAttackAnimation(int index)
@@ -229,6 +219,8 @@ public class EnemyBase : CharacterStats
         }
 
         GameObject box = Instantiate(boxPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
+        var match = GetComponent<NetworkMatch>().matchId;
+        box.GetComponent<NetworkMatch>().matchId = match;
         NetworkServer.Spawn(box);
         Debug.Log("[EnemyBase] 박스 드랍 완료");
     }
