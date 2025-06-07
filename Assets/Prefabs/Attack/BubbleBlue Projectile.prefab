@@ -10047,6 +10047,7 @@ GameObject:
   - component: {fileID: -9111306800310722157}
   - component: {fileID: -3316888680758349696}
   - component: {fileID: 7730943806708382470}
+  - component: {fileID: 8680467042330050344}
   m_Layer: 0
   m_Name: BubbleBlue Projectile
   m_TagString: Untagged
@@ -15111,6 +15112,24 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   MatchID: 
+--- !u!114 &8680467042330050344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7578368588734243847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f06e5283acc9279469c84034747a31c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  casterNetId: 0
+  spawnPointName: 
+  followSpawner: 0
 --- !u!1 &7578629510264252244
 GameObject:
   m_ObjectHideFlags: 0
