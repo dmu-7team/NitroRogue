@@ -6,6 +6,7 @@ using TMPro;
 using System.Collections.Generic;
 using Mirror;
 using System.Collections;
+using Unity.AppUI.UI;
 
 public class EnemyBase : CharacterStats
 {
@@ -28,6 +29,7 @@ public class EnemyBase : CharacterStats
     public bool isAttacking = false;
 
     [Header("체력바 UI")]
+    public Transform healthBarCanvas;
     public Image healthBarImage;
 
     [Header("드랍 박스")]
@@ -36,7 +38,7 @@ public class EnemyBase : CharacterStats
     [Header("데미지 팝업")]
     public GameObject damagePopupPrefab;
     public Transform popupSpawnPoint;
-    public Camera worldCamera;
+    private Camera worldCamera;
 
     private bool isDead = false;
 
@@ -124,6 +126,15 @@ public class EnemyBase : CharacterStats
     {
         if (!isServer || currentAttack == null) return;
         currentAttack.OnAnimationEvent(eventName);
+    }
+    private void LateUpdate()
+    {
+        if (healthBarCanvas != null && worldCamera != null)
+        {
+            // 카메라를 향해 정면으로 회전
+            healthBarCanvas.LookAt(worldCamera.transform);
+            healthBarCanvas.Rotate(0, 180f, 0); // UI가 뒤집히지 않도록 보정
+        }
     }
 
     [Server]
