@@ -3,16 +3,16 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using Mirror;
 using System.Linq;
-using NitroGame; // ← 네임스페이스 추가
+using NitroGame;
 
 public class Inventory : NetworkBehaviour
 {
+    public GameObject inventoryCanvasRoot;
     public Image[] slots;
     private ItemData[] items;
 
     private PlayerStats playerStatus;
     private PlayerInputActions inputActions;
-
     private GameObject boxInRange;
 
     private void Awake()
@@ -24,24 +24,21 @@ public class Inventory : NetworkBehaviour
 
     private void Start()
     {
-        if (!isLocalPlayer) return;
-
-        // 내 하위에 붙은 Canvas 자동 찾기
-        var canvas = GetComponentInChildren<Canvas>(true); // true = 비활성화 포함
-        if (canvas != null)
+        if (!isLocalPlayer)
         {
-            slots = canvas.GetComponentsInChildren<Image>()
-                .Where(img => img.name.StartsWith("Slot"))
-                .OrderBy(img => img.name)
-                .ToArray();
-
-            Debug.Log($"[Inventory] 슬롯 자동 연결됨: {slots.Length}개");
-        }
-        else
-        {
-            Debug.LogWarning("[Inventory] 내 하위에 Canvas 못 찾음");
+            if (inventoryCanvasRoot != null)
+                inventoryCanvasRoot.SetActive(false);
+            return;
         }
 
+        if (inventoryCanvasRoot != null)
+            inventoryCanvasRoot.SetActive(true);
+
+        // 슬롯 연결
+        slots = inventoryCanvasRoot.GetComponentsInChildren<Image>()
+            .Where(img => img.name.StartsWith("Slot"))
+            .OrderBy(img => img.name)
+            .ToArray();
 
         items = new ItemData[slots.Length];
 
@@ -51,7 +48,7 @@ public class Inventory : NetworkBehaviour
         inputActions.Player.UseSlot1.performed += ctx => UseItem(0);
         inputActions.Player.UseSlot2.performed += ctx => UseItem(1);
         inputActions.Player.UseSlot3.performed += ctx => UseItem(2);
-        inputActions.Player.Interact.performed += ctx => TryPickupBox(); // E 키
+        inputActions.Player.Interact.performed += ctx => TryPickupBox();
     }
 
     private void TryPickupBox()
@@ -70,7 +67,7 @@ public class Inventory : NetworkBehaviour
     {
         if (boxNetId == null) return;
 
-        NitroGame.Box box = boxNetId.GetComponent<NitroGame.Box>(); // 명확한 타입 지정
+        NitroGame.Box box = boxNetId.GetComponent<NitroGame.Box>();
         if (box == null) return;
 
         box.GiveItemToPlayer(gameObject);
@@ -92,7 +89,6 @@ public class Inventory : NetworkBehaviour
                 }
 
                 UIManager.Instance?.ShowItemEffectMessage($"{itemData.name} 획득!");
-                Debug.Log($"[Inventory] 아이템 {itemData.name} 슬롯 {i}번에 추가됨");
                 return true;
             }
         }
@@ -105,25 +101,16 @@ public class Inventory : NetworkBehaviour
     {
         if (items == null || slots == null) return;
 
-        if (index < 0 || index >= items.Length)
-        {
-            Debug.LogWarning($"[Inventory] 인덱스 {index}가 범위를 벗어났습니다.");
-            return;
-        }
-
+        if (index < 0 || index >= items.Length) return;
         if (items[index] == null)
         {
-            Debug.Log("[Inventory] 슬롯이 비어있습니다.");
             UIManager.Instance?.ShowItemEffectMessage("해당 슬롯에 아이템이 없습니다!");
             return;
         }
 
-        if (playerStatus == null) return;
-
-        var item = items[index];
-        playerStatus.ApplyItemEffect(item.itemType, item.effectAmount, item.effectDuration);
-
+        playerStatus?.ApplyItemEffect(items[index].itemType, items[index].effectAmount, items[index].effectDuration);
         items[index] = null;
+
         if (slots[index] != null)
         {
             slots[index].sprite = null;
@@ -133,7 +120,7 @@ public class Inventory : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("TreasureChest")) // 너가 말한 태그 기준
+        if (other.CompareTag("TreasureChest"))
             boxInRange = other.gameObject;
     }
 

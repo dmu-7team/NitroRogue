@@ -3,6 +3,7 @@ using TMPro;
 using Mirror;
 using NetworkMessages;
 using UnityEngine.UI; // ← 버튼 포함한 UI 컴포넌트용
+using System.Linq;
 
 public class RoomUIManager : MonoBehaviour
 {
@@ -144,9 +145,7 @@ public class RoomUIManager : MonoBehaviour
         if (mainMenuCanvas != null)
             mainMenuCanvas.SetActive(false);  // ← Canvas 루트 전체 꺼버림
 
-        // 게임 내 HUD는 따로 켜기
-        if (UIManager.Instance != null)
-            UIManager.Instance.ShowInGameHUD();
+
 
         Debug.Log("[RoomUIManager] 모든 UI 정리 완료, 게임 HUD만 활성화됨");
     }
@@ -234,7 +233,7 @@ public class RoomUIManager : MonoBehaviour
         }
     }
 
-    public void UpdateCharacterButtonStates()
+    public void UpdateCharacterButtonStates(int[] selectedCharacters, string[] playerNames)
     {
         for (int i = 0; i < characterButtons.Length; i++)
         {
@@ -243,14 +242,13 @@ public class RoomUIManager : MonoBehaviour
 
             bool isTaken = false;
 
-            foreach (var p in FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None))
+            for (int j = 0; j < selectedCharacters.Length; j++)
             {
-                if (p.selectedCharacter == i)
+                if (selectedCharacters[j] == i)
                 {
+                    txt.text = $"{playerNames[j]} 선택됨";
+                    btn.interactable = false;
                     isTaken = true;
-                    txt.text = $"{p.playerName} 선택됨";
-                    btn.interactable = !isTaken || p.isLocalPlayer;
-                    // 본인이면 다시 선택 가능
                     break;
                 }
             }
@@ -262,6 +260,8 @@ public class RoomUIManager : MonoBehaviour
             }
         }
     }
+
+
     public void OnCharacterButtonClicked(int index)
     {
         var player = NetworkClient.connection.identity.GetComponent<RoomPlayer>();
@@ -277,8 +277,21 @@ public class RoomUIManager : MonoBehaviour
         }
 
         player.CmdSelectCharacter(index);
-        UpdateCharacterButtonStates();
+
+        // 선택 상태 수동 갱신 (로컬에서도 미리 적용)
+        var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
+        int[] selectedCharacters = new int[players.Length];
+        string[] playerNames = new string[players.Length];
+
+        for (int i = 0; i < players.Length; i++)
+        {
+            selectedCharacters[i] = players[i].selectedCharacter;
+            playerNames[i] = players[i].playerName;
+        }
+
+        UpdateCharacterButtonStates(selectedCharacters, playerNames);
     }
+
     public void HideRoomUI()
     {
         roomPanel?.SetActive(false);     // RoomUI: 방 이름/리스트 패널
