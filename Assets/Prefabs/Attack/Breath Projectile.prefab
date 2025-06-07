@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: -8445648592035255270}
   - component: {fileID: 5841918678957087920}
   - component: {fileID: 8717977716720490561}
+  - component: {fileID: 2814606826079147303}
   m_Layer: 0
   m_Name: Breath Projectile
   m_TagString: Untagged
@@ -4965,6 +4966,22 @@ MonoBehaviour:
   rotationSensitivity: 0.01
   positionPrecision: 0.01
   scalePrecision: 0.01
+--- !u!114 &2814606826079147303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2615926316999149427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d17e718851449a6879986e45c458fb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  MatchID: 
 --- !u!1 &2635124948662872169
 GameObject:
   m_ObjectHideFlags: 0

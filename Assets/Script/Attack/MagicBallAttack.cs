@@ -68,19 +68,34 @@ public class MagicBallAttack : AttackBase
 
         Quaternion spawnRot = Quaternion.LookRotation(cachedDirection);
 
-        GameObject obj = GameObject.Instantiate(attackEntity, spawnPos, spawnRot);
-        NetworkServer.Spawn(obj);
+        GameObject attackEntityObj = GameObject.Instantiate(attackEntity, spawnPos, spawnRot);
+        var casterMatch = cachedCaster.GetComponent<NetworkMatch>();
+        var projMatch = attackEntityObj.GetComponent<NetworkMatch>();
+        if (casterMatch != null && projMatch != null)
+        {
+            projMatch.matchId = casterMatch.matchId;
+        }
+        else if (projMatch == null)
+        {
+            Debug.LogWarning($"[{attackEntityObj.name}]에 NetworkMatch 컴포넌트가 없습니다.");
+        }
+        else
+        {
+            Debug.LogWarning($"[{cachedCaster.name}]에 NetworkMatch 컴포넌트가 없습니다.");
+        }
+
+        NetworkServer.Spawn(attackEntityObj);
 
         if (MagicBallObj.followSpawner && spawnPoint != null)
         {
-            NetworkIdentity identity = obj.GetComponent<NetworkIdentity>();
-            uint netId = identity.netId;
-            cachedCaster.GetComponent<AttackManager>().RpcSetParent(netId, MagicBallObj.spawnPoint);
+            NetworkIdentity attackEntityIdentity = attackEntityObj.GetComponent<NetworkIdentity>();
+            uint attackEntityNetId = attackEntityIdentity.netId;
+            cachedCaster.GetComponent<AttackManager>().RpcSetParent(attackEntityNetId, MagicBallObj.spawnPoint);
         }
 
-        if (obj.TryGetComponent(out UniversalHitbox ub))
+        if (attackEntityObj.TryGetComponent(out UniversalHitbox ub))
             ub.Initialize(attackObj.damage, MagicBallObj.duration, cachedCaster);
         else
-            Debug.LogWarning($"[{obj.name}]에 Hitbox가 없습니다.");
+            Debug.LogWarning($"[{attackEntityObj.name}]에 Hitbox가 없습니다.");
     }
 }
