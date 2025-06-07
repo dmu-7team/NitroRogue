@@ -63,24 +63,56 @@ public class MagicBallAttack : AttackBase
     {
         if (cachedCaster == null || attackEntity == null) return;
 
-        Vector3 spawnPos = (spawnPoint != null) ? spawnPoint.position :
-            cachedCaster.transform.position + Vector3.up * 1.2f + cachedDirection * 1f;
-
-        Quaternion spawnRot = Quaternion.LookRotation(cachedDirection);
-
-        GameObject obj = GameObject.Instantiate(attackEntity, spawnPos, spawnRot);
-        NetworkServer.Spawn(obj);
+        GameObject projObj;
 
         if (MagicBallObj.followSpawner && spawnPoint != null)
         {
-            NetworkIdentity identity = obj.GetComponent<NetworkIdentity>();
-            uint netId = identity.netId;
-            cachedCaster.GetComponent<AttackManager>().RpcSetParent(netId, MagicBallObj.spawnPoint);
+            // position/rotation 모두 spawnPoint 그대로 가져옴
+            projObj = GameObject.Instantiate(
+                attackEntity,
+                spawnPoint.position,
+                spawnPoint.rotation
+            );
+        }
+        else
+        {
+            Vector3 spawnPos = (spawnPoint != null)
+                ? spawnPoint.position
+                : cachedCaster.transform.position + Vector3.up * 1.2f + cachedDirection;
+            Quaternion spawnRot = Quaternion.LookRotation(cachedDirection);
+
+            projObj = GameObject.Instantiate(
+                attackEntity,
+                spawnPos,
+                spawnRot
+            );
         }
 
-        if (obj.TryGetComponent(out UniversalHitbox ub))
+        var casterMatch = cachedCaster.GetComponent<NetworkMatch>();
+        var projMatch = projObj.GetComponent<NetworkMatch>();
+        if (casterMatch != null && projMatch != null)
+        {
+            projMatch.matchId = casterMatch.matchId;
+        }
+        else if (projMatch == null)
+        {
+            Debug.LogWarning($"[{projObj.name}]에 NetworkMatch 컴포넌트가 없습니다.");
+        }
+        else
+        {
+            Debug.LogWarning($"[{cachedCaster.name}]에 NetworkMatch 컴포넌트가 없습니다.");
+        }
+
+        var projScript = projObj.GetComponent<Projectile>();
+        projScript.casterNetId = cachedCaster.GetComponent<NetworkIdentity>().netId;
+        projScript.spawnPointName = MagicBallObj.spawnPoint;
+        projScript.followSpawner = MagicBallObj.followSpawner;
+
+        NetworkServer.Spawn(projObj);
+
+        if (projObj.TryGetComponent(out UniversalHitbox ub))
             ub.Initialize(attackObj.damage, MagicBallObj.duration, cachedCaster);
         else
-            Debug.LogWarning($"[{obj.name}]에 Hitbox가 없습니다.");
+            Debug.LogWarning($"[{projObj.name}]에 Hitbox가 없습니다.");
     }
 }

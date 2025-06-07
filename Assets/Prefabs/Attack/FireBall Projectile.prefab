@@ -4769,6 +4769,8 @@ GameObject:
   - component: {fileID: 6902383480630238597}
   - component: {fileID: -6100403933496984188}
   - component: {fileID: -986689493180213512}
+  - component: {fileID: 1426208044203375201}
+  - component: {fileID: -6433374650584811976}
   m_Layer: 0
   m_Name: FireBall Projectile
   m_TagString: Untagged
@@ -4919,6 +4921,40 @@ MonoBehaviour:
   rotationSensitivity: 0.01
   positionPrecision: 0.01
   scalePrecision: 0.01
+--- !u!114 &1426208044203375201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4309751744975563182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d17e718851449a6879986e45c458fb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  MatchID: 
+--- !u!114 &-6433374650584811976
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4309751744975563182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f06e5283acc9279469c84034747a31c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  casterNetId: 0
+  spawnPointName: 
+  followSpawner: 0
 --- !u!1 &4700974784358323638
 GameObject:
   m_ObjectHideFlags: 0

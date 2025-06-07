@@ -31,7 +31,7 @@ namespace NitroGame
 
         private void Update()
         {
-            if (isOpened) return;
+            if (!isLocalPlayer || isOpened) return;
 
             if (playerInRange && currentPlayer != null && Input.GetKeyDown(KeyCode.E))
             {

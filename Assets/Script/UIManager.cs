@@ -9,7 +9,9 @@ public class UIManager : MonoBehaviour
 
     [Header("게임 HUD 루트")]
     [SerializeField] private GameObject hudPanel;  // 전체 HUD 오브젝트
-
+    [SerializeField] public GameObject crosshair;  // HUD 크로스헤어
+    [SerializeField] public Text ammoText;  // HUD 총알개수
+    [SerializeField] public GameObject scopeOverlay;  // HUD 스코프
 
     [Header("메시지")]
     public TextMeshProUGUI msgText;
