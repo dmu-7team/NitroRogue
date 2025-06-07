@@ -86,7 +86,6 @@ public class PlayerStats : CharacterStats
     public void RpcUpdate(float current, float max)
     {
         if (!isLocalPlayer) return;
-        Debug.Log("이거됨?");
         OnHealthChanged?.Invoke(current, max);
     }
 
