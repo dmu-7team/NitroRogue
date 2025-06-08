@@ -6,6 +6,7 @@ public abstract class AttackObjectBase : ScriptableObject
     public string attackName;
     [TextArea] public string attackDescription;
     public Sprite icon;
+    public AudioClip attackSfx;
 
     [Header("전투 데이터")]
     public float cooldown;

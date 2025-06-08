@@ -34,12 +34,19 @@ public class WeaponSystemRBM : NetworkBehaviour
 
     [Header("Effects")]
     [SerializeField] private ParticleSystem muzzleFlash;
+
+    [Header("Gun Sound")]
     [SerializeField] private AudioSource audioSource;
 
     [SerializeField] private AudioClip smgSound;
     [SerializeField] private AudioClip arSound;
     [SerializeField] private AudioClip dmrSound;
     [SerializeField] private AudioClip shotgunSound;
+
+    [SerializeField] private AudioClip smgReloadSound;
+    [SerializeField] private AudioClip arReloadSound;
+    [SerializeField] private AudioClip dmrReloadSound;
+    [SerializeField] private AudioClip shotgunReloadSound;
 
     [Header("Trail Effect")]
     [SerializeField] public GameObject bulletTrailPrefab;
@@ -261,6 +268,16 @@ public class WeaponSystemRBM : NetworkBehaviour
             case WeaponType.SG: audioSource.PlayOneShot(shotgunSound); break;
         }
     }
+    void PlayReloadSound()
+    {
+        switch (weaponType)
+        {
+            case WeaponType.SMG: audioSource.PlayOneShot(smgReloadSound); break;
+            case WeaponType.AR: audioSource.PlayOneShot(arReloadSound); break;
+            case WeaponType.DMR: audioSource.PlayOneShot(dmrReloadSound); break;
+            case WeaponType.SG: audioSource.PlayOneShot(shotgunReloadSound); break;
+        }
+    }
 
     public void HandleReload()
     {
@@ -268,6 +285,7 @@ public class WeaponSystemRBM : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.R) && currentAmmo < maxAmmo && !isReloading)
         {
+            PlayReloadSound();
             animator.SetTrigger("Reload");
             StartCoroutine(ReloadAfterDelay(2.667f));
         }
