@@ -24172,25 +24172,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8142b95cfc27fd49a04b1996bead5c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hudPanel: {fileID: 0}
+  crosshair: {fileID: 0}
+  ammoText: {fileID: 0}
+  scopeOverlay: {fileID: 0}
   msgText: {fileID: 8049372945137238099}
   chestMessageText: {fileID: 8049372945137238099}
   levelUpMessageText: {fileID: 8049372945137238099}
   itemEffectText: {fileID: 8049372945137238099}
-  resultMessageText: {fileID: 0}
-  spectatorText: {fileID: 0}
   healthText: {fileID: 380027627098598321}
   expText: {fileID: 7525609106634214897}
   levelText: {fileID: 3813404203480992296}
   coinText: {fileID: 7312719408121476601}
   powerText: {fileID: 4076023210721861550}
   speedText: {fileID: 9077815906591197397}
-  ammoText: {fileID: 0}
   healthBarImage: {fileID: 7743132335807236316}
   expBarImage: {fileID: 2207851827207717048}
-  killCountText: {fileID: 0}
-  damageDealtText: {fileID: 0}
-  resultPanel: {fileID: 0}
-  closeButton: {fileID: 0}
 --- !u!1 &7448876184272277515
 GameObject:
   m_ObjectHideFlags: 0
@@ -29971,6 +29968,7 @@ GameObject:
   - component: {fileID: 2247020808676157813}
   - component: {fileID: 6651948140247298589}
   - component: {fileID: -3098085745710964154}
+  - component: {fileID: -1917911005857317957}
   m_Layer: 0
   m_Name: Player_ver_RBM
   m_TagString: Player
@@ -30078,7 +30076,7 @@ CapsuleCollider:
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &6134863215752611448
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30102,6 +30100,11 @@ MonoBehaviour:
   cameraHolder: {fileID: 5197195993801820986}
   mouseSensitivity: 100
   animator: {fileID: 1866105014591861558}
+  footstepClips:
+  - {fileID: 8300000, guid: 203ac8b6f07070e4f93f1c1a6fff06c3, type: 3}
+  - {fileID: 8300000, guid: 1deb201b8bf8f89479323a74e421150b, type: 3}
+  walkFootstepInterval: 0.65
+  runFootstepInterval: 0.37
 --- !u!114 &5430551378866477751
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30119,9 +30122,6 @@ MonoBehaviour:
   syncInterval: 0
   weaponType: 4
   muzzle: {fileID: 5315169888042317356}
-  bulletPrefab: {fileID: 7841963988429107884, guid: a0d4757442a469c43a553966959f328d, type: 3}
-  bulletForce: 100
-  weaponDamage: 5
   currentAmmo: 30
   maxAmmo: 30
   ammoText: {fileID: 0}
@@ -30133,16 +30133,17 @@ MonoBehaviour:
   aimCamPos: {fileID: 7702197587144518290}
   camTransitionSpeed: 5
   scopedFOV: 30
-  aimMode: 0
   animator: {fileID: 1866105014591861558}
   muzzleFlash: {fileID: 2946068002783915075}
-  audioSource: {fileID: 0}
-  smgSound: {fileID: 0}
-  arSound: {fileID: 0}
-  dmrSound: {fileID: 0}
-  sniperSound: {fileID: 0}
-  shotgunSound: {fileID: 0}
-  glSound: {fileID: 0}
+  audioSource: {fileID: -1917911005857317957}
+  smgSound: {fileID: 8300000, guid: 48283adefda01514e851c40517a63d59, type: 3}
+  arSound: {fileID: 8300000, guid: 1b145bcffd767854fb0c71c37678ebaa, type: 3}
+  dmrSound: {fileID: 8300000, guid: fecc3e7a0166a104cb810435f6fdf37b, type: 3}
+  shotgunSound: {fileID: 8300000, guid: 1df1429981f76644097c7fd47fc5f239, type: 3}
+  smgReloadSound: {fileID: 8300000, guid: e1d79f4a0c7873742babc5f6e9ff800e, type: 3}
+  arReloadSound: {fileID: 8300000, guid: e1d79f4a0c7873742babc5f6e9ff800e, type: 3}
+  dmrReloadSound: {fileID: 8300000, guid: e1d79f4a0c7873742babc5f6e9ff800e, type: 3}
+  shotgunReloadSound: {fileID: 8300000, guid: e1d79f4a0c7873742babc5f6e9ff800e, type: 3}
   bulletTrailPrefab: {fileID: 235673213667241877, guid: 6c4ffb140e19fe6439d7075e4941926d, type: 3}
 --- !u!114 &2448191328230396683
 MonoBehaviour:
@@ -30180,11 +30181,10 @@ MonoBehaviour:
   currentExp: 0
   expToLevelUp: 100
   level: 1
+  animator: {fileID: 0}
   healthPerLevel: 10
   damagePerLevel: 5
   speedPerLevel: 0.5
-  KillCount: 0
-  TotalDamage: 0
 --- !u!114 &-2293773510668471591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30272,6 +30272,103 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   MatchID: 
+--- !u!82 &-1917911005857317957
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8532805641309439499}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &8786273641792909052
 GameObject:
   m_ObjectHideFlags: 0

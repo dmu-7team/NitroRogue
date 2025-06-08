@@ -14415,7 +14415,7 @@ MonoBehaviour:
   isHoming: 0
   isStatic: 0
   autoDestroy: 1
-  muzzlePrefab: {fileID: 0}
+  muzzlePrefab: {fileID: 4924508274929071776, guid: b27eb026718377248975ec8ed631a272, type: 3}
   hitPrefab: {fileID: 4924508274929071776, guid: d6f2dc7b339f6474e9a03d9f6aa2fee2, type: 3}
   trails: []
   rotate: 0

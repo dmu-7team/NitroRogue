@@ -11,38 +11,35 @@ public partial class NavigateToTargetAction : Action
 {
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
     [SerializeReference] public BlackboardVariable<GameObject> Target;
-    [SerializeReference] public BlackboardVariable<float> MoveSpeed = new BlackboardVariable<float>(3.5f);
-    [SerializeReference] public BlackboardVariable<float> DistanceThreshold = new BlackboardVariable<float>(0.2f);
+    private float MoveSpeed = 3.5f;
+    private float DistanceThreshold = 0.2f;
 
     private NavMeshAgent navAgent;
     private Animator anim;
     private Vector3 adjustedTargetPosition;
-    private float colliderOffset;
 
     protected override Status OnStart()
     {
         if (Agent?.Value == null || Target?.Value == null)
-        {
             return Status.Failure;
-        }
 
-        // 수정된 부분: moveSpeed 값을 BlackboardVariable에 할당
+        // MoveSpeed: EnemyBase에서 가져옴
         EnemyBase enemy = Agent.Value.GetComponent<EnemyBase>();
         if (enemy != null)
-        {
-            MoveSpeed.Value = enemy.MoveSpeed;
-        }
+            MoveSpeed = enemy.MoveSpeed;
 
         navAgent = Agent.Value.GetComponent<NavMeshAgent>();
         anim = Agent.Value.GetComponent<Animator>();
-        colliderOffset = GetColliderOffset();
+
+        // ✅ 에이전트와 타겟 콜라이더 크기 합산해서 거리 설정
+        DistanceThreshold = GetCombinedColliderOffset();
 
         adjustedTargetPosition = GetAdjustedTargetPosition();
 
         if (navAgent != null && navAgent.isOnNavMesh)
         {
-            navAgent.speed = MoveSpeed.Value;
-            navAgent.stoppingDistance = DistanceThreshold.Value;
+            navAgent.speed = MoveSpeed;
+            navAgent.stoppingDistance = DistanceThreshold;
             navAgent.updatePosition = true;
             navAgent.updateRotation = true;
             navAgent.SetDestination(adjustedTargetPosition);
@@ -61,8 +58,9 @@ public partial class NavigateToTargetAction : Action
 
         float distance = GetDistanceXZ();
 
-        if (distance <= DistanceThreshold.Value)
+        if (distance <= DistanceThreshold)
         {
+            anim?.SetFloat("speed", 0f);
             return Status.Success;
         }
 
@@ -81,14 +79,15 @@ public partial class NavigateToTargetAction : Action
             return Status.Running;
         }
 
-        // fallback: transform 이동
+        // fallback: 직접 Transform 이동
         Vector3 direction = adjustedTargetPosition - Agent.Value.transform.position;
         direction.y = 0f;
         direction.Normalize();
 
-        Agent.Value.transform.position += direction * MoveSpeed.Value * Time.deltaTime;
+        Agent.Value.transform.position += direction * MoveSpeed * Time.deltaTime;
         Agent.Value.transform.forward = direction;
 
+        anim?.SetFloat("speed", 1f);
         return Status.Running;
     }
 
@@ -98,18 +97,25 @@ public partial class NavigateToTargetAction : Action
         {
             navAgent.ResetPath();
         }
+
+        anim?.SetFloat("speed", 0f);
     }
 
-    private float GetColliderOffset()
+    // ✅ 에이전트 + 타겟 콜라이더 크기 합산 거리 계산
+    private float GetCombinedColliderOffset()
     {
-        colliderOffset = 0f;
-        var col = Agent.Value.GetComponentInChildren<Collider>();
-        if (col != null)
-        {
-            Vector3 extents = col.bounds.extents;
-            colliderOffset = Mathf.Max(extents.x, extents.z);
-        }
-        return colliderOffset;
+        float self = GetColliderRadius(Agent.Value);
+        float target = GetColliderRadius(Target.Value);
+        return self + target;
+    }
+
+    private float GetColliderRadius(GameObject obj)
+    {
+        var col = obj?.GetComponentInChildren<Collider>();
+        if (col == null) return 0.5f;
+
+        Vector3 extents = col.bounds.extents;
+        return Mathf.Max(extents.x, extents.z);
     }
 
     private Vector3 GetAdjustedTargetPosition()

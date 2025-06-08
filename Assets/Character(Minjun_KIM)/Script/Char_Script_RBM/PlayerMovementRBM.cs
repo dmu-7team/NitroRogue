@@ -9,7 +9,7 @@ public class PlayerMovementRBM : MonoBehaviour
     public float jumpForce = 5f;
     public LayerMask groundMask;
     public Transform groundCheck;
-    public float groundDistance = 0.3f;
+    public float groundDistance = 1f;
 
     [Header("Mouse Look")]
     public Transform cameraHolder;
@@ -24,6 +24,14 @@ public class PlayerMovementRBM : MonoBehaviour
     private WeaponSystemRBM weaponSystem;
     private PlayerStats stats;
 
+    [Header("Sound")]
+    public AudioClip[] footstepClips;
+    [SerializeField] private float walkFootstepInterval = 0.65f;
+    [SerializeField] private float runFootstepInterval = 0.37f;
+
+    private AudioSource audioSource;
+    private float footstepTimer = 0f;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -31,6 +39,9 @@ public class PlayerMovementRBM : MonoBehaviour
 
         weaponSystem = GetComponent<WeaponSystemRBM>();
         stats = GetComponent<PlayerStats>();
+
+        audioSource = GetComponent<AudioSource>();
+        audioSource.playOnAwake = false;
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -68,8 +79,34 @@ public class PlayerMovementRBM : MonoBehaviour
         animator?.SetBool("isMoving", isMoving);
         animator?.SetBool("isRunning", isRunning);
 
+        if (isMoving && isGrounded)
+        {
+            footstepTimer -= Time.deltaTime;
+            float interval = isRunning ? runFootstepInterval : walkFootstepInterval;
+
+            if (footstepTimer <= 0f)
+            {
+                PlayFootstepSound();
+                footstepTimer = interval;
+            }
+        }
+        else
+        {
+            footstepTimer = 0f;
+        }
+
         HandleJump();
         HandleGroundCheck();
+    }
+
+    private void PlayFootstepSound()
+    {
+        if (footstepClips.Length == 0 || audioSource == null) return;
+
+        //일단 그냥 랜덤으로 해놨긴 했는데 향후 바닥에 따라 발소리 다르게 하는것도 좋을 것 같음
+        Debug.Log("발소리");
+        int index = Random.Range(0, footstepClips.Length);
+        audioSource.PlayOneShot(footstepClips[index]);
     }
 
     private void HandleJump()

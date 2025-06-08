@@ -21571,6 +21571,10 @@ MonoBehaviour:
   cameraHolder: {fileID: 0}
   mouseSensitivity: 100
   animator: {fileID: 0}
+  footstepClips:
+  - {fileID: 8300000, guid: 9ea11a2d13d536e4e8441a0f5895995c, type: 3}
+  - {fileID: 8300000, guid: 9e68ea1ebd76aa44c8cfa5beb9850830, type: 3}
+  footstepInterval: 0.5
 --- !u!114 &-4384206218768746743
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21588,9 +21592,6 @@ MonoBehaviour:
   syncInterval: 0
   weaponType: 2
   muzzle: {fileID: 0}
-  bulletPrefab: {fileID: 0}
-  bulletForce: 100
-  weaponDamage: 1
   currentAmmo: 30
   maxAmmo: 30
   ammoText: {fileID: 0}
@@ -21602,16 +21603,17 @@ MonoBehaviour:
   aimCamPos: {fileID: 0}
   camTransitionSpeed: 5
   scopedFOV: 30
-  aimMode: 0
   animator: {fileID: 0}
   muzzleFlash: {fileID: 0}
   audioSource: {fileID: 0}
   smgSound: {fileID: 0}
   arSound: {fileID: 0}
   dmrSound: {fileID: 0}
-  sniperSound: {fileID: 0}
   shotgunSound: {fileID: 0}
-  glSound: {fileID: 0}
+  smgReloadSound: {fileID: 0}
+  arReloadSound: {fileID: 0}
+  dmrReloadSound: {fileID: 0}
+  shotgunReloadSound: {fileID: 0}
   bulletTrailPrefab: {fileID: 0}
 --- !u!114 &-3041943415800481726
 MonoBehaviour:

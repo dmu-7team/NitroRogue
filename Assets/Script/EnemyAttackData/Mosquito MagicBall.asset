@@ -15,7 +15,8 @@ MonoBehaviour:
   attackName: Mosquito MagicBall
   attackDescription: 
   icon: {fileID: 0}
-  cooldown: 3
+  attackSfx: {fileID: 0}
+  cooldown: 2
   range: 20
   damage: 10
   duration: 10

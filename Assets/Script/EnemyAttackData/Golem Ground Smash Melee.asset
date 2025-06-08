@@ -15,11 +15,12 @@ MonoBehaviour:
   attackName: 
   attackDescription: 
   icon: {fileID: 0}
+  attackSfx: {fileID: 0}
   cooldown: 2
   range: 4
   damage: 5
   hitboxName:
   - Left_MeleeCollider
   - Right_MeleeCollider
-  groundEffect: {fileID: 4994997792314849709, guid: 3dd50886582244645be87adb42aa8528, type: 3}
+  groundEffect: {fileID: 4994997792314849709, guid: b9aaa898861f16e47b60c67845c7fb17, type: 3}
   spawnPoint: SpawnPoint

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Mirror;
 using System.Collections;
 using Unity.AppUI.UI;
+using System;
 
 public class EnemyBase : CharacterStats
 {
@@ -40,17 +41,65 @@ public class EnemyBase : CharacterStats
     public Transform popupSpawnPoint;
     private Camera worldCamera;
 
+    [Header("사운드")]
+    public AudioClip footstepClip;
+    [SerializeField] private float footstepInterval = 0.5f;
+    private float footstepTimer = 0f;
+    private AudioSource audioSource;
+
     private bool isDead = false;
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     [ServerCallback]
     private void Start()
     {
         // 서버에서 필요한 초기화는 OnStartServer에서 처리
+    }
+    private void Update()
+    {
+        if (isServer)
+        {
+            if (navMeshAgent == null || footstepClip == null)
+                return;
+
+            bool isMoving = navMeshAgent.velocity.magnitude > 0.1f &&
+                            navMeshAgent.remainingDistance > navMeshAgent.stoppingDistance;
+
+            if (isMoving)
+            {
+                footstepTimer -= Time.deltaTime;
+                if (footstepTimer <= 0f)
+                {
+                    RpcPlayFootstepSound();
+                    footstepTimer = footstepInterval;
+                }
+            }
+            else
+            {
+                footstepTimer = 0f;
+            }
+        }
+    }
+    [ClientRpc]
+    private void RpcPlayFootstepSound()
+    {
+        if (footstepClip == null) return;
+        AudioSource.PlayClipAtPoint(footstepClip, transform.position);
+    }
+
+    private void LateUpdate()
+    {
+        if (healthBarCanvas != null && worldCamera != null)
+        {
+            // 카메라를 향해 정면으로 회전
+            healthBarCanvas.LookAt(worldCamera.transform);
+            healthBarCanvas.Rotate(0, 180f, 0); // UI가 뒤집히지 않도록 보정
+        }
     }
 
     public override void OnStartClient()
@@ -83,7 +132,7 @@ public class EnemyBase : CharacterStats
     [Server]
     public virtual void UseAllAttack(GameObject target)
     {
-        if (bodyRoot == null || isAttacking) return;
+        if (bodyRoot == null || isAttacking || target==null) return;
 
         foreach (var attack in attacks)
         {
@@ -92,23 +141,18 @@ public class EnemyBase : CharacterStats
                 currentAttack = attack;
                 attack.Execute(gameObject, target);
                 isAttacking = true;
-                PlayAttackAnimation(attacks.IndexOf(attack));
+                animator.SetInteger("attackIndex", attacks.IndexOf(attack));
+                animator.SetTrigger("doAttack");
                 RpcPlayAttackAnimation(attacks.IndexOf(attack));
                 return;
             }
         }
     }
 
-    void PlayAttackAnimation(int index)
-    {
-        animator.SetInteger("attackIndex", index);
-        animator.SetTrigger("doAttack");
-    }
-
     [ClientRpc]
     void RpcPlayAttackAnimation(int index)
     {
-        if (animator == null) return;
+        if (animator == null || isServer) return;
         animator.SetInteger("attackIndex", index);
         animator.SetTrigger("doAttack");
     }
@@ -126,15 +170,6 @@ public class EnemyBase : CharacterStats
     {
         if (!isServer || currentAttack == null) return;
         currentAttack.OnAnimationEvent(eventName);
-    }
-    private void LateUpdate()
-    {
-        if (healthBarCanvas != null && worldCamera != null)
-        {
-            // 카메라를 향해 정면으로 회전
-            healthBarCanvas.LookAt(worldCamera.transform);
-            healthBarCanvas.Rotate(0, 180f, 0); // UI가 뒤집히지 않도록 보정
-        }
     }
 
     [Server]
