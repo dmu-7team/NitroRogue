@@ -188,6 +188,26 @@ public class PlayerStats : CharacterStats
         syncedAttackDamage = originalDamage;
         OnPowerChanged?.Invoke(syncedAttackDamage);
     }
+    [Server]
+    public void GainExp(float amount)
+    {
+        currentExp += amount;
+
+        // 서버에선 로직만, UI는 클라이언트에 따로 전달
+        TargetUpdateExp(connectionToClient, currentExp, expToLevelUp);
+
+        if (currentExp >= expToLevelUp)
+        {
+            LevelUp();
+        }
+    }
+
+    [TargetRpc]
+    private void TargetUpdateExp(NetworkConnection target, float current, float toLevelUp)
+    {
+        OnExpChanged?.Invoke(current, toLevelUp);
+    }
+
 
     protected override void Die()
     {

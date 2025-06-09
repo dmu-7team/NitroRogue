@@ -5,12 +5,21 @@ namespace NitroGame
 {
     public class Box : NetworkBehaviour
     {
-        public ItemData[] itemOptions;
-        private bool isOpened = false;
+        [Header("아이템 목록")]
+        public ItemData[] itemOptions; // 인벤토리에 추가할 아이템들 (ScriptableObject)
+
+        [HideInInspector]
+        public bool isOpened = false;
+
 
         private GameObject currentPlayer;
         private bool playerInRange = false;
+        private NetworkIdentity myNetId;
 
+        private void Awake()
+        {
+            myNetId = GetComponent<NetworkIdentity>();
+        }
         private void OnTriggerEnter(Collider other)
         {
             if (other.CompareTag("Player"))
@@ -36,14 +45,23 @@ namespace NitroGame
             if (playerInRange && currentPlayer != null && Input.GetKeyDown(KeyCode.E))
             {
                 var inventory = currentPlayer.GetComponent<Inventory>();
-                var identity = currentPlayer.GetComponent<NetworkIdentity>();
 
-                if (inventory != null && identity != null)
+                if (inventory != null && myNetId != null)
                 {
-                    inventory.CmdPickupBox(this.netIdentity);
+                    inventory.CmdPickupBox(myNetId);
                     isOpened = true;
                 }
+                else
+                {
+                    Debug.LogWarning("[Box] inventory 또는 myNetId가 null입니다");
+                }
             }
+        }
+        public ItemData GetRandomItem()
+        {
+            if (itemOptions == null || itemOptions.Length == 0) return null;
+            int index = Random.Range(0, itemOptions.Length);
+            return itemOptions[index];
         }
 
         public void GiveItemToPlayer(GameObject player)

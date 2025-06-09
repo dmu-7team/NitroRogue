@@ -189,8 +189,7 @@ public class RoomPlayer : NetworkBehaviour
     {
         Debug.Log($"[클라이언트] TargetStartGame 호출됨 - 캐릭터: {characterIndex}, 매치ID: {matchId}");
 
-        RoomUIManager.Instance?.SwitchToGameUI();
-        SpawnLocalPlayerCharacter(characterIndex);
+  
     }
 
     private void SpawnLocalPlayerCharacter(int characterIndex)
