@@ -46,6 +46,8 @@ public class EnemyBase : CharacterStats
     [SerializeField] private float footstepInterval = 0.5f;
     private float footstepTimer = 0f;
     private AudioSource audioSource;
+    [Header("보상 관련")]
+    [SerializeField] private float expReward = 30f;
 
     private bool isDead = false;
 
@@ -233,6 +235,7 @@ public class EnemyBase : CharacterStats
         if (killer != null && killer.TryGetComponent<PlayerStats>(out var killerStats))
         {
             killerStats.KillCount++;
+            killerStats.GainExp(expReward);
         }
 
         behavior?.SetVariableValue("IsDead", true);
