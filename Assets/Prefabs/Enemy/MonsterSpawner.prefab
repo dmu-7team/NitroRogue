@@ -49,10 +49,22 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  enemyPrefab: {fileID: 4921877257883508352, guid: 03acb33812c5ec341b2246e3fca17a10, type: 3}
+  enemyPrefabs:
+  - {fileID: 7962604100564841400, guid: d0fc9fb3ee062e541a88de96af92e8c1, type: 3}
+  - {fileID: 4921877257883508352, guid: 7391d4297faa3e84cab24c5b8a0bb24a, type: 3}
+  - {fileID: 2936583146893896946, guid: ca8e28a08418568459e8964d5adfd78d, type: 3}
+  - {fileID: 7727047731534598215, guid: e07a4cea8010f0a43b01e72039c2f147, type: 3}
+  - {fileID: 8564916408925930016, guid: fba876c46d78a664a87df074814794bc, type: 3}
+  - {fileID: 2732309068803917121, guid: db551a08e2178e34b8141ba6846ffa41, type: 3}
+  - {fileID: 3956764888193744923, guid: 1442ca962994c994db7f03b8d7b42d04, type: 3}
+  - {fileID: 558294534666759081, guid: b4c609bc45b58cf49b3cb96b5efd6206, type: 3}
+  - {fileID: 1494876547522609141, guid: 78a1ff274864a1043916dc00744e82f1, type: 3}
+  - {fileID: 8338668539177126183, guid: e306b286b54e2334ba58eebe8c37b115, type: 3}
+  - {fileID: 2493159302187033998, guid: d6efe56b1a2432c47a13ea0d59c5d631, type: 3}
   spawnInterval: 9999
-  matchId: 
   spawnData: {fileID: 11400000, guid: d8875334108a6e54cb710e1e092a85f4, type: 2}
+  killThreshold: 11
+  specialEnemyPrefab: {fileID: 9222912982316200897, guid: 312334879c7857f459d7323743bc8e6d, type: 3}
 --- !u!114 &7153692030873516557
 MonoBehaviour:
   m_ObjectHideFlags: 0

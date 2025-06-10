@@ -46,9 +46,11 @@ public class EnemyBase : CharacterStats
     [SerializeField] private float footstepInterval = 0.5f;
     private float footstepTimer = 0f;
     private AudioSource audioSource;
+
     [Header("보상 관련")]
     [SerializeField] private float expReward = 30f;
 
+    [SyncVar] public MonsterSpawner spawner;
     private bool isDead = false;
 
     private void Awake()
@@ -231,6 +233,9 @@ public class EnemyBase : CharacterStats
     {
         if (isDead) return;
         isDead = true;
+        isAttacking = true;
+        behavior?.SetVariableValue("IsAttacking", true);
+        spawner?.OnMonsterKilled();
 
         if (killer != null && killer.TryGetComponent<PlayerStats>(out var killerStats))
         {
@@ -249,6 +254,11 @@ public class EnemyBase : CharacterStats
     void RpcPlayDeathAnimation()
     {
         animator.SetTrigger("doDie");
+        Collider[] colliders = GetComponentsInChildren<Collider>(true); // 비활성 포함
+        foreach (var col in colliders)
+        {
+            col.isTrigger = true;
+        }
     }
 
     [Server]

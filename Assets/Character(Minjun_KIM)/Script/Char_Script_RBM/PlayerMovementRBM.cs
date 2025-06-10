@@ -103,8 +103,6 @@ public class PlayerMovementRBM : MonoBehaviour
     {
         if (footstepClips.Length == 0 || audioSource == null) return;
 
-        //일단 그냥 랜덤으로 해놨긴 했는데 향후 바닥에 따라 발소리 다르게 하는것도 좋을 것 같음
-        Debug.Log("발소리");
         int index = Random.Range(0, footstepClips.Length);
         audioSource.PlayOneShot(footstepClips[index]);
     }
