@@ -52,7 +52,8 @@ namespace BitWave_Labs.AnimatedTextReveal
         private IEnumerator CycleThroughLines()
         {
             // Set consistent text alignment for all lines
-            animatedTextReveal.TextMesh.alignment = TextAlignmentOptions.TopLeft;
+            animatedTextReveal.TextMesh.fontSize = 100f;
+            animatedTextReveal.TextMesh.alignment = TextAlignmentOptions.Center;
 
             int index = 0;
 
