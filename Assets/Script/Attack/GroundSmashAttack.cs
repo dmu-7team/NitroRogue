@@ -43,6 +43,22 @@ public class GroundSmashAttack : MeleeAttack
         if (spawnPoint == null) return;
 
         GameObject effect = GameObject.Instantiate(attackObjectGroundSmash.groundEffect, spawnPoint.position, Quaternion.identity);
+
+        var casterMatch = cachedCaster.GetComponent<NetworkMatch>();
+        var projMatch = effect.GetComponent<NetworkMatch>();
+        if (casterMatch != null && projMatch != null)
+        {
+            projMatch.matchId = casterMatch.matchId;
+        }
+        else if (projMatch == null)
+        {
+            Debug.LogWarning($"[{effect.name}]에 NetworkMatch 컴포넌트가 없습니다.");
+        }
+        else
+        {
+            Debug.LogWarning($"[{cachedCaster.name}]에 NetworkMatch 컴포넌트가 없습니다.");
+        }
+
         NetworkServer.Spawn(effect);
         GameObject.Destroy(effect, 2f);
     }

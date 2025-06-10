@@ -380,11 +380,11 @@ MonoBehaviour:
   - {fileID: 2936583146893896946, guid: bc8599d8dac712642ae3bfddd4ccebbe, type: 3}
   - {fileID: 7727047731534598215, guid: e07a4cea8010f0a43b01e72039c2f147, type: 3}
   - {fileID: 7727047731534598215, guid: 68969f412a9dfca4b9a6747c2eca103a, type: 3}
+  - {fileID: 4994997792314849709, guid: b9aaa898861f16e47b60c67845c7fb17, type: 3}
   - {fileID: 100006, guid: 37fefb19538c00d418188ceb218ebd63, type: 3}
   - {fileID: 8564916408925930016, guid: fba876c46d78a664a87df074814794bc, type: 3}
   - {fileID: 7785472633574467289, guid: 3d22bca37969aba4bb6edc78079fa1e1, type: 3}
   - {fileID: 2732309068803917121, guid: db551a08e2178e34b8141ba6846ffa41, type: 3}
-  - {fileID: 2086602806712532617, guid: 276fd3723b32c284e9f37f9d9ff6863f, type: 3}
   - {fileID: 7078556089362761334, guid: 759068f362928494392c923c831e1701, type: 3}
   - {fileID: 3956764888193744923, guid: 1442ca962994c994db7f03b8d7b42d04, type: 3}
   - {fileID: 9222912982316200897, guid: 312334879c7857f459d7323743bc8e6d, type: 3}
@@ -425,6 +425,7 @@ MonoBehaviour:
   - {fileID: 2460976672058901519, guid: 6e9de26e65dd7ea438503e039d949d58, type: 3}
   - {fileID: 2460976672058901519, guid: 757d3bee9a3fd2d4faf14ad2dcf0a384, type: 3}
   roomPlayerPrefab: {fileID: 2086602806712532617, guid: 276fd3723b32c284e9f37f9d9ff6863f, type: 3}
+  MonsterSpawner: {fileID: 7785472633574467289, guid: 3d22bca37969aba4bb6edc78079fa1e1, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -25,6 +25,8 @@ public class CustomNetworkManager_Server : NetworkManager
     private Transform[] spawnPoints;
     private Transform[] enemySpawnPoints;
 
+    public GameObject MonsterSpawner;
+
     public override void Start()
     {
         base.Start();
@@ -182,9 +184,17 @@ public class CustomNetworkManager_Server : NetworkManager
             Debug.Log($"[서버] ReplacePlayer + Spawn 완료: {playerObj.name}");
         }
 
+        var spawnerObj = Instantiate(MonsterSpawner);
+        if (spawnerObj.TryGetComponent(out NetworkMatch spawnmatch))
+        {
+            spawnmatch.matchId = parsedMatchId;
+        }
+        NetworkServer.Spawn(spawnerObj);
+
+
         // 몬스터 생성 지연
-        StartCoroutine(SpawnEnemiesAfterDelay(matchId, 1f));
-        Debug.Log("[서버] 모든 플레이어 처리 완료 → 몬스터 스폰 대기 중...");
+        //StartCoroutine(SpawnEnemiesAfterDelay(matchId, 1f));
+        //Debug.Log("[서버] 모든 플레이어 처리 완료 → 몬스터 스폰 대기 중...");
     }
 
     private IEnumerator SpawnEnemiesAfterDelay(string matchId, float delay)

@@ -216,11 +216,17 @@ public class PlayerStats : CharacterStats
 
         Debug.Log("플레이어 사망 처리");
 
+        RpcPlayerDie();
+
+        base.Die();
+    }
+
+    [ClientRpc]
+    public void RpcPlayerDie()
+    {
         if (animator == null)
             animator = GetComponent<Animator>();
 
         animator?.SetTrigger("Die");
-
-        base.Die();
     }
 }

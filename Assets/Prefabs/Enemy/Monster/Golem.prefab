@@ -2495,6 +2495,8 @@ MonoBehaviour:
   popupSpawnPoint: {fileID: 7021859306539528319}
   footstepClip: {fileID: 8300000, guid: ec599d834817ae441a5381d8974bc3e6, type: 3}
   footstepInterval: 0.7
+  expReward: 30
+  spawner: {fileID: 0}
 --- !u!195 &2826863219475495549
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -2567,8 +2569,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
