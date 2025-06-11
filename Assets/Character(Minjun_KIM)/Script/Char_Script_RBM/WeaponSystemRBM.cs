@@ -62,6 +62,11 @@ public class WeaponSystemRBM : NetworkBehaviour
     [SerializeField] private float dmrFireInterval = 60f / 60f; //50RPM
     [SerializeField] private float shotgunFireInterval = 60f / 90f; //90RPM
 
+    [SerializeField] private Sprite smgIcon;
+    [SerializeField] private Sprite arIcon;
+    [SerializeField] private Sprite dmrIcon;
+    [SerializeField] private Sprite shotgunIcon;
+
     private Coroutine burstCoroutine;
 
     void Start()
@@ -78,6 +83,22 @@ public class WeaponSystemRBM : NetworkBehaviour
             aimMode = AimMode.Scope;
         else
             aimMode = AimMode.Zoom;
+
+        switch (weaponType)
+        {
+            case WeaponType.SMG:
+                UIManager.Instance.SetGunIcon(smgIcon);
+                break;
+            case WeaponType.AR:
+                UIManager.Instance.SetGunIcon(arIcon);
+                break;
+            case WeaponType.DMR:
+                UIManager.Instance.SetGunIcon(dmrIcon);
+                break;
+            case WeaponType.SG:
+                UIManager.Instance.SetGunIcon(shotgunIcon);
+                break;
+        }
     }
 
     void Update()
