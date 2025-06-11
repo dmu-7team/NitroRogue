@@ -15,8 +15,9 @@ MonoBehaviour:
   attackName: MonsterPlant Melee
   attackDescription: 
   icon: {fileID: 0}
+  attackSfx: {fileID: 0}
   cooldown: 5
-  range: 3
+  range: 4
   damage: 5
   hitboxName:
   - Mouth_MeleeCollider
