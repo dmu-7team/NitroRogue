@@ -35,16 +35,27 @@ namespace BitWave_Labs.AnimatedTextReveal
 
         // Holds the running sequence coroutine so we don't start it twice.
         private Coroutine _cycleCoroutine;
-        
+
+        public static AnimateText Instance;
+        private void Awake()
+        {
+            if (Instance == null) Instance = this;
+            else Destroy(gameObject);
+        }
+        public void ShowMapName()
+        {
+            _cycleCoroutine = StartCoroutine(CycleThroughLines());
+        }
+
         /// <summary>
         /// Listens for the trigger key and starts the text cycling once.
         /// </summary>
-        private void Update()
-        {
-            // On Space, begin cycling if not already started
-            if (Input.GetKeyDown(KeyCode.Z) && _cycleCoroutine == null)
-                _cycleCoroutine = StartCoroutine(CycleThroughLines());
-        }
+        //private void Update()
+        //{
+        //    // On Space, begin cycling if not already started
+        //    if (Input.GetKeyDown(KeyCode.Z) && _cycleCoroutine == null)
+        //        _cycleCoroutine = StartCoroutine(CycleThroughLines());
+        //}
 
         /// <summary>
         /// Coroutine that iterates over each line, applies fadeIn/fadeOut according to settings

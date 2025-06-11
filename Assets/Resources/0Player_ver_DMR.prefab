@@ -1252,7 +1252,7 @@ MonoBehaviour:
   defaultCamPos: {fileID: 5530317650597976280}
   aimCamPos: {fileID: 9122895395639324629}
   camTransitionSpeed: 5
-  scopedFOV: 30
+  scopedFOV: 10
   animator: {fileID: 3456327250828170975}
   muzzleFlash: {fileID: 3964968331432576415}
   audioSource: {fileID: -6273537196939050506}
