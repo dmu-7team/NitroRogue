@@ -17,7 +17,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   attackSfx: {fileID: 0}
   cooldown: 5
-  range: 4
+  range: 4.2
   damage: 5
   hitboxName:
   - Leg_MeleeCollider

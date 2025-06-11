@@ -17,7 +17,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   attackSfx: {fileID: 0}
   cooldown: 5
-  range: 3
+  range: 4.5
   damage: 2
   hitboxName:
   - Whirlwind MeleeCollider

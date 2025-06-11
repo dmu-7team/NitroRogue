@@ -4861,7 +4861,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   tickInterval: 0
-  speed: 10
+  speed: 15
   isHoming: 0
   isStatic: 0
   autoDestroy: 1
