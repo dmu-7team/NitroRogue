@@ -259,6 +259,15 @@ public class EnemyBase : CharacterStats
         {
             col.isTrigger = true;
         }
+        Transform[] transforms = GetComponentsInChildren<Transform>(true); // 비활성 포함
+        foreach (var tr in transforms)
+        {
+            if (tr.gameObject.name == "BreathSpawnPoint")
+            {
+                tr.gameObject.SetActive(false);
+            }
+        }
+
     }
 
     [Server]
