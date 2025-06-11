@@ -1,6 +1,7 @@
 ﻿using Mirror;
 using UnityEngine;
 using System.Collections;
+using BitWave_Labs.AnimatedTextReveal;
 
 [RequireComponent(typeof(PlayerMovementRBM))]
 [RequireComponent(typeof(WeaponSystemRBM))]
@@ -41,6 +42,8 @@ public class PlayerControllerRBM : NetworkBehaviour
         // 4. UI 전환
         RoomUIManager.Instance?.SwitchToGameUI();
         Debug.Log("[PlayerController] 권한 있는 내 캐릭터로 전환됨: UI 및 카메라 설정 완료");
+
+        AnimateText.Instance?.ShowMapName();
     }
 
 

@@ -1181,7 +1181,7 @@ MonoBehaviour:
   animator: {fileID: 3456327250828170975}
   muzzleFlash: {fileID: 3964968331432576415}
   audioSource: {fileID: -5881411656869779034}
-  smgSound: {fileID: 8300000, guid: 48283adefda01514e851c40517a63d59, type: 3}
+  smgSound: {fileID: 8300000, guid: 6c16e9c163440d74eb26de8d1536c3b4, type: 3}
   arSound: {fileID: 8300000, guid: 1b145bcffd767854fb0c71c37678ebaa, type: 3}
   dmrSound: {fileID: 8300000, guid: fecc3e7a0166a104cb810435f6fdf37b, type: 3}
   shotgunSound: {fileID: 8300000, guid: 1df1429981f76644097c7fd47fc5f239, type: 3}
