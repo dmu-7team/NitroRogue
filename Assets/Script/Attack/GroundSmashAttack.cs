@@ -41,11 +41,12 @@ public class GroundSmashAttack : MeleeAttack
     {
         if (attackObjectGroundSmash.groundEffect == null) return;
         if (spawnPoint == null) return;
-
         GameObject effect = GameObject.Instantiate(attackObjectGroundSmash.groundEffect, spawnPoint.position, Quaternion.identity);
 
         var casterMatch = cachedCaster.GetComponent<NetworkMatch>();
         var projMatch = effect.GetComponent<NetworkMatch>();
+        Debug.Log("¿Ö ¾ÈµÊ");
+
         if (casterMatch != null && projMatch != null)
         {
             projMatch.matchId = casterMatch.matchId;
