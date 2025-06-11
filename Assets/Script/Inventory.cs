@@ -5,7 +5,8 @@ using Mirror;
 using System.Linq;
 using NitroGame;
 using static UnityEditor.Progress;
-using System.Collections; // ← 이걸 꼭 추가해야 함!
+using System.Collections;
+using System.Text.RegularExpressions; // ← 이걸 꼭 추가해야 함!
 
 public class Inventory : NetworkBehaviour
 {
@@ -43,7 +44,7 @@ public class Inventory : NetworkBehaviour
 
         // 슬롯 연결
         slots = inventoryCanvasRoot.GetComponentsInChildren<Image>()
-            .Where(img => img.name.StartsWith("Slot"))
+            .Where(img => Regex.IsMatch(img.name, @"^Slot\d+$"))
             .OrderBy(img => img.name)
             .ToArray();
 
@@ -56,6 +57,11 @@ public class Inventory : NetworkBehaviour
         inputActions.Player.UseSlot2.performed += ctx => UseItem(1);
         inputActions.Player.UseSlot3.performed += ctx => UseItem(2);
         inputActions.Player.Interact.performed += ctx => TryPickupBox();
+
+        for (int i=0; i<slots.Length; i++)
+        {
+            slots[i].enabled = false;
+        }
     }
 
 
@@ -244,7 +250,7 @@ public class Inventory : NetworkBehaviour
         if (index < 0 || index >= items.Length) return;
         if (items[index] == null)
         {
-            UIManager.Instance?.ShowItemEffectMessage("해당 슬롯에 아이템이 없습니다!");
+            //UIManager.Instance?.ShowItemEffectMessage("해당 슬롯에 아이템이 없습니다!");
             return;
         }
 
