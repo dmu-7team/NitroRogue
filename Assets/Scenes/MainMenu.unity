@@ -79609,6 +79609,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4350405222209313091, guid: fb935e0e8da1ef24c9df609d0fdee3b6, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1500
+      objectReference: {fileID: 0}
+    - target: {fileID: 4350405222209313091, guid: fb935e0e8da1ef24c9df609d0fdee3b6, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 4350405222209313091, guid: fb935e0e8da1ef24c9df609d0fdee3b6, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 260
       objectReference: {fileID: 0}
@@ -83125,12 +83133,28 @@ PrefabInstance:
       value: AnimateText
       objectReference: {fileID: 0}
     - target: {fileID: 6834870798667354404, guid: 0a51904978859394db3dcef3c8261e4b, type: 3}
+      propertyPath: lines.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6834870798667354404, guid: 0a51904978859394db3dcef3c8261e4b, type: 3}
+      propertyPath: delayBeforeFadeIn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6834870798667354404, guid: 0a51904978859394db3dcef3c8261e4b, type: 3}
       propertyPath: animatedTextReveal
       value: 
       objectReference: {fileID: 1021795880}
     - target: {fileID: 6834870798667354404, guid: 0a51904978859394db3dcef3c8261e4b, type: 3}
+      propertyPath: delayBeforeFadeOut
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6834870798667354404, guid: 0a51904978859394db3dcef3c8261e4b, type: 3}
       propertyPath: 'lines.Array.data[0]'
       value: "\uC78A\uD600\uC9C4 \uC9C0\uD558\uBB34\uB364"
+      objectReference: {fileID: 0}
+    - target: {fileID: 6834870798667354404, guid: 0a51904978859394db3dcef3c8261e4b, type: 3}
+      propertyPath: 'lines.Array.data[1]'
+      value: "\uBAAC\uC2A4\uD130\uB97C \uC7A1\uC73C\uC138\uC694"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
