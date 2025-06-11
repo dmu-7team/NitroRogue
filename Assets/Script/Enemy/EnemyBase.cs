@@ -235,6 +235,7 @@ public class EnemyBase : CharacterStats
         isDead = true;
         isAttacking = true;
         behavior?.SetVariableValue("IsAttacking", true);
+        navMeshAgent.isStopped = true;
         spawner?.OnMonsterKilled();
 
         if (killer != null && killer.TryGetComponent<PlayerStats>(out var killerStats))
