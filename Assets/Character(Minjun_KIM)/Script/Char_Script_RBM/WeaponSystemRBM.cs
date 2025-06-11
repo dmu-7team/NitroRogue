@@ -57,7 +57,11 @@ public class WeaponSystemRBM : NetworkBehaviour
     private PlayerStats stats;
 
     private float lastFireTime = 0f;
-    private float smgFireInterval = 60f / 800f;
+    [SerializeField] private float smgFireInterval = 60f / 800f; //800RPM, 분당 800발 발사
+    [SerializeField] private float arFireInterval = 60f / 600f; //600RPM
+    [SerializeField] private float dmrFireInterval = 60f / 60f; //50RPM
+    [SerializeField] private float shotgunFireInterval = 60f / 90f; //90RPM
+
     private Coroutine burstCoroutine;
 
     void Start()
@@ -82,19 +86,20 @@ public class WeaponSystemRBM : NetworkBehaviour
 
         HandleAim();
 
-        if (Input.GetMouseButton(0) && !animator.GetBool("isRunning") && !isReloading && currentAmmo > 0)
-        {
-            if (weaponType == WeaponType.SMG)
-                TryFireSMG();
-        }
+        //핸들링 파이어와 무관하게 작동해요
+        //if (Input.GetMouseButton(0) && !animator.GetBool("isRunning") && !isReloading && currentAmmo > 0)
+        //{
+        //    if (weaponType == WeaponType.SMG)
+        //        TryFireSMG();
+        //}
 
-        if (Input.GetMouseButtonDown(0) && !animator.GetBool("isRunning") && !isReloading && currentAmmo > 0)
-        {
-            if (weaponType == WeaponType.AR)
-                TryFireBurst();
-            else if (weaponType != WeaponType.SMG)
-                FireSingleShot();
-        }
+        //if (Input.GetMouseButtonDown(0) && !animator.GetBool("isRunning") && !isReloading && currentAmmo > 0)
+        //{
+        //    if (weaponType == WeaponType.AR)
+        //        TryFireBurst();
+        //    else if (weaponType != WeaponType.SMG)
+        //        FireSingleShot();
+        //}
     }
 
     public void HandleFire()
@@ -115,9 +120,19 @@ public class WeaponSystemRBM : NetworkBehaviour
                 if (Input.GetMouseButtonDown(0) && burstCoroutine == null)
                     burstCoroutine = StartCoroutine(FireBurst());
                 break;
-            default:
-                if (Input.GetMouseButtonDown(0))
+            case WeaponType.DMR:
+                if (Input.GetMouseButtonDown(0) && Time.time - lastFireTime >= dmrFireInterval)
+                {
+                    lastFireTime = Time.time;
                     FireSingleShot();
+                }
+                break;
+            case WeaponType.SG:
+                if (Input.GetMouseButtonDown(0) && Time.time - lastFireTime >= shotgunFireInterval)
+                {
+                    lastFireTime = Time.time;
+                    FireSingleShot();
+                }
                 break;
         }
     }
