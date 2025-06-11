@@ -1181,15 +1181,19 @@ MonoBehaviour:
   animator: {fileID: 3456327250828170975}
   muzzleFlash: {fileID: 3964968331432576415}
   audioSource: {fileID: -5881411656869779034}
-  smgSound: {fileID: 8300000, guid: 6c16e9c163440d74eb26de8d1536c3b4, type: 3}
+  smgSound: {fileID: 8300000, guid: 75833f0192389734abeaa8f0c211823e, type: 3}
   arSound: {fileID: 8300000, guid: 1b145bcffd767854fb0c71c37678ebaa, type: 3}
   dmrSound: {fileID: 8300000, guid: fecc3e7a0166a104cb810435f6fdf37b, type: 3}
   shotgunSound: {fileID: 8300000, guid: 1df1429981f76644097c7fd47fc5f239, type: 3}
-  smgReloadSound: {fileID: 8300000, guid: e1d79f4a0c7873742babc5f6e9ff800e, type: 3}
-  arReloadSound: {fileID: 8300000, guid: e1d79f4a0c7873742babc5f6e9ff800e, type: 3}
-  dmrReloadSound: {fileID: 8300000, guid: e1d79f4a0c7873742babc5f6e9ff800e, type: 3}
-  shotgunReloadSound: {fileID: 8300000, guid: e1d79f4a0c7873742babc5f6e9ff800e, type: 3}
+  smgReloadSound: {fileID: 8300000, guid: 45e124947dcf2f0429a575270613dee1, type: 3}
+  arReloadSound: {fileID: 8300000, guid: 45e124947dcf2f0429a575270613dee1, type: 3}
+  dmrReloadSound: {fileID: 8300000, guid: 45e124947dcf2f0429a575270613dee1, type: 3}
+  shotgunReloadSound: {fileID: 8300000, guid: 45e124947dcf2f0429a575270613dee1, type: 3}
   bulletTrailPrefab: {fileID: 235673213667241877, guid: 6c4ffb140e19fe6439d7075e4941926d, type: 3}
+  smgFireInterval: 0.075
+  arFireInterval: 0.1
+  dmrFireInterval: 1
+  shotgunFireInterval: 0.6666667
 --- !u!114 &4886699710192472923
 MonoBehaviour:
   m_ObjectHideFlags: 0
