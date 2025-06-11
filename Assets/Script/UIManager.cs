@@ -10,8 +10,9 @@ public class UIManager : MonoBehaviour
     [Header("게임 HUD 루트")]
     [SerializeField] private GameObject hudPanel;  // 전체 HUD 오브젝트
     [SerializeField] public GameObject crosshair;  // HUD 크로스헤어
-    [SerializeField] public Text ammoText;  // HUD 총알개수
+    [SerializeField] public TextMeshProUGUI ammoText;  // HUD 총알개수
     [SerializeField] public GameObject scopeOverlay;  // HUD 스코프
+    [SerializeField] public Image gunIcon;  // 총 아이콘
 
     [Header("메시지")]
     public TextMeshProUGUI msgText;
@@ -291,6 +292,11 @@ public class UIManager : MonoBehaviour
             expBarImage.fillAmount = fill;
             expText.text = $"경험치 {current:F0} / {max:F0}";
         }
+    }
+
+    public void SetGunIcon(Sprite gunIcon)
+    {
+        this.gunIcon.sprite = gunIcon;
     }
 
 }
