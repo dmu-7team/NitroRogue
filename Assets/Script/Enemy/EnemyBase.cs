@@ -259,6 +259,11 @@ public class EnemyBase : CharacterStats
         {
             col.isTrigger = true;
         }
+        Rigidbody[] rigidbodys = GetComponentsInChildren<Rigidbody>(true); // 비활성 포함
+        foreach (var rb in rigidbodys)
+        {
+            rb.isKinematic = true;
+        }
         Transform[] transforms = GetComponentsInChildren<Transform>(true); // 비활성 포함
         foreach (var tr in transforms)
         {
