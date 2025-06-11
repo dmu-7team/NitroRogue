@@ -1270,8 +1270,8 @@ MonoBehaviour:
   dmrFireInterval: 1
   shotgunFireInterval: 0.6666667
   smgIcon: {fileID: 1973369706, guid: 6753f41929102bb408bf0be641ce0212, type: 3}
-  arIcon: {fileID: 464137037, guid: 6753f41929102bb408bf0be641ce0212, type: 3}
-  dmrIcon: {fileID: 1830466763, guid: 6753f41929102bb408bf0be641ce0212, type: 3}
+  arIcon: {fileID: 1830466763, guid: 6753f41929102bb408bf0be641ce0212, type: 3}
+  dmrIcon: {fileID: 464137037, guid: 6753f41929102bb408bf0be641ce0212, type: 3}
   shotgunIcon: {fileID: -827983752, guid: 6753f41929102bb408bf0be641ce0212, type: 3}
 --- !u!114 &4886699710192472923
 MonoBehaviour:

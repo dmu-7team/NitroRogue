@@ -96,7 +96,7 @@ public class UIManager : MonoBehaviour
             if (healthBarCoroutine != null) StopCoroutine(healthBarCoroutine);
             healthBarCoroutine = StartCoroutine(AnimateHealthBar(targetFill));
 
-            healthBarImage.color = (targetFill <= 0.3f) ? Color.red : Color.green;
+            healthBarImage.color = (targetFill <= 0.3f) ? Color.black : Color.red;
 
             if (targetFill <= 0.1f)
             {
