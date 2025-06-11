@@ -69,3 +69,7 @@ MonoBehaviour:
   roomName: 
   currentPlayers: 0
   maxPlayers: 0
+  isReady: 0
+  playerName: "\uD50C\uB808\uC774\uC5B4"
+  isLeader: 0
+  selectedCharacter: -1

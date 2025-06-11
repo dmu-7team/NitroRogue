@@ -44,6 +44,7 @@ public class PlayerControllerRBM : NetworkBehaviour
         Debug.Log("[PlayerController] 권한 있는 내 캐릭터로 전환됨: UI 및 카메라 설정 완료");
 
         AnimateText.Instance?.ShowMapName();
+        AudioManager.Instance?.PlayGameBGM();
     }
 
 

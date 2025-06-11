@@ -32107,7 +32107,7 @@ GameObject:
   - component: {fileID: 607733724}
   - component: {fileID: 607733723}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: Class Button Group Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37022,7 +37022,7 @@ GameObject:
   - component: {fileID: 700545251}
   - component: {fileID: 700545250}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Create Room Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37605,8 +37605,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -100, y: 81.5}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: -130, y: 81.5}
+  m_SizeDelta: {x: 140, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &714037510
 MonoBehaviour:
@@ -39169,7 +39169,7 @@ GameObject:
   - component: {fileID: 755173539}
   - component: {fileID: 755173541}
   m_Layer: 5
-  m_Name: Button
+  m_Name: Create Room Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -50541,8 +50541,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -100, y: 124.95}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: -130, y: 124.95}
+  m_SizeDelta: {x: 140, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &897345912
 MonoBehaviour:
@@ -51769,7 +51769,7 @@ GameObject:
   - component: {fileID: 929676482}
   - component: {fileID: 929676484}
   m_Layer: 5
-  m_Name: InputField (TMP)
+  m_Name: Room Name InputField
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -86290,8 +86290,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1144322813}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 92.46547, y: -7.4518943, z: -2.1353042}
+  m_LocalRotation: {x: -0.10035322, y: -0.6900153, z: 0.09669016, w: -0.71025294}
+  m_LocalPosition: {x: -4.5799828, y: 9.053738, z: 0.079255104}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -104868,8 +104868,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uBC29\uB098\uAC00\uAE30"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 6e3fc796b7989284eafc49cc0e5207d0, type: 2}
-  m_sharedMaterial: {fileID: 842688090706270138, guid: 6e3fc796b7989284eafc49cc0e5207d0, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2a06bd97a000a674e8943795f51cf863, type: 2}
+  m_sharedMaterial: {fileID: -5071962696887357316, guid: 2a06bd97a000a674e8943795f51cf863, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -106364,7 +106364,7 @@ GameObject:
   - component: {fileID: 1568712746}
   - component: {fileID: 1568712745}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: Room Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -116550,7 +116550,7 @@ GameObject:
   - component: {fileID: 1712440804}
   - component: {fileID: 1712440803}
   m_Layer: 5
-  m_Name: Button (1)
+  m_Name: Cancel Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -119727,7 +119727,7 @@ RectTransform:
   m_GameObject: {fileID: 1764243660}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.1, y: 1.1, z: 1.1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1568712744}
@@ -128754,7 +128754,7 @@ RectTransform:
   m_GameObject: {fileID: 1940394108}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.1, y: 1.1, z: 1.1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 700545249}
@@ -130687,7 +130687,7 @@ RectTransform:
   m_GameObject: {fileID: 1980522654}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.1, y: 1.1, z: 1.1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2143467003}
