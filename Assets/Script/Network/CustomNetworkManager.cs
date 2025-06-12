@@ -44,6 +44,19 @@ public class CustomNetworkManager : NetworkManager
         NetworkClient.RegisterHandler<RoomListSyncMessage>(msg => RoomListUI.Instance.OnRoomListSyncMessageReceived(msg));
     }
 
+    public override void Start()
+    {
+        base.Start();
+
+        // 테스트용: 서버 IP 하드코딩해서 자동 접속
+        if (!NetworkClient.isConnected && !NetworkServer.active)
+        {
+            NetworkManager.singleton.networkAddress = "121.157.99.154"; // ← 너 공인 IP
+            NetworkManager.singleton.StartClient();
+
+            Debug.Log($"[AutoConnect] 서버 자동 접속 시도 중 → {NetworkManager.singleton.networkAddress}");
+        }
+    }
 
 
     public override void OnClientConnect()
