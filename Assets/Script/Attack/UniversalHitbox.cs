@@ -38,6 +38,8 @@ public class UniversalHitbox : NetworkBehaviour
     [SerializeField] private bool rotate = false;
     [SerializeField] private float rotateAmount = 45f;
 
+    private NetworkMatch ownerMatch;
+
     public override void OnStartServer()
     {
         rb = GetComponent<Rigidbody>();
@@ -78,7 +80,7 @@ public class UniversalHitbox : NetworkBehaviour
         owner = ownerObj;
         target = tgt;
         initialized = true;
-
+        ownerMatch = ownerObj.GetComponent<NetworkMatch>();
         tickTimes.Clear();
 
         if (autoDestroy)
@@ -107,6 +109,10 @@ public class UniversalHitbox : NetworkBehaviour
         if (!isServer || !initialized) return true;
         if (other.gameObject == owner) return true;
         if (!other.CompareTag("Player")) return true;
+
+        var otherMatch = other.GetComponent<NetworkMatch>();
+        if (ownerMatch == null || otherMatch == null) return true;
+        if (ownerMatch.matchId != otherMatch.matchId) return true;
         return false;
     }
 
