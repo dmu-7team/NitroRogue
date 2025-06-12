@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
+using Mirror;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerMovementRBM : MonoBehaviour
+public class PlayerMovementRBM : NetworkBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
@@ -34,17 +35,26 @@ public class PlayerMovementRBM : MonoBehaviour
 
     void Start()
     {
+        if (!isLocalPlayer) return;
+
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
 
         weaponSystem = GetComponent<WeaponSystemRBM>();
         stats = GetComponent<PlayerStats>();
-
         audioSource = GetComponent<AudioSource>();
         audioSource.playOnAwake = false;
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+    }
+
+    void Update()
+    {
+        if (!isLocalPlayer) return;
+
+        HandleLook();
+        HandleMove();
     }
 
     public void HandleLook()
@@ -68,16 +78,17 @@ public class PlayerMovementRBM : MonoBehaviour
         bool isMoving = moveDirection.magnitude > 0.1f;
 
         bool isRunning = Input.GetKey(KeyCode.LeftShift) && z > 0f && isMoving && !weaponSystem.IsReloading();
-        //float currentSpeed = isRunning ? runSpeed : moveSpeed;
         float currentSpeed = isRunning ? stats.MoveSpeed * 1.5f : stats.MoveSpeed;
+
         Vector3 velocity = moveDirection.normalized * currentSpeed;
         velocity.y = rb.linearVelocity.y;
         rb.linearVelocity = velocity;
 
+        // 로컬 애니메이션 적용 + 서버 동기화
+        SetMoveAnim(isMoving, isRunning);
+
         animator?.SetFloat("moveX", x);
         animator?.SetFloat("moveZ", z);
-        animator?.SetBool("isMoving", isMoving);
-        animator?.SetBool("isRunning", isRunning);
 
         if (isMoving && isGrounded)
         {
@@ -112,12 +123,52 @@ public class PlayerMovementRBM : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded && !weaponSystem.IsReloading())
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            animator?.SetTrigger("ClickSpacebar");
+            animator?.SetTrigger("ClickSpacebar"); // 로컬용
+            CmdPlayJumpAnim(); // 동기화용
         }
     }
 
     private void HandleGroundCheck()
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+    }
+
+    // ==============================
+    // 애니메이션 동기화 (Move / Jump)
+    // ==============================
+
+    void SetMoveAnim(bool isMoving, bool isRunning)
+    {
+        animator?.SetBool("isMoving", isMoving);
+        animator?.SetBool("isRunning", isRunning);
+
+        CmdSetMoveAnim(isMoving, isRunning);
+    }
+
+    [Command]
+    void CmdSetMoveAnim(bool isMoving, bool isRunning)
+    {
+        RpcSetMoveAnim(isMoving, isRunning);
+    }
+
+    [ClientRpc]
+    void RpcSetMoveAnim(bool isMoving, bool isRunning)
+    {
+        if (isLocalPlayer) return; // 로컬은 이미 실행했음
+        animator?.SetBool("isMoving", isMoving);
+        animator?.SetBool("isRunning", isRunning);
+    }
+
+    [Command]
+    void CmdPlayJumpAnim()
+    {
+        RpcPlayJumpAnim();
+    }
+
+    [ClientRpc]
+    void RpcPlayJumpAnim()
+    {
+        if (isLocalPlayer) return;
+        animator?.SetTrigger("ClickSpacebar");
     }
 }
