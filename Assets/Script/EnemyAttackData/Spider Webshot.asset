@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c278a4702e321794ca31908b5ab745ae, type: 3}
-  m_Name: Spider MagicBall
+  m_Name: Spider Webshot
   m_EditorClassIdentifier: 
   attackName: 
   attackDescription: 
