@@ -77,15 +77,15 @@ public class PlayerMovementRBM : NetworkBehaviour
         Vector3 moveDirection = transform.right * x + transform.forward * z;
         bool isMoving = moveDirection.magnitude > 0.1f;
 
-        bool isRunning = Input.GetKey(KeyCode.LeftShift) && z > 0f && isMoving && !weaponSystem.IsReloading();
-        float currentSpeed = isRunning ? stats.MoveSpeed * 1.5f : stats.MoveSpeed;
+        bool isSprinting = Input.GetKey(KeyCode.LeftShift) && z > 0f && isMoving && !weaponSystem.IsReloading();
+        float currentSpeed = isSprinting ? stats.MoveSpeed * 1.5f : stats.MoveSpeed;
 
         Vector3 velocity = moveDirection.normalized * currentSpeed;
         velocity.y = rb.linearVelocity.y;
         rb.linearVelocity = velocity;
 
         // 로컬 애니메이션 적용 + 서버 동기화
-        SetMoveAnim(isMoving, isRunning);
+        SetMoveAnim(isMoving, isSprinting);
 
         animator?.SetFloat("moveX", x);
         animator?.SetFloat("moveZ", z);
@@ -93,7 +93,7 @@ public class PlayerMovementRBM : NetworkBehaviour
         if (isMoving && isGrounded)
         {
             footstepTimer -= Time.deltaTime;
-            float interval = isRunning ? runFootstepInterval : walkFootstepInterval;
+            float interval = isSprinting ? runFootstepInterval : walkFootstepInterval;
 
             if (footstepTimer <= 0f)
             {
@@ -123,7 +123,7 @@ public class PlayerMovementRBM : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded && !weaponSystem.IsReloading())
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            animator?.SetTrigger("ClickSpacebar"); // 로컬용
+            animator?.SetTrigger("jump"); // 로컬용
             CmdPlayJumpAnim(); // 동기화용
         }
     }
@@ -137,26 +137,26 @@ public class PlayerMovementRBM : NetworkBehaviour
     // 애니메이션 동기화 (Move / Jump)
     // ==============================
 
-    void SetMoveAnim(bool isMoving, bool isRunning)
+    void SetMoveAnim(bool isMoving, bool isSprinting)
     {
         animator?.SetBool("isMoving", isMoving);
-        animator?.SetBool("isRunning", isRunning);
+        animator?.SetBool("isSprinting", isSprinting);
 
-        CmdSetMoveAnim(isMoving, isRunning);
+        CmdSetMoveAnim(isMoving, isSprinting);
     }
 
     [Command]
-    void CmdSetMoveAnim(bool isMoving, bool isRunning)
+    void CmdSetMoveAnim(bool isMoving, bool isSprinting)
     {
-        RpcSetMoveAnim(isMoving, isRunning);
+        RpcSetMoveAnim(isMoving, isSprinting);
     }
 
     [ClientRpc]
-    void RpcSetMoveAnim(bool isMoving, bool isRunning)
+    void RpcSetMoveAnim(bool isMoving, bool isSprinting)
     {
         if (isLocalPlayer) return; // 로컬은 이미 실행했음
         animator?.SetBool("isMoving", isMoving);
-        animator?.SetBool("isRunning", isRunning);
+        animator?.SetBool("isSprinting", isSprinting);
     }
 
     [Command]
@@ -169,6 +169,6 @@ public class PlayerMovementRBM : NetworkBehaviour
     void RpcPlayJumpAnim()
     {
         if (isLocalPlayer) return;
-        animator?.SetTrigger("ClickSpacebar");
+        animator?.SetTrigger("jump");
     }
 }

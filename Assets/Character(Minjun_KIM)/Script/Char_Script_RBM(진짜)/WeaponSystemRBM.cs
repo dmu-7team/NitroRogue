@@ -125,7 +125,7 @@ public class WeaponSystemRBM : NetworkBehaviour
 
     public void HandleFire()
     {
-        if (!isLocalPlayer || animator.GetBool("isRunning") || isReloading || currentAmmo <= 0)
+        if (!isLocalPlayer || animator.GetBool("isSprinting") || isReloading || currentAmmo <= 0)
             return;
 
         switch (weaponType)
@@ -134,17 +134,22 @@ public class WeaponSystemRBM : NetworkBehaviour
                 if (Input.GetMouseButton(0) && Time.time - lastFireTime >= smgFireInterval)
                 {
                     lastFireTime = Time.time;
+                    PlayShootAnimFor(weaponType);
                     FireSingleShot();
                 }
                 break;
             case WeaponType.AR:
                 if (Input.GetMouseButtonDown(0) && burstCoroutine == null)
+                {
+                    PlayShootAnimFor(weaponType);
                     burstCoroutine = StartCoroutine(FireBurst());
+                }
                 break;
             case WeaponType.DMR:
                 if (Input.GetMouseButtonDown(0) && Time.time - lastFireTime >= dmrFireInterval)
                 {
                     lastFireTime = Time.time;
+                    PlayShootAnimFor(weaponType);
                     FireSingleShot();
                 }
                 break;
@@ -152,26 +157,27 @@ public class WeaponSystemRBM : NetworkBehaviour
                 if (Input.GetMouseButtonDown(0) && Time.time - lastFireTime >= shotgunFireInterval)
                 {
                     lastFireTime = Time.time;
+                    PlayShootAnimFor(weaponType);
                     FireSingleShot();
                 }
                 break;
         }
     }
 
-    void TryFireSMG()
-    {
-        if (Time.time - lastFireTime >= smgFireInterval)
-        {
-            lastFireTime = Time.time;
-            FireSingleShot();
-        }
-    }
+    //void TryFireSMG()
+    //{
+    //    if (Time.time - lastFireTime >= smgFireInterval)
+    //    {
+    //        lastFireTime = Time.time;
+    //        FireSingleShot();
+    //    }
+    //}
 
-    void TryFireBurst()
-    {
-        if (burstCoroutine == null)
-            burstCoroutine = StartCoroutine(FireBurst());
-    }
+    //void TryFireBurst()
+    //{
+    //    if (burstCoroutine == null)
+    //        burstCoroutine = StartCoroutine(FireBurst());
+    //}
 
     IEnumerator FireBurst()
     {
@@ -184,18 +190,35 @@ public class WeaponSystemRBM : NetworkBehaviour
         burstCoroutine = null;
     }
 
+    private const int UPPER_LAYER_INDEX = 1;
+
+    // 상체 레이어가 이미 Shoot 재생/전이 중이면 트리거 재발화 금지
+    bool CanTriggerShoot()
+    {
+        if (animator == null) return false;
+        var st = animator.GetCurrentAnimatorStateInfo(UPPER_LAYER_INDEX);
+        bool inShoot = st.IsName("Shoot") && st.normalizedTime < 0.95f;
+        bool transitioning = animator.IsInTransition(UPPER_LAYER_INDEX);
+        return !(inShoot || transitioning);
+    }
+
+    // 무기 타입에 맞는 사격 애니메이션 재생
+    void PlayShootAnimFor(WeaponType type)
+    {
+        switch (type)
+        {
+            case WeaponType.SMG: animator.SetFloat("shootMode", 3f); break;
+            case WeaponType.AR: animator.SetFloat("shootMode", 2f); break;
+            default: animator.SetFloat("shootMode", 1f); break;
+        }
+        if (CanTriggerShoot())
+            animator.SetTrigger("shoot");
+    }
+
     void FireSingleShot()
     {
         currentAmmo--;
         UpdateAmmoUI();
-
-        switch (weaponType)
-        {
-            case WeaponType.SMG: animator.SetTrigger("AutoShoot"); break;
-            case WeaponType.AR: animator.SetTrigger("BurstShoot"); break;
-            default: animator.SetTrigger("Shoot"); break;
-        }
-
         FireBulletBasedOnType();
     }
 
@@ -322,7 +345,8 @@ public class WeaponSystemRBM : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.R) && currentAmmo < maxAmmo && !isReloading)
         {
             PlayReloadSound();
-            animator.SetTrigger("Reload");
+            Debug.Log("장전");
+            animator.SetTrigger("reload");
             StartCoroutine(ReloadAfterDelay(2.667f));
         }
     }

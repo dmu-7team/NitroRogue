@@ -1238,7 +1238,7 @@ Animator:
   m_GameObject: {fileID: 2460976672058901519}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 860793eb3324391468f1c120a75ec049, type: 3}
-  m_Controller: {fileID: 9100000, guid: d74501b7c62f02c429394fe0bbfa695b, type: 2}
+  m_Controller: {fileID: 9100000, guid: f735c6546e50b7b459a311c47c122102, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1312,9 +1312,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76170b206d83bbf47927848039a3969b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   moveSpeed: 5
   runSpeed: 8
-  jumpForce: 5
+  jumpForce: 2
   groundMask:
     serializedVersion: 2
     m_Bits: 64
@@ -1326,8 +1329,8 @@ MonoBehaviour:
   footstepClips:
   - {fileID: 8300000, guid: 203ac8b6f07070e4f93f1c1a6fff06c3, type: 3}
   - {fileID: 8300000, guid: 1deb201b8bf8f89479323a74e421150b, type: 3}
-  walkFootstepInterval: 0.65
-  runFootstepInterval: 0.37
+  walkFootstepInterval: 1.2
+  runFootstepInterval: 0.5
 --- !u!114 &2543631903229549781
 MonoBehaviour:
   m_ObjectHideFlags: 0

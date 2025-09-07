@@ -57,6 +57,7 @@ public class CustomNetworkManager_Server : NetworkManager
         NetworkServer.RegisterHandler<RoomListRequestMessage>(OnRoomListRequestMessageReceived);
     }
 
+    //방 참여
     private void OnJoinMatchMessageReceived(NetworkConnectionToClient conn, JoinMatchMessage msg)
     {
         Debug.Log($"[서버] JoinMatch 요청: {msg.matchId} / {msg.roomName}");
@@ -87,6 +88,7 @@ public class CustomNetworkManager_Server : NetworkManager
         BroadcastPlayerList(msg.matchId);
     }
 
+    //방 조회
     private void OnRoomListRequestMessageReceived(NetworkConnectionToClient conn, RoomListRequestMessage msg)
     {
         List<RoomInfo> roomInfos = matchRooms.Select(pair => new RoomInfo
@@ -216,6 +218,7 @@ public class CustomNetworkManager_Server : NetworkManager
 
 
 
+    //플레이어 목록 브로드캐스트
     public void BroadcastPlayerList(string matchId)
     {
         if (!matchRooms.ContainsKey(matchId)) return;

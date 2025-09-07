@@ -27542,9 +27542,10 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  enemyPrefab: {fileID: 4921877257883508352, guid: 03acb33812c5ec341b2246e3fca17a10, type: 3}
-  spawnInterval: 9999
+  enemyPrefabs: []
   spawnData: {fileID: 0}
+  killThreshold: 20
+  specialEnemyPrefab: {fileID: 0}
 --- !u!1001 &576865133
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -46681,6 +46682,10 @@ PrefabInstance:
     - target: {fileID: 4617036660772024948, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
       propertyPath: m_Name
       value: Portal red
+      objectReference: {fileID: 0}
+    - target: {fileID: 4617036660772024948, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4706116037937865665, guid: 52c7d057cba585641bb68312c10d7791, type: 3}
       propertyPath: m_LocalScale.x
@@ -111888,6 +111893,7 @@ MonoBehaviour:
   crosshair: {fileID: 0}
   ammoText: {fileID: 0}
   scopeOverlay: {fileID: 0}
+  gunIcon: {fileID: 0}
   msgText: {fileID: 1688991823590013524}
   chestMessageText: {fileID: 1688991823590013524}
   levelUpMessageText: {fileID: 1688991823590013524}
