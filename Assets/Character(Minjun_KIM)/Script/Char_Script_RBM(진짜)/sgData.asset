@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 702565d1ef879254f921ba1aac2a79ea, type: 3}
+  m_Name: sgData
+  m_EditorClassIdentifier: 
+  id: 1
+  displayName: shotgun
+  icon: {fileID: -827983752, guid: 6753f41929102bb408bf0be641ce0212, type: 3}
+  type: 3
+  fireMode: 3
+  aimMode: 0
+  magSize: 15
+  reloadTime: 2.667
+  rpm: 90
+  burstCount: 3
+  burstDelay: 0.1
+  pelletCount: 10
+  spreadDeg: 10
+  scopedFOV: 30
+  fireClip: {fileID: 8300000, guid: 1df1429981f76644097c7fd47fc5f239, type: 3}
+  reloadClip: {fileID: 8300000, guid: 45e124947dcf2f0429a575270613dee1, type: 3}

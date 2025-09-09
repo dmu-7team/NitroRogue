@@ -103,24 +103,7 @@ public class WeaponSystemRBM : NetworkBehaviour
 
     void Update()
     {
-        if (!isLocalPlayer) return;
-
-        HandleAim();
-
-        //핸들링 파이어와 무관하게 작동해요
-        //if (Input.GetMouseButton(0) && !animator.GetBool("isRunning") && !isReloading && currentAmmo > 0)
-        //{
-        //    if (weaponType == WeaponType.SMG)
-        //        TryFireSMG();
-        //}
-
-        //if (Input.GetMouseButtonDown(0) && !animator.GetBool("isRunning") && !isReloading && currentAmmo > 0)
-        //{
-        //    if (weaponType == WeaponType.AR)
-        //        TryFireBurst();
-        //    else if (weaponType != WeaponType.SMG)
-        //        FireSingleShot();
-        //}
+        if (isLocalPlayer) HandleAim();
     }
 
     public void HandleFire()
@@ -163,21 +146,6 @@ public class WeaponSystemRBM : NetworkBehaviour
                 break;
         }
     }
-
-    //void TryFireSMG()
-    //{
-    //    if (Time.time - lastFireTime >= smgFireInterval)
-    //    {
-    //        lastFireTime = Time.time;
-    //        FireSingleShot();
-    //    }
-    //}
-
-    //void TryFireBurst()
-    //{
-    //    if (burstCoroutine == null)
-    //        burstCoroutine = StartCoroutine(FireBurst());
-    //}
 
     IEnumerator FireBurst()
     {

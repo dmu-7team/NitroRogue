@@ -4,22 +4,14 @@ using System;
 
 public class CharacterStats : NetworkBehaviour
 {
-    [SyncVar] public float currentHealth;
-    [SyncVar] public float maxHealth = 100f;
+    [SyncVar(hook = nameof(OnCurHpSync))] protected float currentHealth;
+    [SyncVar(hook = nameof(OnMaxHpSync))] protected float maxHealth = 100f;
 
-    //  SyncVar 필드 제거
-    // → 자식이 따로 관리
-    // public float attackDamage;
-    // public float moveSpeed;
-
-    // 속성만 남기고 자식에서 override 하게 만들기
     public virtual float AttackDamage => 0f;
     public virtual float MoveSpeed => 0f;
 
     public virtual float CurrentHealth => currentHealth;
     public virtual float MaxHealth => maxHealth;
-
-    public virtual event Action<float, float> OnHealthChanged;
 
     public override void OnStartServer()
     {
@@ -27,21 +19,27 @@ public class CharacterStats : NetworkBehaviour
         currentHealth = maxHealth;
     }
 
+    void OnCurHpSync(float oldVal, float newVal) => NotifyDerived();
+    void OnMaxHpSync(float oldVal, float newVal) => NotifyDerived();
+
+    protected virtual void OnHealthSynced(float cur, float max) { /* 기본은 아무것도 안 함 */ }
+
+    protected void NotifyDerived() => OnHealthSynced(currentHealth, maxHealth);
+
     [Server]
     public virtual void SetHealth(float current, float max)
     {
-        currentHealth = current;
+        max = Mathf.Max(1f, max);
+        current = Mathf.Clamp(current, 0, max);
         maxHealth = max;
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        currentHealth = current;
     }
 
     [Server]
     public virtual void TakeDamage(float damage, GameObject attacker = null)
     {
-        currentHealth -= damage;
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
-        if (currentHealth <= 0)
-            Die();
+        currentHealth = Mathf.Clamp(currentHealth - Mathf.Abs(damage), 0, maxHealth);
+        if (currentHealth <= 0) Die();
     }
 
     [Server]

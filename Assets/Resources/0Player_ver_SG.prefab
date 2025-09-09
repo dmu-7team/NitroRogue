@@ -1092,6 +1092,7 @@ GameObject:
   - component: {fileID: 8790241664111477490}
   - component: {fileID: 398416214304943837}
   - component: {fileID: 1077809983208230917}
+  - component: {fileID: 8315759096956485603}
   m_Layer: 0
   m_Name: 0Player_ver_SG
   m_TagString: Player
@@ -1236,7 +1237,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2460976672058901519}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b3df75ae82d370141a53d292d65cdd6d, type: 3}
   m_Name: 
@@ -1310,9 +1311,6 @@ MonoBehaviour:
   syncInterval: 0
   currentHealth: 0
   maxHealth: 100
-  currentExp: 0
-  expToLevelUp: 100
-  level: 1
   animator: {fileID: 0}
   healthPerLevel: 10
   damagePerLevel: 5
@@ -1501,6 +1499,32 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &8315759096956485603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2460976672058901519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8dd4b2d851f8fc4fa8f65726e2ec790, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  config: {fileID: 11400000, guid: 0dec45b0b2681d349b804c2bc81734bb, type: 2}
+  muzzle: {fileID: 6497579117348275070}
+  playerCamera: {fileID: 3176191638402731530}
+  cameraHolder: {fileID: 8935639255905158896}
+  defaultCamPos: {fileID: 5530317650597976280}
+  aimCamPos: {fileID: 9122895395639324629}
+  camTransitionSpeed: 5
+  muzzleFx: {fileID: 3964968331432576415}
+  bulletTrailPrefab: {fileID: 235673213667241877, guid: 6c4ffb140e19fe6439d7075e4941926d, type: 3}
+  audioSource: {fileID: 1077809983208230917}
+  animator: {fileID: 3456327250828170975}
 --- !u!1 &2518677131893347981
 GameObject:
   m_ObjectHideFlags: 0

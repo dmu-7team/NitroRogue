@@ -173,6 +173,12 @@ public class CustomNetworkManager_Server : NetworkManager
                 matchComp.matchId = parsedMatchId;
             }
 
+            // nickname 설정
+            if (playerObj.TryGetComponent(out PlayerStats playerStats))
+            {
+                playerStats.NickName = roomPlayer.name;
+            }
+
             // 미리 게임 시작 알림
             roomPlayer.TargetStartGame(conn, index, matchId);
             Debug.Log($"[서버] TargetStartGame 호출 완료");

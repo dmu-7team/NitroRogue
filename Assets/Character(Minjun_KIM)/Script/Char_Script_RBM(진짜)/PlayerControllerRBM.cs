@@ -8,7 +8,7 @@ using BitWave_Labs.AnimatedTextReveal;
 public class PlayerControllerRBM : NetworkBehaviour
 {
     private PlayerMovementRBM movement;
-    private WeaponSystemRBM weaponSystem;
+    //private WeaponSystemRBM weaponSystem;
     public GameObject cameraObject;
 
     public override void OnStartAuthority()
@@ -22,7 +22,7 @@ public class PlayerControllerRBM : NetworkBehaviour
 
         // 2. 내 컴포넌트 설정
         movement = GetComponent<PlayerMovementRBM>();
-        weaponSystem = GetComponent<WeaponSystemRBM>();
+        //weaponSystem = GetComponent<WeaponSystemRBM>();
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -51,12 +51,13 @@ public class PlayerControllerRBM : NetworkBehaviour
 
     void Update()
     {
-        if (!isLocalPlayer || movement == null || weaponSystem == null) return;
+        if (!isLocalPlayer || movement == null) return;
+        // if (!isLocalPlayer || movement == null || weaponSystem == null) return;
 
         movement.HandleMove();
         movement.HandleLook();
-        weaponSystem.HandleFire();
-        weaponSystem.HandleReload();
+        //weaponSystem.HandleFire();
+        //weaponSystem.HandleReload();
     }
 
 
@@ -81,35 +82,31 @@ public class PlayerControllerRBM : NetworkBehaviour
         }
     }
 
-    [Command]
-    public void CmdSpawnTrail(Vector3 start, Vector3 end)
-    {
-        if (weaponSystem == null || weaponSystem.bulletTrailPrefab == null)
-        {
-            Debug.LogWarning("[CMD] Trail Prefab이 없습니다.");
-            return;
-        }
+    //[Command]
+    //public void CmdSpawnTrail(Vector3 start, Vector3 end)
+    //{
+    //    if (weaponSystem == null || weaponSystem.bulletTrailPrefab == null)
+    //    {
+    //        Debug.LogWarning("[CMD] Trail Prefab이 없습니다.");
+    //        return;
+    //    }
 
-        GameObject trail = Instantiate(weaponSystem.bulletTrailPrefab, start, Quaternion.identity);
-        NetworkServer.Spawn(trail);
+    //    GameObject trail = Instantiate(weaponSystem.bulletTrailPrefab, start, Quaternion.identity);
+    //    NetworkServer.Spawn(trail);
 
-        var lr = trail.GetComponent<LineRenderer>();
-        if (lr != null)
-        {
-            lr.SetPosition(0, start);
-            lr.SetPosition(1, end);
-        }
+    //    var lr = trail.GetComponent<LineRenderer>();
+    //    if (lr != null)
+    //    {
+    //        lr.SetPosition(0, start);
+    //        lr.SetPosition(1, end);
+    //    }
 
-        StartCoroutine(DestroyAfter(trail, 0.1f));
-    }
+    //    StartCoroutine(DestroyAfter(trail, 0.1f));
+    //}
 
     private IEnumerator DestroyAfter(GameObject obj, float delay)
     {
         yield return new WaitForSeconds(delay);
         NetworkServer.Destroy(obj);
     }
-
-   
-
-
 }
