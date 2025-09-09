@@ -13,7 +13,7 @@ public class CustomNetworkManager : NetworkManager
     [SerializeField] private GameObject playerPrefab_DMR;
     [SerializeField] private GameObject playerPrefab_SG;
     [SerializeField] private GameObject playerPrefab_SMG;
-
+    [SerializeField] private GameObject missionManagerPrefab;
 
     [Header("클라이언트 몬스터 프리팹 등록")]
     [SerializeField] private GameObject[] monsterPrefabs; // 인스펙터에서 할당
@@ -22,7 +22,7 @@ public class CustomNetworkManager : NetworkManager
     {
         base.OnStartClient();
         joinSent = false;
-
+        if (missionManagerPrefab) NetworkClient.RegisterPrefab(missionManagerPrefab); // ★ 추가
         // 플레이어 프리팹 등록 (신규 직업)
         if (playerPrefab_AR != null) NetworkClient.RegisterPrefab(playerPrefab_AR);
         if (playerPrefab_DMR != null) NetworkClient.RegisterPrefab(playerPrefab_DMR);
@@ -42,19 +42,19 @@ public class CustomNetworkManager : NetworkManager
         // 메시지 핸들러
         NetworkClient.RegisterHandler<JoinResultMessage>(OnJoinResultMessageReceived);
         NetworkClient.RegisterHandler<RoomListSyncMessage>(msg => RoomListUI.Instance.OnRoomListSyncMessageReceived(msg));
+
+        Debug.Log($"[Client] 접속 시도 IP: {NetworkManager.singleton.networkAddress}");
+
     }
 
     public override void Start()
     {
         base.Start();
-
-        // 테스트용: 서버 IP 하드코딩해서 자동 접속
         if (!NetworkClient.isConnected && !NetworkServer.active)
         {
-            NetworkManager.singleton.networkAddress = "121.157.99.154"; // ← 너 공인 IP
+            NetworkManager.singleton.networkAddress = "localhost"; // or "127.0.0.1"
             NetworkManager.singleton.StartClient();
-
-            Debug.Log($"[AutoConnect] 서버 자동 접속 시도 중 → {NetworkManager.singleton.networkAddress}");
+            Debug.Log("[AutoConnect] 로컬 서버로 자동 접속 시도");
         }
     }
 

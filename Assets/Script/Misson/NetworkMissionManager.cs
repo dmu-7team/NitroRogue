@@ -1,73 +1,47 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using Mirror;
+using System;
 
 public class NetworkMissionManager : NetworkBehaviour
 {
-    public static NetworkMissionManager Instance;
+    public static NetworkMissionManager Instance { get; private set; }
 
-    [Header("미션 UI")]
-    public TextMeshProUGUI missionText;
+    // 팀 누적 처치 수(>=1 이면 완료)
+    [SyncVar(hook = nameof(OnTeamKillChanged))]
+    private int teamKill;
 
-    [SyncVar(hook = nameof(OnMissionChanged))]
-    private bool missionCompleted = false;
+    public static event Action<int> OnTeamKillUpdated; // 클라 UI 리스너
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        else if (Instance != this) Destroy(gameObject);
     }
 
-    private void Start()
+    [Server]
+    public void AddTeamKill(int amount = 1)
     {
-        if (isClient && missionText != null)
-        {
-            // 시작 시 기본 텍스트 초기화
-            missionText.text = "□ 에네미 1마리 이상 잡으세요";
-        }
+        if (amount > 0) teamKill += amount;
     }
 
-    public void CheckMissionProgress()
-    {
-        if (!isServer) return;
+    // (선택) bool로 쓰고 싶으면: [SyncVar(hook=nameof(OnCompleted))] bool missionCompleted;
+    // [Server] public void MarkCompleted(){ missionCompleted = true; }
 
-        if (!missionCompleted)
-        {
-            missionCompleted = true;
-        }
-    }
-
-    private void OnMissionChanged(bool oldValue, bool newValue)
+    void OnTeamKillChanged(int oldVal, int newVal)
     {
-        if (newValue)
-        {
-            ShowMissionCompletedUI();
-        }
+        if (isClient) OnTeamKillUpdated?.Invoke(newVal);
     }
 
     public override void OnStartClient()
     {
         base.OnStartClient();
-
-        if (missionText == null) return;
-
-        if (missionCompleted)
-        {
-            ShowMissionCompletedUI();
-        }
-        else
-        {
-            // 아직 미션 미완료 상태인 경우에도 텍스트 세팅
-            missionText.text = "□ 에네미 1마리 이상 잡으세요";
-        }
+        OnTeamKillUpdated?.Invoke(teamKill); // 늦게 들어온 클라 초기 UI 세팅
     }
-
-    private void ShowMissionCompletedUI()
+    public static NetworkMissionManager GetOrFind()
     {
-        if (missionText != null)
-        {
-            missionText.text = "■ 에네미 1마리 이상 잡으세요";
-        }
+        if (Instance != null) return Instance;
+        return FindFirstObjectByType<NetworkMissionManager>();
     }
+    // 매치 분리를 할 거면 아래처럼 NetworkMatch를 붙이고 matchId를 세팅해줘야 함.
+    // public NetworkMatch networkMatch; // 컴포넌트로 추가해 두고 서버에서 matchId 주입
 }
