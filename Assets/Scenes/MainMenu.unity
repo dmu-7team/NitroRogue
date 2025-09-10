@@ -1216,7 +1216,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8142b95cfc27fd49a04b1996bead5c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hudPanel: {fileID: 943120442}
   crosshair: {fileID: 57160553}
   ammoText: {fileID: 468540932}
   scopeOverlay: {fileID: 337402297}
@@ -25939,7 +25938,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2936a303f21e3fc43a015c115e6fc7cd, type: 3}
+  m_Script: {fileID: 11500000, guid: 0c485f631e5d57348ab65bf0b77acab4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &473996361
@@ -46664,7 +46663,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1368679396}
-  - {fileID: 1137760285}
   m_Father: {fileID: 879000815}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -50322,6 +50320,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 865305857}
+  - {fileID: 1137760285}
   m_Father: {fileID: 1385047423}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
@@ -86270,12 +86269,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1137760284}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 865305857}
+  m_Father: {fileID: 879000815}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -91187,6 +91186,10 @@ PrefabInstance:
       propertyPath: missionText
       value: 
       objectReference: {fileID: 1137760286}
+    - target: {fileID: 6081093156135785108, guid: 759068f362928494392c923c831e1701, type: 3}
+      propertyPath: missionText
+      value: 
+      objectReference: {fileID: 1137760286}
     - target: {fileID: 7078556089362761334, guid: 759068f362928494392c923c831e1701, type: 3}
       propertyPath: m_Name
       value: NetworkMissionManager
@@ -93834,6 +93837,15 @@ MonoBehaviour:
   healthText: {fileID: 1852346083}
   expFill: {fileID: 128836127}
   expText: {fileID: 1893387338}
+  barLerpDuration: 0.5
+  blinkInterval: 0.3
+  lowHpThreshold: 0.3
+  criticalHpThreshold: 0.1
+  hpNormalColor: {r: 1, g: 0, b: 0, a: 1}
+  hpLowColor: {r: 0, g: 0, b: 0, a: 1}
+  expFlashColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  expFlashDuration: 0.2
+  expFlashCount: 3
 --- !u!1001 &1314593802
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -139804,6 +139816,14 @@ PrefabInstance:
       propertyPath: createButton
       value: 
       objectReference: {fileID: 755173541}
+    - target: {fileID: 3299789727782889157, guid: c39be96806109e246b0bf1d723e904e6, type: 3}
+      propertyPath: roomNameText
+      value: 
+      objectReference: {fileID: 1085316673}
+    - target: {fileID: 3299789727782889157, guid: c39be96806109e246b0bf1d723e904e6, type: 3}
+      propertyPath: roomUIPrefab
+      value: 
+      objectReference: {fileID: 8905104389162583780, guid: bb8fc428f2206c74592343c7054463c1, type: 3}
     - target: {fileID: 3299789727782889157, guid: c39be96806109e246b0bf1d723e904e6, type: 3}
       propertyPath: contentParent
       value: 

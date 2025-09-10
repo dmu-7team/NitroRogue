@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Mirror;
@@ -13,18 +13,18 @@ public class RoomListUI : MonoBehaviour
     public static string matchIdToJoin;
     public static bool enableAutoJoin = false;
 
-    [Header("¹æ ¸®½ºÆ® UI")]
+    [Header("ë°© ë¦¬ìŠ¤íŠ¸ UI")]
     public GameObject roomUIPrefab;
     public Transform contentParent;
     public Button refreshButton;
 
-    [Header("¹æ ¸¸µé±â ÆË¾÷ UI")]
+    [Header("ë°© ë§Œë“¤ê¸° íŒì—… UI")]
     public GameObject createRoomPopup;
     public TMP_InputField roomNameInputField;
     public Button createButton;
     public Button cancelButton;
 
-    [Header("·ë ¾À ³» ¹æ ÀÌ¸§ UI")]
+    [Header("ë£¸ ì”¬ ë‚´ ë°© ì´ë¦„ UI")]
     public TextMeshProUGUI roomNameText;
 
     private static bool handlerRegistered = false;
@@ -41,18 +41,18 @@ public class RoomListUI : MonoBehaviour
         }
         createRoomPopup?.SetActive(false);
         Instance = this;
-        Debug.Log($"[RoomListUI] ÇöÀç ÀÎ½ºÅÏ½º ID: {GetInstanceID()}");
+        Debug.Log($"[RoomListUI] í˜„ì¬ ì¸ìŠ¤í„´ìŠ¤ ID: {GetInstanceID()}");
         if (!handlerRegistered)
         {
             NetworkClient.RegisterHandler<RoomListSyncMessage>(OnRoomListSyncMessageReceived);
             handlerRegistered = true;
-            Debug.Log("[RoomListUI] RoomListSyncMessage ÇÚµé·¯ µî·Ï ¿Ï·á");
+            Debug.Log("[RoomListUI] RoomListSyncMessage í•¸ë“¤ëŸ¬ ë“±ë¡ ì™„ë£Œ");
         }
     }
 
     private void Start()
     {
-        Debug.Log("[RoomListUI] Start È£ÃâµÊ");
+        Debug.Log("[RoomListUI] Start í˜¸ì¶œë¨");
 
         if (!handlerRegistered)
         {
@@ -62,7 +62,7 @@ public class RoomListUI : MonoBehaviour
 
         if (!listenersRegistered)
         {
-            Debug.Log($"[RoomListUI] ¸®½º³Ê µî·Ï ½Ãµµ, ÀÎ½ºÅÏ½º ID: {GetInstanceID()}");
+            Debug.Log($"[RoomListUI] ë¦¬ìŠ¤ë„ˆ ë“±ë¡ ì‹œë„, ì¸ìŠ¤í„´ìŠ¤ ID: {GetInstanceID()}");
 
             createButton.onClick.RemoveAllListeners();
             cancelButton.onClick.RemoveAllListeners();
@@ -77,22 +77,28 @@ public class RoomListUI : MonoBehaviour
 
         createRoomPopup?.SetActive(false);
 
-        // ¹æ ÀÌ¸§ UI °»½Å
+        // ë°© ì´ë¦„ UI ê°±ì‹ 
         TryUpdateRoomNameUI();
     }
 
     private void OnEnable()
     {
-        if (!NetworkClient.isConnected && !triedAutoConnect)
+        if (!NetworkClient.isConnected && !NetworkClient.active && !NetworkServer.active && !triedAutoConnect)
         {
             triedAutoConnect = true;
-            Debug.Log("[RoomListUI] ÀÚµ¿ ¼­¹ö ¿¬°á ½Ãµµ");
-            NetworkManager.singleton.networkAddress = "127.0.0.1";
-            NetworkManager.singleton.StartClient();
+            Debug.Log("[RoomListUI] ìë™ ì„œë²„ ì—°ê²° ì‹œë„ (localhost:7777)");
+
+            var nm = NetworkManager.singleton;
+            nm.networkAddress = "localhost";         // ë‚´ë¶€ë§ì´ë©´ 192.168.x.xë¡œ
+            var tp = nm.GetComponent<TelepathyTransport>();
+            if (tp != null) tp.port = 7777;
+
+            nm.StartClient();
         }
 
         InvokeRepeating(nameof(RequestRoomListRefresh), 1f, refreshInterval);
     }
+
 
 
     private void OnDisable()
@@ -116,14 +122,14 @@ public class RoomListUI : MonoBehaviour
     {
         if (!NetworkClient.isConnected)
         {
-            Debug.LogWarning("[RoomListUI] ¾ÆÁ÷ ¼­¹ö¿¡ ¿¬°áµÇÁö ¾ÊÀ½. ¿¬°á ÈÄ ½ÃµµÇÏ¼¼¿ä.");
+            Debug.LogWarning("[RoomListUI] ì•„ì§ ì„œë²„ì— ì—°ê²°ë˜ì§€ ì•ŠìŒ. ì—°ê²° í›„ ì‹œë„í•˜ì„¸ìš”.");
             return;
         }
 
         string roomName = roomNameInputField.text;
         if (string.IsNullOrWhiteSpace(roomName))
         {
-            Debug.LogWarning("[RoomListUI] ¹æ ÀÌ¸§ÀÌ ºñ¾î ÀÖ½À´Ï´Ù.");
+            Debug.LogWarning("[RoomListUI] ë°© ì´ë¦„ì´ ë¹„ì–´ ìˆìŠµë‹ˆë‹¤.");
             return;
         }
 
@@ -142,30 +148,42 @@ public class RoomListUI : MonoBehaviour
         createRoomPopup.SetActive(false);
 
         RoomUIManager.Instance.ShowRoom(roomName);
-        Debug.Log($"[RoomListUI] ¹æ »ı¼º ¿äÃ» Àü¼Û: {roomName} ({newMatchId})");
+        Debug.Log($"[RoomListUI] ë°© ìƒì„± ìš”ì²­ ì „ì†¡: {roomName} ({newMatchId})");
     }
 
     public void RequestRoomListRefresh()
     {
         if (NetworkClient.isConnected)
         {
-            Debug.Log("[RoomListUI] ¼­¹ö¿¡ ¹æ ¸®½ºÆ® ¿äÃ» Àü¼Û (ÀÚµ¿)");
+            Debug.Log("[RoomListUI] ì„œë²„ì— ë°© ë¦¬ìŠ¤íŠ¸ ìš”ì²­ ì „ì†¡ (ìë™)");
             NetworkClient.Send(new RoomListRequestMessage());
+            return;
         }
-        else if (!triedAutoConnect)
+
+        if (!triedAutoConnect)
         {
             triedAutoConnect = true;
-            Debug.Log("[RoomListUI] ¼­¹ö¿¡ ÀÚµ¿ ¿¬°á ½Ãµµ Áß...");
-            NetworkManager.singleton.networkAddress = "127.0.0.1";
-            NetworkManager.singleton.StartClient();
+            Debug.Log("[RoomListUI] ì„œë²„ì— ìë™ ì—°ê²° ì‹œë„ ì¤‘... (localhost:7777)");
+
+            // ì£¼ì†Œ/í¬íŠ¸ ë¡œì»¬ë¡œ ê³ ì •
+            var nm = NetworkManager.singleton;
+            nm.networkAddress = "localhost"; // ë˜ëŠ” ì„œë²„ PCì˜ ë‚´ë¶€ IP (ì˜ˆ: 192.168.x.x)
+
+            // Telepathy í¬íŠ¸ ë§ì¶”ê¸°
+            var tp = nm.GetComponent<TelepathyTransport>();
+            if (tp != null) tp.port = 7777;
+
+            if (!NetworkClient.active && !NetworkServer.active)
+                nm.StartClient();
         }
     }
+
 
     public void OnRoomListSyncMessageReceived(RoomListSyncMessage msg)
     {
         if (contentParent == null)
         {
-            Debug.LogWarning("[RoomListUI] contentParent ¾øÀ½ -> ¹æ ¸®½ºÆ® °»½Å ¹«½Ã");
+            Debug.LogWarning("[RoomListUI] contentParent ì—†ìŒ -> ë°© ë¦¬ìŠ¤íŠ¸ ê°±ì‹  ë¬´ì‹œ");
             return;
         }
 
@@ -175,7 +193,7 @@ public class RoomListUI : MonoBehaviour
         foreach (RoomInfo info in msg.roomList)
         {
             if (info.currentPlayers <= 0)
-                continue; // ¹æ¿¡ ÇÃ·¹ÀÌ¾î°¡ ¾øÀ¸¸é Ç¥½ÃÇÏÁö ¾ÊÀ½
+                continue; // ë°©ì— í”Œë ˆì´ì–´ê°€ ì—†ìœ¼ë©´ í‘œì‹œí•˜ì§€ ì•ŠìŒ
 
             GameObject roomItem = Instantiate(roomUIPrefab, contentParent);
             RoomInfoUI ui = roomItem.GetComponent<RoomInfoUI>();
@@ -203,7 +221,7 @@ public class RoomListUI : MonoBehaviour
     {
         if (contentParent == null || !contentParent.gameObject.activeInHierarchy)
         {
-            Debug.LogWarning("[RoomListUI] contentParent ºñÈ°¼ºÈ­µÊ");
+            Debug.LogWarning("[RoomListUI] contentParent ë¹„í™œì„±í™”ë¨");
             return;
         }
 
@@ -212,7 +230,7 @@ public class RoomListUI : MonoBehaviour
 
         if (list == null || list.Count == 0)
         {
-            Debug.Log("[RoomListUI] Ç¥½ÃÇÒ ¹æ ¾øÀ½");
+            Debug.Log("[RoomListUI] í‘œì‹œí•  ë°© ì—†ìŒ");
             return;
         }
 
@@ -222,7 +240,7 @@ public class RoomListUI : MonoBehaviour
             var infoUI = obj.GetComponent<RoomInfoUI>();
 
             if (infoUI != null)
-                infoUI.SetInfo(info);  // ¿©±âµµ ¼öÁ¤µÊ
+                infoUI.SetInfo(info);  // ì—¬ê¸°ë„ ìˆ˜ì •ë¨
         }
     }
 
@@ -232,7 +250,7 @@ public class RoomListUI : MonoBehaviour
         {
             var player = NetworkClient.connection.identity.GetComponent<RoomPlayer>();
             if (player != null)
-                roomNameText.text = $"¹æ ÀÌ¸§: {player.roomName}";
+                roomNameText.text = $"ë°© ì´ë¦„: {player.roomName}";
         }
     }
 
