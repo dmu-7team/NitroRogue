@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 5347417932251279745}
   - component: {fileID: 4853706716915207958}
   - component: {fileID: 2516017307130271443}
-  - component: {fileID: 6081093156135785108}
   m_Layer: 0
   m_Name: NetworkMissionManager
   m_TagString: Untagged
@@ -83,16 +82,3 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   MatchID: 
---- !u!114 &6081093156135785108
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7078556089362761334}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fbb4a58693772404fb1d24ca2df9719e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  missionText: {fileID: 0}
