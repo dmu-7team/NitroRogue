@@ -10,6 +10,8 @@ using UnityEngine.AI;
 
 public class CustomNetworkManager_Server : NetworkManager
 {
+    [Header("Match-scoped managers")]
+    [SerializeField] private GameObject missionManagerPrefab; // ← 인스펙터에 NetworkMissionManager 프리팹 연결
     public GameObject[] monsterPrefabs;
     public GameObject[] characterPrefabs;
     public GameObject roomPlayerPrefab;
@@ -57,7 +59,6 @@ public class CustomNetworkManager_Server : NetworkManager
         NetworkServer.RegisterHandler<RoomListRequestMessage>(OnRoomListRequestMessageReceived);
     }
 
-    //방 참여
     private void OnJoinMatchMessageReceived(NetworkConnectionToClient conn, JoinMatchMessage msg)
     {
         Debug.Log($"[서버] JoinMatch 요청: {msg.matchId} / {msg.roomName}");
@@ -88,7 +89,6 @@ public class CustomNetworkManager_Server : NetworkManager
         BroadcastPlayerList(msg.matchId);
     }
 
-    //방 조회
     private void OnRoomListRequestMessageReceived(NetworkConnectionToClient conn, RoomListRequestMessage msg)
     {
         List<RoomInfo> roomInfos = matchRooms.Select(pair => new RoomInfo
@@ -173,12 +173,6 @@ public class CustomNetworkManager_Server : NetworkManager
                 matchComp.matchId = parsedMatchId;
             }
 
-            // nickname 설정
-            if (playerObj.TryGetComponent(out PlayerStats playerStats))
-            {
-                playerStats.NickName = roomPlayer.name;
-            }
-
             // 미리 게임 시작 알림
             roomPlayer.TargetStartGame(conn, index, matchId);
             Debug.Log($"[서버] TargetStartGame 호출 완료");
@@ -199,7 +193,21 @@ public class CustomNetworkManager_Server : NetworkManager
         }
         NetworkServer.Spawn(spawnerObj);
 
+        if (missionManagerPrefab != null)
+        {
+            var mmObj = Instantiate(missionManagerPrefab);
 
+            // 매치 분리(InterestManagement)를 쓰고 있으니 같은 matchId 부여
+            var mmMatch = mmObj.GetComponent<NetworkMatch>();
+            if (mmMatch != null) mmMatch.matchId = parsedMatchId;
+
+            NetworkServer.Spawn(mmObj);
+            Debug.Log($"[서버] MissionManager 스폰 완료 (matchId={parsedMatchId})");
+        }
+        else
+        {
+            Debug.LogError("[서버] missionManagerPrefab 이 비어있습니다. 인스펙터에 연결하세요.");
+        }
         // 몬스터 생성 지연
         //StartCoroutine(SpawnEnemiesAfterDelay(matchId, 1f));
         //Debug.Log("[서버] 모든 플레이어 처리 완료 → 몬스터 스폰 대기 중...");
@@ -224,7 +232,6 @@ public class CustomNetworkManager_Server : NetworkManager
 
 
 
-    //플레이어 목록 브로드캐스트
     public void BroadcastPlayerList(string matchId)
     {
         if (!matchRooms.ContainsKey(matchId)) return;

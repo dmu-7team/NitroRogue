@@ -6,14 +6,12 @@ using TMPro;
 using System.Collections.Generic;
 using Mirror;
 using System.Collections;
-using Unity.AppUI.UI;
-using System;
 
 public class EnemyBase : CharacterStats
 {
     [Header("공격 관련")]
     public AttackObjectBase[] attackObjs;
-    private List<AttackBase> attacks = new List<AttackBase>();
+    private readonly List<AttackBase> attacks = new List<AttackBase>();
     private AttackBase currentAttack;
     [SerializeField] private GameObject bodyRoot;
 
@@ -45,50 +43,49 @@ public class EnemyBase : CharacterStats
     public AudioClip footstepClip;
     [SerializeField] private float footstepInterval = 0.5f;
     private float footstepTimer = 0f;
-    private AudioSource audioSource;
 
     [Header("보상 관련")]
     [SerializeField] private float expReward = 30f;
 
     [SyncVar] public MonsterSpawner spawner;
+
     private bool isDead = false;
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
-        audioSource = GetComponent<AudioSource>();
     }
 
     [ServerCallback]
     private void Start()
     {
-        // 서버에서 필요한 초기화는 OnStartServer에서 처리
+        // 서버 초기화는 OnStartServer에서 주로 처리
     }
+
     private void Update()
     {
-        if (isServer)
+        if (!isServer) return;
+
+        if (navMeshAgent == null || footstepClip == null) return;
+
+        bool isMoving = navMeshAgent.velocity.magnitude > 0.1f &&
+                        navMeshAgent.remainingDistance > navMeshAgent.stoppingDistance;
+
+        if (isMoving)
         {
-            if (navMeshAgent == null || footstepClip == null)
-                return;
-
-            bool isMoving = navMeshAgent.velocity.magnitude > 0.1f &&
-                            navMeshAgent.remainingDistance > navMeshAgent.stoppingDistance;
-
-            if (isMoving)
+            footstepTimer -= Time.deltaTime;
+            if (footstepTimer <= 0f)
             {
-                footstepTimer -= Time.deltaTime;
-                if (footstepTimer <= 0f)
-                {
-                    RpcPlayFootstepSound();
-                    footstepTimer = footstepInterval;
-                }
-            }
-            else
-            {
-                footstepTimer = 0f;
+                RpcPlayFootstepSound();
+                footstepTimer = footstepInterval;
             }
         }
+        else
+        {
+            footstepTimer = 0f;
+        }
     }
+
     [ClientRpc]
     private void RpcPlayFootstepSound()
     {
@@ -100,9 +97,8 @@ public class EnemyBase : CharacterStats
     {
         if (healthBarCanvas != null && worldCamera != null)
         {
-            // 카메라를 향해 정면으로 회전
             healthBarCanvas.LookAt(worldCamera.transform);
-            healthBarCanvas.Rotate(0, 180f, 0); // UI가 뒤집히지 않도록 보정
+            healthBarCanvas.Rotate(0, 180f, 0); // 뒤집힘 보정
         }
     }
 
@@ -122,6 +118,7 @@ public class EnemyBase : CharacterStats
         if (navMeshAgent != null)
             navMeshAgent.speed = MoveSpeed;
 
+        // 공격 인스턴스 준비
         foreach (var attackObj in attackObjs)
         {
             var attackInstance = attackObj.CreateAttackInstance();
@@ -136,7 +133,7 @@ public class EnemyBase : CharacterStats
     [Server]
     public virtual void UseAllAttack(GameObject target)
     {
-        if (bodyRoot == null || isAttacking || target==null) return;
+        if (bodyRoot == null || isAttacking || target == null) return;
 
         foreach (var attack in attacks)
         {
@@ -145,6 +142,7 @@ public class EnemyBase : CharacterStats
                 currentAttack = attack;
                 attack.Execute(gameObject, target);
                 isAttacking = true;
+
                 animator.SetInteger("attackIndex", attacks.IndexOf(attack));
                 animator.SetTrigger("doAttack");
                 RpcPlayAttackAnimation(attacks.IndexOf(attack));
@@ -154,7 +152,7 @@ public class EnemyBase : CharacterStats
     }
 
     [ClientRpc]
-    void RpcPlayAttackAnimation(int index)
+    private void RpcPlayAttackAnimation(int index)
     {
         if (animator == null || isServer) return;
         animator.SetInteger("attackIndex", index);
@@ -184,14 +182,10 @@ public class EnemyBase : CharacterStats
         RpcShowDamagePopup((int)amount);
 
         if (attacker != null && attacker.TryGetComponent<PlayerStats>(out var player))
-        {
             player.TotalDamage += amount;
-        }
 
         if (CurrentHealth <= 0)
-        {
             Die(attacker);
-        }
     }
 
     [ClientRpc]
@@ -206,11 +200,13 @@ public class EnemyBase : CharacterStats
     {
         if (damagePopupPrefab == null) return;
 
-        Vector3 spawnPos = popupSpawnPoint != null ? popupSpawnPoint.position : transform.position + Vector3.up * 1.5f;
+        Vector3 spawnPos = popupSpawnPoint != null
+            ? popupSpawnPoint.position
+            : transform.position + Vector3.up * 1.5f;
+
         GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity);
         TMP_Text text = popup.GetComponentInChildren<TMP_Text>();
-        if (text != null)
-            text.text = amount.ToString();
+        if (text != null) text.text = amount.ToString();
 
         if (worldCamera != null)
         {
@@ -234,6 +230,7 @@ public class EnemyBase : CharacterStats
         if (isDead) return;
         isDead = true;
         isAttacking = true;
+
         behavior?.SetVariableValue("IsAttacking", true);
         navMeshAgent.isStopped = true;
         spawner?.OnMonsterKilled();
@@ -245,35 +242,33 @@ public class EnemyBase : CharacterStats
         }
 
         behavior?.SetVariableValue("IsDead", true);
+
         RpcPlayDeathAnimation();
         DropBox();
         StartCoroutine(DelayedDestroy());
-        NetworkMissionManager.Instance?.CheckMissionProgress();
+
+        // ★ 팀 미션 진행도 증가 (서버 권위)
+        var mm = NetworkMissionManager.GetOrFind();
+        if (mm != null)
+            mm.AddTeamKill(1);
     }
 
     [ClientRpc]
-    void RpcPlayDeathAnimation()
+    private void RpcPlayDeathAnimation()
     {
         animator.SetTrigger("doDie");
-        Collider[] colliders = GetComponentsInChildren<Collider>(true); // 비활성 포함
-        foreach (var col in colliders)
-        {
+
+        foreach (var col in GetComponentsInChildren<Collider>(true))
             col.isTrigger = true;
-        }
-        Rigidbody[] rigidbodys = GetComponentsInChildren<Rigidbody>(true); // 비활성 포함
-        foreach (var rb in rigidbodys)
-        {
+
+        foreach (var rb in GetComponentsInChildren<Rigidbody>(true))
             rb.isKinematic = true;
-        }
-        Transform[] transforms = GetComponentsInChildren<Transform>(true); // 비활성 포함
-        foreach (var tr in transforms)
+
+        foreach (var tr in GetComponentsInChildren<Transform>(true))
         {
             if (tr.gameObject.name == "BreathSpawnPoint")
-            {
                 tr.gameObject.SetActive(false);
-            }
         }
-
     }
 
     [Server]
@@ -293,13 +288,17 @@ public class EnemyBase : CharacterStats
         }
 
         GameObject box = Instantiate(boxPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
-        var match = GetComponent<NetworkMatch>().matchId;
-        box.GetComponent<NetworkMatch>().matchId = match;
+
+        // matchId 전파 (매치 분리 유지)
+        var match = GetComponent<NetworkMatch>()?.matchId ?? default;
+        var boxMatch = box.GetComponent<NetworkMatch>();
+        if (boxMatch != null) boxMatch.matchId = match;
+
         NetworkServer.Spawn(box);
         Debug.Log("[EnemyBase] 박스 드랍 완료");
     }
 
-    void OnDrawGizmosSelected()
+    private void OnDrawGizmosSelected()
     {
         if (bodyRoot == null || attackObjs == null) return;
 
