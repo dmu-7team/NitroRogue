@@ -8,7 +8,6 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance { get; private set; }
 
     [Header("게임 HUD 루트")]
-    [SerializeField] private GameObject hudPanel;  // 전체 HUD 오브젝트
     [SerializeField] public GameObject crosshair;  // HUD 크로스헤어
     [SerializeField] public TextMeshProUGUI ammoText;  // HUD 총알개수
     [SerializeField] public GameObject scopeOverlay;  // HUD 스코프
@@ -35,12 +34,7 @@ public class UIManager : MonoBehaviour
     private Coroutine chestMessageCoroutine;
     private Coroutine levelUpCoroutine;
     private Coroutine itemEffectCoroutine;
-    private Coroutine expBarCoroutine;
-    private Coroutine healthBarCoroutine;
-    private Coroutine healthBlinkCoroutine;
-    private Coroutine expLevelUpEffectCoroutine;
 
-    private bool isBlinking = false;
 
     private void Awake()
     {
@@ -72,69 +66,15 @@ public class UIManager : MonoBehaviour
 
         Debug.Log("[UIManager] Player 연결 완료");
 
-        stats.OnHealthChanged += UpdateHealthUI;
-        stats.OnExpChanged += UpdateExpUI;
         stats.OnSpeedChanged += UpdateSpeedUI;
         stats.OnPowerChanged += UpdatePowerUI;
 
-        UpdateHealthUI(stats.CurrentHealth, stats.MaxHealth);
-        UpdateExpUI(stats.CurrentExp, stats.ExpToLevelUp);
-        UpdateSpeedUI(stats.MoveSpeed);         // 수정된 부분
-        UpdatePowerUI(stats.AttackDamage);      // 수정된 부분
+        UpdateSpeedUI(stats.MoveSpeed);
+        UpdatePowerUI(stats.AttackDamage);
 
         if (levelText != null)
         {
             levelText.text = $"Lv {stats.Level}";
-        }
-    }
-
-    private void UpdateHealthUI(float current, float max)
-    {
-        if (healthBarImage != null)
-        {
-            float targetFill = current / max;
-            if (healthBarCoroutine != null) StopCoroutine(healthBarCoroutine);
-            healthBarCoroutine = StartCoroutine(AnimateHealthBar(targetFill));
-
-            healthBarImage.color = (targetFill <= 0.3f) ? Color.black : Color.red;
-
-            if (targetFill <= 0.1f)
-            {
-                if (!isBlinking)
-                {
-                    isBlinking = true;
-                    healthBlinkCoroutine = StartCoroutine(BlinkHealthBar());
-                }
-            }
-            else
-            {
-                if (isBlinking)
-                {
-                    isBlinking = false;
-                    if (healthBlinkCoroutine != null) StopCoroutine(healthBlinkCoroutine);
-                    healthBarImage.enabled = true;
-                }
-            }
-        }
-
-        if (healthText != null)
-        {
-            healthText.text = $"체력 {current:F0} / {max:F0}";
-        }
-    }
-
-    private void UpdateExpUI(float current, float toLevelUp)
-    {
-        if (expBarImage != null)
-        {
-            float targetFill = current / toLevelUp;
-            if (expBarCoroutine != null) StopCoroutine(expBarCoroutine);
-            expBarCoroutine = StartCoroutine(AnimateExpBar(targetFill));
-        }
-
-        if (expText != null)
-        {
-            expText.text = $"경험치 {current:F0} / {toLevelUp:F0}";
         }
     }
 
@@ -151,82 +91,6 @@ public class UIManager : MonoBehaviour
         if (speedText != null)
         {
             speedText.text = $"스피드 {current:F1}";
-        }
-    }
-
-    private IEnumerator AnimateHealthBar(float targetFill)
-    {
-        float duration = 0.5f;
-        float elapsed = 0f;
-        float startFill = healthBarImage.fillAmount;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            healthBarImage.fillAmount = Mathf.Lerp(startFill, targetFill, elapsed / duration);
-            yield return null;
-        }
-
-        healthBarImage.fillAmount = targetFill;
-    }
-
-    private IEnumerator AnimateExpBar(float targetFill)
-    {
-        float duration = 0.5f;
-        float elapsed = 0f;
-        float startFill = expBarImage.fillAmount;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            expBarImage.fillAmount = Mathf.Lerp(startFill, targetFill, elapsed / duration);
-            yield return null;
-        }
-
-        expBarImage.fillAmount = targetFill;
-    }
-
-    private IEnumerator BlinkHealthBar()
-    {
-        while (true)
-        {
-            healthBarImage.enabled = !healthBarImage.enabled;
-            yield return new WaitForSeconds(0.3f);
-        }
-    }
-
-    public void PlayExpLevelUpEffect()
-    {
-        if (expBarImage == null) return;
-
-        if (expLevelUpEffectCoroutine != null) StopCoroutine(expLevelUpEffectCoroutine);
-        expLevelUpEffectCoroutine = StartCoroutine(ExpLevelUpEffect());
-    }
-
-    private IEnumerator ExpLevelUpEffect()
-    {
-        Color originalColor = expBarImage.color;
-        Color highlightColor = Color.yellow;
-
-        float flashDuration = 0.2f;
-        int flashCount = 3;
-
-        for (int i = 0; i < flashCount; i++)
-        {
-            expBarImage.color = highlightColor;
-            yield return new WaitForSeconds(flashDuration);
-            expBarImage.color = originalColor;
-            yield return new WaitForSeconds(flashDuration);
-        }
-
-        expBarImage.color = originalColor;
-    }
-
-    public void UpdateLevelText(int level)
-    {
-        if (levelText != null)
-        {
-            levelText.text = $"Lv {level}";
         }
     }
 
@@ -256,42 +120,6 @@ public class UIManager : MonoBehaviour
         target.gameObject.SetActive(true);
         yield return new WaitForSeconds(duration);
         target.gameObject.SetActive(false);
-    }
-    public void ShowInGameHUD()
-    {
-        if (hudPanel != null)
-        {
-            hudPanel.SetActive(true);
-            Debug.Log("[UIManager] 게임 HUD 활성화");
-        }
-    }
-
-    public void HideInGameHUD()
-    {
-        if (hudPanel != null)
-        {
-            hudPanel.SetActive(false);
-            Debug.Log("[UIManager] 게임 HUD 비활성화");
-        }
-    }
-    public void UpdateHealthBar(float current, float max)
-    {
-        if (healthBarImage != null)
-        {
-            float fill = current / max;
-            healthBarImage.fillAmount = fill;
-            healthText.text = $"체력 {current:F0} / {max:F0}";
-        }
-    }
-
-    public void UpdateExpBar(float current, float max)
-    {
-        if (expBarImage != null)
-        {
-            float fill = current / max;
-            expBarImage.fillAmount = fill;
-            expText.text = $"경험치 {current:F0} / {max:F0}";
-        }
     }
 
     public void SetGunIcon(Sprite gunIcon)

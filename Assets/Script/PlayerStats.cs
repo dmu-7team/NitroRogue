@@ -260,7 +260,13 @@ public class PlayerStats : CharacterStats
         OnSpeedChanged?.Invoke(syncedMoveSpeed);
         OnPowerChanged?.Invoke(syncedAttackDamage);
 
-        UIManager.Instance?.UpdateLevelText(level);
         Debug.Log($"레벨 업! 현재 레벨: {level}");
+    }
+
+    public void EmitAll()
+    {
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        OnExpChanged?.Invoke(currentExp, expToLevelUp);
+        OnLevelChanged?.Invoke(level);
     }
 }
