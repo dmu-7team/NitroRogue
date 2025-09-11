@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 using Mirror;
 using System.Linq;
 using NitroGame;
-using static UnityEditor.Progress;
+
 using System.Collections;
 using System.Text.RegularExpressions; // ← 이걸 꼭 추가해야 함!
 

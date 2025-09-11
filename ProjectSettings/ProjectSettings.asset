@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: NitoRogue
+  productName: SERVER_BUILDNitoRogue_Server
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -819,7 +819,7 @@ PlayerSettings:
   webWasm2023: 0
   scriptingDefineSymbols:
     Server: EDGEGAP_PLUGIN_SERVERS
-    Standalone: MIRROR;MIRROR_89_OR_NEWER;MIRROR_90_OR_NEWER;MIRROR_93_OR_NEWER;MIRROR_96_OR_NEWER;EDGEGAP_PLUGIN_SERVERS
+    Standalone: MIRROR;MIRROR_89_OR_NEWER;MIRROR_90_OR_NEWER;MIRROR_93_OR_NEWER;MIRROR_96_OR_NEWER;EDGEGAP_PLUGIN_SERVERS;SERVER_BUILD
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
@@ -840,8 +840,8 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: nitro(week7)
-  metroPackageVersion: 
+  metroPackageName: nitroweek7
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
@@ -849,7 +849,7 @@ PlayerSettings:
   metroCertificateNotAfter: 0000000000000000
   metroApplicationDescription: nitro(week7)
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: NitoRogue
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0

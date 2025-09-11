@@ -22,6 +22,7 @@ MonoBehaviour:
   m_Scenes: []
   m_ScriptingDefines:
   - UNITY_SERVER
+  - SERVER_BUILD
   m_PlayerSettingsYaml:
     m_Settings: []
   references:
