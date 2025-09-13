@@ -23,11 +23,11 @@ MonoBehaviour:
   - m_enabled: 1
     m_path: Assets/Scenes/server.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Title.unity
-  - m_enabled: 1
     m_path: Assets/Scenes/MainMenu.unity
   - m_enabled: 1
     m_path: Assets/Scenes/room.unity
+  - m_enabled: 0
+    m_path: Assets/Scenes/Title.unity
   - m_enabled: 0
     m_path: Assets/Scenes/WoojinScene.unity
   m_ScriptingDefines:

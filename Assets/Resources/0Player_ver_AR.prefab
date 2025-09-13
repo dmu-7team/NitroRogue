@@ -1411,8 +1411,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  currentHealth: 0
-  maxHealth: 100
   animator: {fileID: 0}
   healthPerLevel: 10
   damagePerLevel: 5

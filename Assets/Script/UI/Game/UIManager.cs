@@ -35,8 +35,22 @@ public class UIManager : MonoBehaviour
     private Coroutine levelUpCoroutine;
     private Coroutine itemEffectCoroutine;
 
+    [Header("결과 패널")]
+    [SerializeField] private GameObject victoryPanel;
+    [SerializeField] private GameObject defeatPanel;
 
-    private void Awake()
+    public void ShowVictoryPanel()
+    {
+        if (victoryPanel) victoryPanel.SetActive(true);
+        if (defeatPanel) defeatPanel.SetActive(false);
+    }
+
+    public void ShowDefeatPanel()
+    {
+            if (defeatPanel) defeatPanel.SetActive(true);
+            if (victoryPanel) victoryPanel.SetActive(false);
+        }
+private void Awake()
     {
         if (Instance == null)
         {

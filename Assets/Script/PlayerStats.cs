@@ -91,6 +91,7 @@ public class PlayerStats : CharacterStats
         SetHealth(maxHealth, maxHealth);
         originalSpeed = syncedMoveSpeed;
         originalDamage = syncedAttackDamage;
+        NetworkGameState.Instance?.Register(this);
     }
 
 #if UNITY_EDITOR
@@ -219,7 +220,7 @@ public class PlayerStats : CharacterStats
 
         Debug.Log("플레이어 사망 처리");
         RpcPlayerDie();
-
+        if (isServer) NetworkGameState.Instance?.Unregister(this);
         base.Die();
     }
 
@@ -230,6 +231,7 @@ public class PlayerStats : CharacterStats
             animator = GetComponent<Animator>();
 
         animator?.SetTrigger("die");
+        if (isLocalPlayer) SpectatorManager.EnterSpectate(this);
     }
 
 
