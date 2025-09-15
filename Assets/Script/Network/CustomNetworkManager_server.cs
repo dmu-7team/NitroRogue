@@ -28,6 +28,7 @@ public class CustomNetworkManager_Server : NetworkManager
     private Transform[] enemySpawnPoints;
 
     public GameObject MonsterSpawner;
+    public GameObject GameManager;
 
     public override void Start()
     {
@@ -142,6 +143,10 @@ public class CustomNetworkManager_Server : NetworkManager
             return;
         }
 
+        var spawnerObj = Instantiate(GameManager);
+        spawnerObj.GetComponent<NetworkMatch>().matchId = parsedMatchId;
+        NetworkServer.Spawn(spawnerObj);
+
         foreach (var roomPlayer in players)
         {
             var conn = roomPlayer.connectionToClient;
@@ -172,6 +177,11 @@ public class CustomNetworkManager_Server : NetworkManager
             {
                 matchComp.matchId = parsedMatchId;
             }
+            var stats = playerObj.GetComponent<PlayerStats>();
+            if (stats != null)
+            {
+                stats.NickName = roomPlayer.playerName;
+            }
 
             // 미리 게임 시작 알림
             roomPlayer.TargetStartGame(conn, index, matchId);
@@ -186,12 +196,12 @@ public class CustomNetworkManager_Server : NetworkManager
             Debug.Log($"[서버] ReplacePlayer + Spawn 완료: {playerObj.name}");
         }
 
-        var spawnerObj = Instantiate(MonsterSpawner);
-        if (spawnerObj.TryGetComponent(out NetworkMatch spawnmatch))
-        {
-            spawnmatch.matchId = parsedMatchId;
-        }
-        NetworkServer.Spawn(spawnerObj);
+        //var spawnerObj = Instantiate(MonsterSpawner);
+        //if (spawnerObj.TryGetComponent(out NetworkMatch spawnmatch))
+        //{
+        //    spawnmatch.matchId = parsedMatchId;
+        //}
+        //NetworkServer.Spawn(spawnerObj);
 
         if (missionManagerPrefab != null)
         {

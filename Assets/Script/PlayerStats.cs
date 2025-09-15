@@ -32,6 +32,7 @@ public class PlayerStats : CharacterStats
     [SyncVar] private float totalDamage = 0f;
     [SyncVar] private string nickName;
 
+    private MatchManager myMatchManager;
 
     // == 에디터/레퍼런스 ==
     [SerializeField] private Animator animator;
@@ -76,6 +77,12 @@ public class PlayerStats : CharacterStats
     public override void OnStopClient()
     {
         base.OnStopClient();
+
+        if (myMatchManager != null)
+        {
+            myMatchManager.RemovePlayer(transform);
+        }
+
         Despawned?.Invoke(this);
     }
 
@@ -88,6 +95,14 @@ public class PlayerStats : CharacterStats
     public override void OnStartServer()
     {
         base.OnStartServer();
+
+        var matchId = GetComponent<NetworkMatch>().matchId;
+
+        if (MatchManager.ActiveMatches.TryGetValue(matchId, out myMatchManager))
+        {
+            myMatchManager.AddPlayer(transform);
+        }
+
         SetHealth(maxHealth, maxHealth);
         originalSpeed = syncedMoveSpeed;
         originalDamage = syncedAttackDamage;

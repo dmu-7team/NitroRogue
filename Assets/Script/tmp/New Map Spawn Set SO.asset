@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9250068098f946b4890b809e96b4a25c, type: 3}
+  m_Name: New Map Spawn Set SO
+  m_EditorClassIdentifier: 
+  normalList:
+  - prefab: {fileID: 7962604100564841400, guid: d0fc9fb3ee062e541a88de96af92e8c1, type: 3}
+    chance: 50
+  - prefab: {fileID: 3956764888193744923, guid: 1442ca962994c994db7f03b8d7b42d04, type: 3}
+    chance: 50
+  eliteList: []
+  bossPrefab: {fileID: 0}
+  bossSpawnPointTag: BossSpawn

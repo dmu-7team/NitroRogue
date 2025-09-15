@@ -6,6 +6,7 @@ using TMPro;
 using System.Collections.Generic;
 using Mirror;
 using System.Collections;
+using System;
 
 public class EnemyBase : CharacterStats
 {
@@ -50,6 +51,8 @@ public class EnemyBase : CharacterStats
     [SyncVar] public MonsterSpawner spawner;
 
     private bool isDead = false;
+
+    public event System.Action OnDied;
 
     private void Awake()
     {
@@ -228,6 +231,7 @@ public class EnemyBase : CharacterStats
     public void Die(GameObject killer)
     {
         if (isDead) return;
+        OnDied?.Invoke();
         isDead = true;
         isAttacking = true;
 
