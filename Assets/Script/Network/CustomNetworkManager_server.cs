@@ -88,6 +88,7 @@ public class CustomNetworkManager_Server : NetworkManager
         });
 
         BroadcastPlayerList(msg.matchId);
+        SendSelectionsTo(conn, msg.matchId);
     }
 
     private void OnRoomListRequestMessageReceived(NetworkConnectionToClient conn, RoomListRequestMessage msg)
@@ -327,6 +328,53 @@ public class CustomNetworkManager_Server : NetworkManager
 
 
 
+    // ★★★ [추가] 현재 방의 스냅샷 만들기
+    private (int[] selected, string[] names) BuildSelectionSnapshot(string matchId)
+    {
+        if (!matchRooms.TryGetValue(matchId, out var list) || list == null)
+            return (Array.Empty<int>(), Array.Empty<string>());
+
+        var players = list
+            .Where(p => p != null && p.connectionToClient != null)
+            .OrderBy(p => p.connectionToClient.connectionId)   // 순서 고정
+            .ToArray();
+
+        int[] selected = new int[players.Length];
+        string[] names = new string[players.Length];
+        for (int i = 0; i < players.Length; i++)
+        {
+            selected[i] = players[i].selectedCharacter;
+            names[i] = players[i].playerName;
+        }
+        return (selected, names);
+    }
+
+    // ★★★ [추가] 방에 "방금 들어온 1명"에게만 스냅샷 푸시
+    public void SendSelectionsTo(NetworkConnectionToClient conn, string matchId)
+    {
+        var (selected, names) = BuildSelectionSnapshot(matchId);
+
+        var rp = conn?.identity ? conn.identity.GetComponent<RoomPlayer>() : null;
+        if (rp == null) return;
+
+        rp.TargetUpdateCharacterButtons(conn, selected, names);    // RoomPlayer의 TargetRpc
+        Debug.Log($"[Server→Target] snapshot to conn={conn.connectionId} matchId={matchId} names={string.Join(", ", names)}");
+    }
+
+    // ★★★ [추가] 같은 방 모두에게 브로드캐스트
+    public void BroadcastSelections(string matchId)
+    {
+        if (!matchRooms.TryGetValue(matchId, out var list) || list == null) return;
+
+        var (selected, names) = BuildSelectionSnapshot(matchId);
+        foreach (var rp in list)
+        {
+            var c = rp.connectionToClient;
+            if (c != null)
+                rp.TargetUpdateCharacterButtons(c, selected, names);
+        }
+        Debug.Log($"[Server→All] broadcast matchId={matchId} names={string.Join(", ", names)}");
+    }
 
     private void SendRoomListToAllClients()
     {
