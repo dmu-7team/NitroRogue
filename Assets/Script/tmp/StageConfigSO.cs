@@ -14,6 +14,9 @@ public class StageConfigSO : ScriptableObject
     public int nextStageId = -1;  // -1이면 마지막(보스 처치 시 게임 종료)
     public int killsToBoss = 0;   // 0이면 처치 수로 자동 소환 안 함(제단만 사용)
 
-    [Header("서버용 NavMesh 데이터(사전 베이크)")]
-    public NavMeshData[] navMeshDatas; // 서버가 Add/Remove로 장착
+    [Header("서버용 로직 프리팹")]
+    public GameObject serverLogicPrefab;
+
+    [Header("클라이언트용 맵 프리팹")]
+    public GameObject clientMapPrefab;
 }

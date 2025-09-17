@@ -590,8 +590,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  currentHealth: 0
-  maxHealth: 100
   attackObjs:
   - {fileID: 11400000, guid: cb7d23764f8290a4aa67145ea5be6219, type: 2}
   - {fileID: 11400000, guid: 600307b476002be4d8f674328b7b7025, type: 2}
@@ -616,7 +614,7 @@ NavMeshAgent:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2732309068803917121}
   m_Enabled: 1
-  m_AgentTypeID: -334000983
+  m_AgentTypeID: -1372625422
   m_Radius: 0.5
   m_Speed: 1
   m_Acceleration: 8

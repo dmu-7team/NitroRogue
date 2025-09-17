@@ -45,14 +45,11 @@ public class AudioManager : MonoBehaviour
         audioSource.enabled = true;
         audioSource.volume = 0f; // 초기 볼륨 0
         gameObject.SetActive(true);
-
-        Debug.Log($"[AudioManager] Awake - GameObject Active: {gameObject.activeSelf}, AudioSource Enabled: {audioSource.enabled}, AudioListener Enabled: {audioListener.enabled}");
     }
 
     private void Start()
     {
         PlayMainBGM();
-        Debug.Log($"[AudioManager] Start - Current BGM: {(audioSource.clip != null ? audioSource.clip.name : "None")}, Playing: {audioSource.isPlaying}");
     }
 
     // AudioListener 보장
@@ -84,12 +81,10 @@ public class AudioManager : MonoBehaviour
             if (audioListener == null)
             {
                 audioListener = gameObject.AddComponent<AudioListener>();
-                Debug.Log("[AudioManager] Added AudioListener to AudioManager due to existing listeners");
             }
             audioListener.enabled = true;
         }
 
-        Debug.Log($"[AudioManager] EnsureAudioListener - AudioListener Enabled: {audioListener.enabled}");
     }
 
     public void PlayMainBGM()
@@ -141,7 +136,6 @@ public class AudioManager : MonoBehaviour
         if (audioSource != null)
         {
             StartCoroutine(FadeOut());
-            Debug.Log("[AudioManager] BGM 페이드아웃 시작");
         }
     }
 
@@ -151,7 +145,6 @@ public class AudioManager : MonoBehaviour
         {
             EnsureAudioListener();
             StartCoroutine(FadeIn(audioSource.clip));
-            Debug.Log("[AudioManager] BGM 페이드인 재개");
         }
     }
 
@@ -161,7 +154,6 @@ public class AudioManager : MonoBehaviour
         {
             targetVolume = Mathf.Clamp01(volume);
             audioSource.volume = targetVolume;
-            Debug.Log($"[AudioManager] 볼륨 설정: {targetVolume}");
         }
     }
 
@@ -189,7 +181,6 @@ public class AudioManager : MonoBehaviour
         }
         audioSource.volume = targetVolume;
 
-        Debug.Log($"[AudioManager] FadeIn 완료 - 클립: {clip.name}");
         fadeCoroutine = null;
     }
 
@@ -212,7 +203,6 @@ public class AudioManager : MonoBehaviour
         audioSource.volume = 0f;
         audioSource.Pause();
 
-        Debug.Log("[AudioManager] FadeOut 완료");
         fadeCoroutine = null;
     }
 
@@ -228,7 +218,6 @@ public class AudioManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"[AudioManager] Scene Loaded: {scene.name}, GameObject Active: {gameObject.activeSelf}, AudioSource Playing: {audioSource.isPlaying}, AudioListener Enabled: {audioListener.enabled}");
         EnsureAudioListener();
         if (!audioSource.isPlaying && audioSource.clip != null)
         {

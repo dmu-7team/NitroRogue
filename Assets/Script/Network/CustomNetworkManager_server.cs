@@ -3,32 +3,22 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using UnityEngine.SceneManagement;
 using NetworkMessages;
-using System.Collections;
-using UnityEngine.AI;
 
 public class CustomNetworkManager_Server : NetworkManager
 {
     [Header("Match-scoped managers")]
-    [SerializeField] private GameObject missionManagerPrefab; // ← 인스펙터에 NetworkMissionManager 프리팹 연결
-    public GameObject[] monsterPrefabs;
+    [SerializeField] private GameObject missionManagerPrefab;
+
     public GameObject[] characterPrefabs;
     public GameObject roomPlayerPrefab;
     public Dictionary<string, List<RoomPlayer>> matchRooms = new();
-   private Dictionary<int, string> characterPrefabMap = new()
-    {
-        { 0, "Player_ver_AR" },
-        { 1, "Player_ver_DMR" },
-        { 2, "Player_ver_SG" },
-        { 3, "Player_ver_SMG" }
-    };
 
-    private Transform[] spawnPoints;
-    private Transform[] enemySpawnPoints;
-
-    public GameObject MonsterSpawner;
-    public GameObject GameManager;
+    [Header("매치 생성 설정")]
+    public GameObject matchManagerPrefabs;
+    public List<Transform> matchStartPoints;
+    private List<Transform> availableStartPoints;
+    private Dictionary<Guid, List<RoomPlayer>> pendingMatches = new Dictionary<Guid, List<RoomPlayer>>();
 
     public override void Start()
     {
@@ -42,23 +32,18 @@ public class CustomNetworkManager_Server : NetworkManager
         base.OnStartServer();
         Debug.Log("[서버] OnStartServer 진입 완료");
 
-        //  플레이어 스폰포인트 저장
-        spawnPoints = GameObject.FindGameObjectsWithTag("PlayerSpawnPoint")
-                                .OrderBy(go => go.name)
-                                .Select(go => go.transform)
-                                .ToArray();
-        Debug.Log($"[서버] PlayerSpawnPoint 개수: {spawnPoints.Length}");
-
-        //  몬스터 스폰포인트 저장
-        enemySpawnPoints = GameObject.FindGameObjectsWithTag("EnemySpawnPoint")
-                                     .OrderBy(go => go.name)
-                                     .Select(go => go.transform)
-                                     .ToArray();
-        Debug.Log($"[서버] EnemySpawnPoint 개수: {enemySpawnPoints.Length}");
+        availableStartPoints = new List<Transform>(matchStartPoints);
+        MatchManager.OnManagerReady += HandleManagerReady;
 
         NetworkServer.RegisterHandler<JoinMatchMessage>(OnJoinMatchMessageReceived);
         NetworkServer.RegisterHandler<RoomListRequestMessage>(OnRoomListRequestMessageReceived);
     }
+    public override void OnStopServer()
+    {
+        base.OnStopServer();
+        MatchManager.OnManagerReady -= HandleManagerReady;
+    }
+
 
     private void OnJoinMatchMessageReceived(NetworkConnectionToClient conn, JoinMatchMessage msg)
     {
@@ -144,12 +129,43 @@ public class CustomNetworkManager_Server : NetworkManager
             return;
         }
 
-        var spawnerObj = Instantiate(GameManager);
-        spawnerObj.GetComponent<NetworkMatch>().matchId = parsedMatchId;
-        NetworkServer.Spawn(spawnerObj);
-
-        foreach (var roomPlayer in players)
+        // 사용 가능한 시작 지점이 있는지 확인합니다.
+        if (availableStartPoints.Count == 0)
         {
+            Debug.LogError("[서버] 새 매치를 생성할 비어있는 시작 지점이 없습니다!");
+            // TODO: 플레이어에게 서버가 꽉 찼다고 알리는 로직
+            return;
+        }
+
+        // 비어있는 위치 중 하나를 선택하고 목록에서 '사용 중'으로 변경합니다.
+        Transform startPoint = availableStartPoints[0];
+        availableStartPoints.RemoveAt(0);
+
+        pendingMatches[parsedMatchId] = new List<RoomPlayer>(players);
+
+        // 선택된 위치에 'MatchManager' 프리팹을 생성합니다.
+        GameObject matchInstance = Instantiate(matchManagerPrefabs, startPoint.position, startPoint.rotation);
+        matchInstance.GetComponent<NetworkMatch>().matchId = parsedMatchId;
+        NetworkServer.Spawn(matchInstance);
+    }
+
+
+    // MatchManager가 준비되었다는 신호를 받았을 때 실행될 메서드
+    [Server]
+    private void HandleManagerReady(MatchManager readyManager)
+    {
+        Guid matchId = readyManager.GetComponent<NetworkMatch>().matchId;
+        if (!pendingMatches.TryGetValue(matchId, out var playersToSpawn)) return;
+
+        Debug.Log($"Manager for match [{matchId}] is ready. Spawning {playersToSpawn.Count} players...");
+
+        List<Transform> newPlayerTransforms = new List<Transform>();
+
+        // NetworkManager는 플레이어 생성(RoomPlayer -> InGame Player)까지만 담당합니다.
+        foreach (var roomPlayer in playersToSpawn)
+        {
+            if (roomPlayer == null) continue;
+
             var conn = roomPlayer.connectionToClient;
             int index = roomPlayer.selectedCharacter;
 
@@ -159,25 +175,16 @@ public class CustomNetworkManager_Server : NetworkManager
                 continue;
             }
 
-            GameObject prefab = characterPrefabs[index];
-            if (prefab == null)
+            GameObject playerPrefab = characterPrefabs[index];
+            if (playerPrefab == null)
             {
                 Debug.LogError($"[서버] characterPrefabs[{index}]가 null임");
                 continue;
             }
 
-            // 생성 위치
-            Vector3 spawnPos = GetSpawnPosition(index);
-
-            // 캐릭터 인스턴스 생성
-            GameObject playerObj = Instantiate(prefab, spawnPos, Quaternion.identity);
-            Debug.Log($"[서버] 캐릭터 인스턴스 생성됨: {playerObj.name}");
-
-            // matchId 설정
-            if (playerObj.TryGetComponent(out NetworkMatch matchComp))
-            {
-                matchComp.matchId = parsedMatchId;
-            }
+            GameObject playerObj = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+            playerObj.GetComponent<NetworkMatch>().matchId = matchId;
+            
             var stats = playerObj.GetComponent<PlayerStats>();
             if (stats != null)
             {
@@ -185,24 +192,21 @@ public class CustomNetworkManager_Server : NetworkManager
             }
 
             // 미리 게임 시작 알림
-            roomPlayer.TargetStartGame(conn, index, matchId);
+            roomPlayer.TargetStartGame(conn, index, matchId.ToString());
             Debug.Log($"[서버] TargetStartGame 호출 완료");
 
             // 기존 RoomPlayer 제거 → ReplacePlayer 순서 중요!
             NetworkServer.Destroy(roomPlayer.gameObject);
-
-            // 교체 및 스폰
             NetworkServer.ReplacePlayerForConnection(conn, playerObj, new ReplacePlayerOptions());
-            NetworkServer.Spawn(playerObj);
-            Debug.Log($"[서버] ReplacePlayer + Spawn 완료: {playerObj.name}");
+
+            newPlayerTransforms.Add(playerObj.transform);
         }
 
-        //var spawnerObj = Instantiate(MonsterSpawner);
-        //if (spawnerObj.TryGetComponent(out NetworkMatch spawnmatch))
-        //{
-        //    spawnmatch.matchId = parsedMatchId;
-        //}
-        //NetworkServer.Spawn(spawnerObj);
+        // 생성된 플레이어 목록을 MatchManager에게 넘겨주며 모든 책임을 위임합니다.
+        readyManager.StartMatchWithPlayers(newPlayerTransforms);
+
+        // 대기열에서 제거
+        pendingMatches.Remove(matchId);
 
         if (missionManagerPrefab != null)
         {
@@ -210,36 +214,17 @@ public class CustomNetworkManager_Server : NetworkManager
 
             // 매치 분리(InterestManagement)를 쓰고 있으니 같은 matchId 부여
             var mmMatch = mmObj.GetComponent<NetworkMatch>();
-            if (mmMatch != null) mmMatch.matchId = parsedMatchId;
+            if (mmMatch != null) mmMatch.matchId = matchId;
 
             NetworkServer.Spawn(mmObj);
-            Debug.Log($"[서버] MissionManager 스폰 완료 (matchId={parsedMatchId})");
+            Debug.Log($"[서버] MissionManager 스폰 완료 (matchId={matchId})");
         }
         else
         {
             Debug.LogError("[서버] missionManagerPrefab 이 비어있습니다. 인스펙터에 연결하세요.");
         }
-        // 몬스터 생성 지연
-        //StartCoroutine(SpawnEnemiesAfterDelay(matchId, 1f));
-        //Debug.Log("[서버] 모든 플레이어 처리 완료 → 몬스터 스폰 대기 중...");
     }
 
-    private IEnumerator SpawnEnemiesAfterDelay(string matchId, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        SpawnEnemiesForMatch(matchId);
-    }
-
-
-
-
-    private Vector3 GetSpawnPosition(int index)
-    {
-        if (spawnPoints == null || spawnPoints.Length == 0 || index >= spawnPoints.Length)
-            return new Vector3(index * 2f, 0f, 0f);
-
-        return spawnPoints[index].position; //  Y축 고정 제거
-    }
 
 
 
@@ -258,71 +243,6 @@ public class CustomNetworkManager_Server : NetworkManager
 
             player.TargetRebuildPlayerList(infoList);
         }
-    }
-    private Vector3 GetEnemySpawnPosition(int index)
-    {
-        if (enemySpawnPoints == null || enemySpawnPoints.Length == 0 || index >= enemySpawnPoints.Length)
-            return new Vector3(index * 3f, 1f, 5f); // 기본 위치: 좌우로 벌리고 살짝 앞으로
-
-        return enemySpawnPoints[index].position;
-    }
-
-    public void SpawnEnemiesForMatch(string matchId)
-    {
-        Debug.Log($"[몬스터스폰] SpawnEnemiesForMatch() 진입: matchId = {matchId}");
-
-        if (!Guid.TryParse(matchId, out var guid))
-        {
-            Debug.LogError($"[몬스터스폰] matchId Guid 변환 실패: {matchId}");
-            return;
-        }
-
-        if (!matchRooms.TryGetValue(matchId, out var players))
-        {
-            Debug.LogError($"[몬스터스폰] 해당 matchId의 플레이어 목록 없음: {matchId}");
-            return;
-        }
-
-        Debug.Log($"[몬스터스폰] 플레이어 수: {players.Count}, 몬스터 프리팹 수: {monsterPrefabs.Length}");
-
-        for (int i = 0; i < monsterPrefabs.Length && i < players.Count; i++)
-        {
-            var prefab = monsterPrefabs[i];
-            if (prefab == null) continue;
-
-            Vector3 playerPos = players[i] != null ? players[i].transform.position : Vector3.zero;
-
-            // 플레이어 주변 랜덤 위치
-            Vector3 offset = UnityEngine.Random.insideUnitSphere * 3f;
-            offset.y = 0f; // 수직 무시
-            Vector3 tryPos = playerPos + offset;
-
-            Vector3 spawnPos = tryPos; // 기본값은 보정 실패 시 fallback용
-
-            if (NavMesh.SamplePosition(spawnPos, out NavMeshHit hit, 2f, NavMesh.AllAreas))
-            {
-                spawnPos = hit.position;
-                Debug.Log($"[몬스터스폰] NavMesh 보정 위치: {spawnPos}");
-            }
-            else
-            {
-                spawnPos.y = 0f; // <= 이 줄 추가
-                Debug.LogWarning($"[몬스터스폰] NavMesh 보정 실패, 기본 위치로 강제 소환: {spawnPos}");
-            }
-
-
-            GameObject monster = Instantiate(prefab, spawnPos, Quaternion.identity);
-            Debug.Log($"[몬스터스폰] {prefab.name} → {spawnPos} 위치에 Instantiate 성공");
-
-            var match = monster.GetComponent<NetworkMatch>();
-            if (match != null)
-                match.matchId = guid;
-
-            NetworkServer.Spawn(monster);
-            Debug.Log($"[몬스터스폰] NetworkServer.Spawn 완료: {monster.name}");
-        }
-
-        Debug.Log("[몬스터스폰] 플레이어 주변 몬스터 스폰 완료");
     }
 
 
@@ -388,5 +308,16 @@ public class CustomNetworkManager_Server : NetworkManager
 
         var msg = new RoomListSyncMessage { roomList = roomInfos };
         NetworkServer.SendToAll(msg);
+    }
+
+    // 매치가 끝나면 MatchManager가 이 메서드를 호출하여 위치를 반납합니다.
+    [Server]
+    public void FreeUpMatchPoint(Transform pointToFree)
+    {
+        if (pointToFree != null && !availableStartPoints.Contains(pointToFree))
+        {
+            availableStartPoints.Add(pointToFree);
+            Debug.Log($"Point {pointToFree.name} at {pointToFree.position} is now available.");
+        }
     }
 }

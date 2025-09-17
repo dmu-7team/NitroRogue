@@ -153,6 +153,30 @@ public class PlayerStats : CharacterStats
         OnExpChanged?.Invoke(current, toLevelUp);
     }
 
+    [TargetRpc]
+    public void TargetTeleport(NetworkConnectionToClient target, Vector3 pos, Quaternion rot)
+    {
+        // 이 스크립트가 붙은 "내" 플레이어 오브젝트에서 직접 스냅
+        var t = transform;
+
+        if (t.TryGetComponent<CharacterController>(out var cc))
+        {
+            cc.enabled = false;
+            t.SetPositionAndRotation(pos, rot);
+            cc.enabled = true;
+        }
+        else
+        {
+            t.SetPositionAndRotation(pos, rot);
+        }
+
+        if (t.TryGetComponent<Rigidbody>(out var rb))
+        {
+            rb.angularVelocity = Vector3.zero;
+            rb.position = pos;
+            rb.rotation = rot;
+        }
+    }
 
     // == 로컬/공용 API ==
     public void Heal(float amount)

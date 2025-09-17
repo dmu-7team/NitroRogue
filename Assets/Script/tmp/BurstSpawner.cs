@@ -59,7 +59,6 @@ public class BurstSpawner : NetworkBehaviour
     {
         if (players == null || players.Count == 0) return;
 
-        // 이제 타이머 확인이 유일한 역할
         if (Time.time >= nextBurstTime)
             TryDoBurst(players);
     }
@@ -85,9 +84,6 @@ public class BurstSpawner : NetworkBehaviour
             ScheduleNextBurst();
             return;
         }
-
-        Debug.Log($"[BurstSpawner] Burst Wave! Spawning {totalSpawnCount} enemies for {players.Count} players.");
-
         float jitterMax = rule.intraBurstMaxDelay;
 
         for (int i = 0; i < totalSpawnCount; i++)
@@ -114,7 +110,12 @@ public class BurstSpawner : NetworkBehaviour
             ? stage.mapSpawnSet.PickByChance(stage.mapSpawnSet.eliteList)
             : stage.mapSpawnSet.PickByChance(stage.mapSpawnSet.normalList);
 
-        if (prefab == null) yield break;
+        if (prefab == null)
+        {
+            // [로그 추가] 스폰할 몬스터를 못 고르면 이 에러가 뜰 것입니다.
+            Debug.LogError($"[BurstSpawner] Could not pick a monster prefab to spawn. Check MapSpawnSetSO '{stage.mapSpawnSet.name}' to see if monster lists are empty.");
+            yield break;
+        }
 
         var go = Instantiate(prefab, pos, Quaternion.identity);
         var netIdComponent = go.GetComponent<NetworkIdentity>();
