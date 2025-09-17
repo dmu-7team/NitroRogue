@@ -49,12 +49,13 @@ public class PlayerStats : CharacterStats
 
 
     // == 공개 프로퍼티 ==
-    public float CurrentExp   => currentExp;
-    public float ExpToLevelUp => expToLevelUp;
-    public int   Level        => level;
-    public int   KillCount    { get => killCount;   set => killCount = value; }
-    public float TotalDamage  { get => totalDamage; set => totalDamage = value; }
-    public string NickName { get; set; }
+    public float  CurrentExp   => currentExp;
+    public float  ExpToLevelUp => expToLevelUp;
+    public int    Level        => level;
+    public int    KillCount    { get => killCount;   set => killCount = value; }
+    public float  TotalDamage  { get => totalDamage; set => totalDamage = value; }
+    public string NickName     { get; set; }
+    public bool   IsDead       => isDead;
 
     public override float MoveSpeed    => syncedMoveSpeed;
     public override float AttackDamage => syncedAttackDamage;

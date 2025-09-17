@@ -48,8 +48,6 @@ public class EnemyBase : CharacterStats
     [Header("보상 관련")]
     [SerializeField] private float expReward = 30f;
 
-    [SyncVar] public MonsterSpawner spawner;
-
     private bool isDead = false;
 
     public event System.Action OnDied;
@@ -237,7 +235,6 @@ public class EnemyBase : CharacterStats
 
         behavior?.SetVariableValue("IsAttacking", true);
         navMeshAgent.isStopped = true;
-        spawner?.OnMonsterKilled();
 
         if (killer != null && killer.TryGetComponent<PlayerStats>(out var killerStats))
         {
