@@ -25,6 +25,8 @@ public partial class UpdateTargetAction : Action
         foreach (GameObject player in players)
         {
             if (player == Self.Value) continue;
+            PlayerStats stats = player.GetComponent<PlayerStats>();
+            if (stats == null || stats.IsDead) continue;
 
             NetworkMatch playerMatch = player.GetComponent<NetworkMatch>();
             if (playerMatch == null || playerMatch.matchId != selfMatch.matchId) continue;
