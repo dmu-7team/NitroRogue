@@ -402,7 +402,7 @@ GameObject:
   - component: {fileID: 61790322313122051}
   m_Layer: 0
   m_Name: TurtleShell
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -460,8 +460,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  currentHealth: 0
-  maxHealth: 100
   attackObjs:
   - {fileID: 11400000, guid: 9b6136637a73a6c48a9bb0cd9f3c977a, type: 2}
   bodyRoot: {fileID: 2943225202750506227}
@@ -476,7 +474,6 @@ MonoBehaviour:
   footstepClip: {fileID: 0}
   footstepInterval: 0.5
   expReward: 30
-  spawner: {fileID: 0}
 --- !u!195 &1823522091270840390
 NavMeshAgent:
   m_ObjectHideFlags: 0

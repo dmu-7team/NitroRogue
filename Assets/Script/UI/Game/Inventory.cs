@@ -17,7 +17,7 @@ public class Inventory : NetworkBehaviour
     private PlayerStats playerStatus;
     private PlayerInputActions inputActions;
     private GameObject boxInRange;
-
+    private GameObject bossAltarInRange;
     private void Awake()
     {
         playerStatus = GetComponent<PlayerStats>();
@@ -65,7 +65,26 @@ public class Inventory : NetworkBehaviour
     }
 
 
+    private void TryInteract()
+    {
+        if (boxInRange)
+        {
+            TryPickupBox();
+        } else if (bossAltarInRange)
+        {
+            CmdRequestSpawnBoss();
+        }
+    }
+    [Command]
+    private void CmdRequestSpawnBoss()
+    {
+        var matchId = GetComponent<NetworkMatch>().matchId;
 
+        if (MatchManager.ActiveMatches.TryGetValue(matchId, out var myMatchManager))
+        {
+            myMatchManager.RequestBossSpawn();
+        }
+    }
     private void TryPickupBox()
     {
         if (boxInRange == null) return;
@@ -239,7 +258,7 @@ public class Inventory : NetworkBehaviour
         inputActions.Player.UseSlot1.performed += ctx => UseItem(0);
         inputActions.Player.UseSlot2.performed += ctx => UseItem(1);
         inputActions.Player.UseSlot3.performed += ctx => UseItem(2);
-        inputActions.Player.Interact.performed += ctx => TryPickupBox();
+        inputActions.Player.Interact.performed += ctx => TryInteract();
     }
 
 
@@ -264,16 +283,21 @@ public class Inventory : NetworkBehaviour
         }
     }
 
+    
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("TreasureChest"))
             boxInRange = other.gameObject;
+        if (other.CompareTag("BossAltar"))
+            bossAltarInRange = other.gameObject;
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("TreasureChest") && other.gameObject == boxInRange)
             boxInRange = null;
+        if (other.CompareTag("BossAltar") && other.gameObject == bossAltarInRange)
+            bossAltarInRange = null;
     }
 
     private void OnEnable() => inputActions?.Player.Enable();

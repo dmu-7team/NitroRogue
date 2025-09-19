@@ -2219,7 +2219,7 @@ GameObject:
   - component: {fileID: -119275975249831535}
   m_Layer: 0
   m_Name: MonsterPlant
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2277,8 +2277,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  currentHealth: 0
-  maxHealth: 100
   attackObjs:
   - {fileID: 11400000, guid: 484cd6128f491ad4b9de9c39561614ce, type: 2}
   - {fileID: 11400000, guid: 112d12027dd259947924fe1e112ea7bd, type: 2}
@@ -2294,7 +2292,6 @@ MonoBehaviour:
   footstepClip: {fileID: 8300000, guid: 13556e2ba6c977d42b369d2e614daf0c, type: 3}
   footstepInterval: 0.2
   expReward: 30
-  spawner: {fileID: 0}
 --- !u!195 &931930210005736392
 NavMeshAgent:
   m_ObjectHideFlags: 0

@@ -2407,10 +2407,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8142b95cfc27fd49a04b1996bead5c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hudPanel: {fileID: 5191142738041517906}
   crosshair: {fileID: 2598354640459504404}
-  ammoText: {fileID: 3430609095013622098}
+  ammoText: {fileID: 0}
   scopeOverlay: {fileID: 4830994931033295729}
+  gunIcon: {fileID: 0}
   msgText: {fileID: 6307675298265273769}
   chestMessageText: {fileID: 6307675298265273769}
   levelUpMessageText: {fileID: 6307675298265273769}
@@ -2423,6 +2423,8 @@ MonoBehaviour:
   speedText: {fileID: 2436595903481625886}
   healthBarImage: {fileID: 8073116684385384498}
   expBarImage: {fileID: 7902139343945814589}
+  victoryPanel: {fileID: 0}
+  defeatPanel: {fileID: 0}
 --- !u!1 &6613812294315714493
 GameObject:
   m_ObjectHideFlags: 0

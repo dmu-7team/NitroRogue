@@ -18,5 +18,5 @@ MonoBehaviour:
   - prefab: {fileID: 3956764888193744923, guid: 1442ca962994c994db7f03b8d7b42d04, type: 3}
     chance: 50
   eliteList: []
-  bossPrefab: {fileID: 0}
-  bossSpawnPointTag: BossSpawn
+  bossPrefab: {fileID: 9222912982316200897, guid: 312334879c7857f459d7323743bc8e6d, type: 3}
+  bossSpawnPointTag: BossSpawnPoint

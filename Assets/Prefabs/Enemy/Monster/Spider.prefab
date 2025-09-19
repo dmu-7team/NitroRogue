@@ -1737,7 +1737,7 @@ GameObject:
   - component: {fileID: 7346884443970251785}
   m_Layer: 0
   m_Name: Spider
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1795,8 +1795,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  currentHealth: 0
-  maxHealth: 100
   attackObjs:
   - {fileID: 11400000, guid: 0f4836106c324084b91347b64ac7f572, type: 2}
   - {fileID: 11400000, guid: 8dd8d4372994fe64cbc13dec05c21a48, type: 2}
@@ -1813,7 +1811,6 @@ MonoBehaviour:
   footstepClip: {fileID: 8300000, guid: 6ee2d064964206a4091fb2e9d89cb16f, type: 3}
   footstepInterval: 0.1
   expReward: 30
-  spawner: {fileID: 0}
 --- !u!195 &4604589906398908215
 NavMeshAgent:
   m_ObjectHideFlags: 0

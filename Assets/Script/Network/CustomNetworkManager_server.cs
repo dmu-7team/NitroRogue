@@ -133,7 +133,7 @@ public class CustomNetworkManager_Server : NetworkManager
         if (availableStartPoints.Count == 0)
         {
             Debug.LogError("[서버] 새 매치를 생성할 비어있는 시작 지점이 없습니다!");
-            // TODO: 플레이어에게 서버가 꽉 찼다고 알리는 로직
+            // TODO: 플레이어에게 매치 서버가 꽉 찼다고 알리는 로직
             return;
         }
 

@@ -18,7 +18,7 @@ public class MapSpawnSetSO : ScriptableObject
 
     [Header("보스 정보")]
     public GameObject bossPrefab;
-    public string bossSpawnPointTag = "BossSpawn";
+    public string bossSpawnPointTag = "BossSpawnPoint";
 
     private static int Sum(ChanceEntry[] arr)
     {

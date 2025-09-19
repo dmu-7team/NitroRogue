@@ -42846,6 +42846,59 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.20788708, y: 0.6346346, z: 0.3401082}
   m_Center: {x: -0.000000040978193, y: 0.12751105, z: 0.1700541}
+--- !u!1 &1918140492089323507
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5452292240216737545}
+  - component: {fileID: 4870900633046269094}
+  m_Layer: 6
+  m_Name: BossAlterArea
+  m_TagString: BossAltar
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5452292240216737545
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1918140492089323507}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7111151925520606366}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &4870900633046269094
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1918140492089323507}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2, y: 10, z: 2}
+  m_Center: {x: 0, y: 5, z: 0}
 --- !u!1 &1921416851892844738
 GameObject:
   m_ObjectHideFlags: 0
@@ -69242,6 +69295,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.7999992, y: 0.030169018, z: 2.8000002}
   m_Center: {x: -1.3999996, y: 0.015084509, z: -1.4000001}
+--- !u!1 &3080630935280391437
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5823708995837371989}
+  m_Layer: 6
+  m_Name: BossSpawn
+  m_TagString: BossSpawnPoint
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5823708995837371989
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3080630935280391437}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 6.12, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7111151925520606366}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3088885556710484018
 GameObject:
   m_ObjectHideFlags: 0
@@ -173036,7 +173120,9 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 10, y: 1, z: 10}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 5823708995837371989}
+  - {fileID: 5452292240216737545}
   m_Father: {fileID: 9157572318524002792}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &2021339547417820613
@@ -173112,8 +173198,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.82858646, y: 2.52, z: 0.8285864}
-  m_Center: {x: -0.00000067055225, y: 1.26, z: 0.000000834465}
+  m_Size: {x: 0.8285865, y: 2.52, z: 0.8285864}
+  m_Center: {x: -0.0000006705523, y: 1.26, z: 0.000000834465}
 --- !u!1 &7835972949850962668
 GameObject:
   m_ObjectHideFlags: 0

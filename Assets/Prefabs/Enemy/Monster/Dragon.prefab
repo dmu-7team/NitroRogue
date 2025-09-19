@@ -1194,7 +1194,6 @@ MonoBehaviour:
   footstepClip: {fileID: 8300000, guid: d1b4130a6844b504284aa6874ed1312a, type: 3}
   footstepInterval: 0.7
   expReward: 30
-  spawner: {fileID: 0}
 --- !u!195 &468265654259782412
 NavMeshAgent:
   m_ObjectHideFlags: 0

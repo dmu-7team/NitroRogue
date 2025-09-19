@@ -9,6 +9,8 @@ TagManager:
   - roon
   - PlayerSpawnPoint
   - EnemySpawnPoint
+  - BossSpawnPoint
+  - BossAltar
   layers:
   - Default
   - TransparentFX

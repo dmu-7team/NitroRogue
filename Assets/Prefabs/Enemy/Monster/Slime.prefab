@@ -241,7 +241,7 @@ GameObject:
   - component: {fileID: -3485602857859408547}
   m_Layer: 0
   m_Name: Slime
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -299,8 +299,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  currentHealth: 0
-  maxHealth: 100
   attackObjs:
   - {fileID: 11400000, guid: cc0a8c9298e8a5e439be8fcc23914d53, type: 2}
   bodyRoot: {fileID: 698216279277231275}
@@ -315,7 +313,6 @@ MonoBehaviour:
   footstepClip: {fileID: 8300000, guid: c8fa5b63fde4608458d582a385031c7b, type: 3}
   footstepInterval: 0.69
   expReward: 30
-  spawner: {fileID: 0}
 --- !u!195 &1916742304385904769
 NavMeshAgent:
   m_ObjectHideFlags: 0

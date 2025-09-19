@@ -114,7 +114,7 @@ GameObject:
   - component: {fileID: -1461259348908832605}
   m_Layer: 0
   m_Name: Skeleton
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -172,8 +172,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  currentHealth: 0
-  maxHealth: 100
   attackObjs:
   - {fileID: 11400000, guid: 625718b43c0133e4b83d8cce4f18e824, type: 2}
   - {fileID: 11400000, guid: 952906af5b25bd34b8b7e211c75597c4, type: 2}
@@ -189,7 +187,6 @@ MonoBehaviour:
   footstepClip: {fileID: 8300000, guid: f2dc203354506904bbb8d9eceaa14d90, type: 3}
   footstepInterval: 0.3
   expReward: 30
-  spawner: {fileID: 0}
 --- !u!195 &119617723286252901
 NavMeshAgent:
   m_ObjectHideFlags: 0

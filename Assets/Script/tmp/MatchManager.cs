@@ -276,6 +276,7 @@ public class MatchManager : NetworkBehaviour
     [Server]
     public void RequestBossSpawn()
     {
+        Debug.Log("보스 리스폰 받음");
         if (isBossAlive) return;
         var stage = gameModeConfig.FindStage(currentStageId);
         if (stage == null || stage.mapSpawnSet == null || stage.mapSpawnSet.bossPrefab == null) return;
@@ -285,6 +286,7 @@ public class MatchManager : NetworkBehaviour
         Quaternion rot = point ? point.transform.rotation : Quaternion.identity;
 
         currentBoss = Instantiate(stage.mapSpawnSet.bossPrefab, pos, rot);
+        currentBoss.GetComponent<NetworkMatch>().matchId = matchId;
         NetworkServer.Spawn(currentBoss);
         isBossAlive = true;
 
