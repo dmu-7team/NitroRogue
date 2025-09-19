@@ -140,5 +140,58 @@ private void Awake()
     {
         this.gunIcon.sprite = gunIcon;
     }
+    // 필드
+    private bool swRunning = false;
+    private float swStart;
+    private float swPausedAccum = 0f;
+    [SerializeField] private TextMeshProUGUI stopwatchText;
+
+    // 시작/일시정지/재개/리셋
+    public void StartStopwatchLocal()
+    {
+        swPausedAccum = 0f;
+        swStart = Time.time;
+        swRunning = true;
+    }
+
+    public void PauseStopwatchLocal()
+    {
+        if (!swRunning) return;
+        swPausedAccum += (Time.time - swStart);
+        swRunning = false;
+    }
+
+    public void ResumeStopwatchLocal()
+    {
+        if (swRunning) return;
+        swStart = Time.time;
+        swRunning = true;
+    }
+
+    public void ResetStopwatchLocal()
+    {
+        swRunning = false;
+        swPausedAccum = 0f;
+        UpdateStopwatchText(0);
+    }
+
+    // Update에서 호출
+    void Update()
+    {
+        if (swRunning)
+        {
+            float elapsed = (Time.time - swStart) + swPausedAccum;
+            UpdateStopwatchText(elapsed);
+        }
+    }
+
+    private void UpdateStopwatchText(double t)
+    {
+        int minutes = (int)(t / 60);
+        int seconds = (int)(t % 60);
+        int centi = (int)((t - Mathf.Floor((float)t)) * 100);
+        if (stopwatchText != null)
+            stopwatchText.text = $"{minutes:00}:{seconds:00}.{centi:00}";
+    }
 
 }

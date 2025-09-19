@@ -148,6 +148,7 @@ public class RoomUIManager : MonoBehaviour
 
 
         Debug.Log("[RoomUIManager] 모든 UI 정리 완료, 게임 HUD만 활성화됨");
+        UIManager.Instance.StartStopwatchLocal();
     }
 
 
