@@ -247,7 +247,7 @@ public class RoomUIManager : MonoBehaviour
             {
                 if (selectedCharacters[j] == i)
                 {
-                    txt.text = $"{playerNames[j]} º±≈√µ ";
+                    txt.text = $"{playerNames[j]}\nº±≈√µ ";
                     btn.interactable = false;
                     isTaken = true;
                     break;

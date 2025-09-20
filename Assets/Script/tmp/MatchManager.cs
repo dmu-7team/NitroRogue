@@ -276,7 +276,6 @@ public class MatchManager : NetworkBehaviour
     [Server]
     public void RequestBossSpawn()
     {
-        Debug.Log("보스 리스폰 받음");
         if (isBossAlive) return;
         var stage = gameModeConfig.FindStage(currentStageId);
         if (stage == null || stage.mapSpawnSet == null || stage.mapSpawnSet.bossPrefab == null) return;
@@ -297,6 +296,7 @@ public class MatchManager : NetworkBehaviour
     [Server]
     private void OnBossDied()
     {
+        Debug.Log("보스 사망 받음");
         isBossAlive = false;
         currentBoss = null;
         var stage = gameModeConfig.FindStage(currentStageId);
@@ -316,5 +316,9 @@ public class MatchManager : NetworkBehaviour
         spawner.ApplyStep(currentDifficultyStep, gameModeConfig.FindStage(currentStageId), gameModeConfig.spawnRule);
     }
 
-    [ClientRpc] void RpcGameOver() { /* 게임 종료 연출 */ }
+    [ClientRpc] void RpcGameOver()
+    {
+        /* 게임 종료 연출 */
+        Debug.Log("게임 종료 클라 받음");
+    }
 }
