@@ -231,7 +231,11 @@ public class PlayerStats : CharacterStats
             animator = GetComponent<Animator>();
 
         animator?.SetTrigger("die");
-        if (isLocalPlayer) SpectatorManager.EnterSpectate(this);
+        if (isLocalPlayer)
+        {
+            SpectatorManager.EnterSpectate(this);
+            gameObject.tag = "Spectator";
+        }
     }
 
 
