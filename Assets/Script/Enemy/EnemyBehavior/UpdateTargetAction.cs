@@ -39,7 +39,11 @@ public partial class UpdateTargetAction : Action
             }
         }
 
-        if (minDistancePlayer == null) return Status.Failure;
+        if (minDistancePlayer == null)
+        {
+            Target.Value = null;
+            return Status.Failure;
+        }
 
         Target.Value = minDistancePlayer;
         return Status.Success;

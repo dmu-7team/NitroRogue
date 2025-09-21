@@ -135,6 +135,8 @@ public class EnemyBase : CharacterStats
     public virtual void UseAllAttack(GameObject target)
     {
         if (bodyRoot == null || isAttacking || target == null) return;
+        var stats = target.GetComponent<PlayerStats>();
+        if (stats == null || stats.IsDead) return;
 
         foreach (var attack in attacks)
         {
