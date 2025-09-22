@@ -4,6 +4,7 @@ using Mirror;
 using NetworkMessages;
 using UnityEngine.UI; // ← 버튼 포함한 UI 컴포넌트용
 using System.Linq;
+using Unity.VisualScripting;
 
 public class RoomUIManager : MonoBehaviour
 {
