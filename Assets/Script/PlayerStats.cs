@@ -262,6 +262,8 @@ public class PlayerStats : CharacterStats
         RpcPlayerDie();
         if (isServer) NetworkGameState.Instance?.Unregister(this);
         base.Die();
+
+
     }
 
     [ClientRpc]
@@ -271,8 +273,16 @@ public class PlayerStats : CharacterStats
             animator = GetComponent<Animator>();
 
         animator?.SetTrigger("die");
-        if (isLocalPlayer) SpectatorManager.EnterSpectate(this);
+
+        if (isLocalPlayer)
+        {
+            // 죽은 본인 클라만 관전 + UI 전환
+            SpectatorManager.EnterSpectate(this);
+            //UIManager.Instance?.EnterSpectatorHUD();
+            Debug.Log("[UI] EnterSpectatorHUD 호출됨 (로컬 플레이어)");
+        }
     }
+
 
 
     // == SyncVarHooks ==

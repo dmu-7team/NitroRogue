@@ -38,6 +38,20 @@ public class UIManager : MonoBehaviour
     [Header("결과 패널")]
     [SerializeField] private GameObject victoryPanel;
     [SerializeField] private GameObject defeatPanel;
+    [Header("=== HUD 그룹 ===")]
+    [SerializeField] private GameObject inGameHUDRoot;     // 플레이어 HUD 전체 부모
+    [SerializeField] private GameObject spectatorHUDRoot;  // 관전자 HUD 부모
+    public void EnterGameplayHUD()
+    {
+        if (inGameHUDRoot) inGameHUDRoot.SetActive(true);
+        if (spectatorHUDRoot) spectatorHUDRoot.SetActive(false);
+    }
+
+    public void EnterSpectatorHUD()
+    {
+        if (inGameHUDRoot) inGameHUDRoot.SetActive(false);
+        if (spectatorHUDRoot) spectatorHUDRoot.SetActive(true);
+    }
 
     public void ShowVictoryPanel()
     {
@@ -48,8 +62,10 @@ public class UIManager : MonoBehaviour
     public void ShowDefeatPanel()
     {
             if (defeatPanel) defeatPanel.SetActive(true);
+            if (spectatorHUDRoot) spectatorHUDRoot.SetActive(false);
             if (victoryPanel) victoryPanel.SetActive(false);
-        }
+            if (inGameHUDRoot) inGameHUDRoot.SetActive(false);
+    }
 private void Awake()
     {
         if (Instance == null)

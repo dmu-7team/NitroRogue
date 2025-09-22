@@ -11,6 +11,7 @@ TagManager:
   - EnemySpawnPoint
   - BossSpawnPoint
   - BossAltar
+  - match
   layers:
   - Default
   - TransparentFX

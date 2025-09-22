@@ -6,18 +6,19 @@ public class SpectatorManager : MonoBehaviour
 {
     public static SpectatorManager Instance;
 
+    // === 설정 ===
+    private const string SceneCameraTag = "match";  // 씬에 박아둔 카메라/앵커 태그
+    private static readonly string[] AnchorNames = { "match", "MainCamera", "CameraAnchor", "Head" };
+
     // 로컬에서 보이는 살아있는 플레이어들
     private readonly List<PlayerStats> alive = new();
 
     // 후보 순회용 인덱스(원하면 키로 다음/이전 구현 가능)
     private int index = 0;
 
-    // 관전 전용 카메라(항상 이거 하나만 사용)
+    // 관전 전용 카메라(가능하면 씬의 Tag=match 카메라를 재사용)
     private Camera specCam;
     private AudioListener specListener;
-
-    // FPS 시점 기준점 후보 이름(프리팹에서 하나만 통일해두면 가장 깔끔)
-    private static readonly string[] AnchorNames = { "MainCamera", "FPSCamera" };
 
     void Awake()
     {
@@ -50,6 +51,7 @@ public class SpectatorManager : MonoBehaviour
     {
         if (Instance == null) return;
         Instance.InternalEnter(me);
+
     }
 
     // ===== 관전 진입 =====
@@ -58,7 +60,7 @@ public class SpectatorManager : MonoBehaviour
         // 1) 내 캐릭터(컨트롤/렌더/자기 카메라) 비활성화
         HideLocalPlayer(me);
 
-        // 2) 관전 전용 카메라 확보
+        // 2) 관전 카메라 확보(우선: 씬의 Tag=match 카메라)
         EnsureSpectateCamera();
 
         // 3) 후보: 나 제외 + 활성 + 체력>0
@@ -68,8 +70,9 @@ public class SpectatorManager : MonoBehaviour
 
         if (candidates.Count == 0)
         {
-            // 아무도 없으면 임시 위치에서 대기(서버가 패배 패널을 띄울 것)
-            DetachAndPark(specCam.transform);
+            UIManager.Instance?.ShowDefeatPanel();
+            // 아무도 없으면 '씬 카메라(match)'로 주차 시점
+            UseFallbackCamera(null);
             return;
         }
 
@@ -82,9 +85,22 @@ public class SpectatorManager : MonoBehaviour
     {
         if (specCam != null) return;
 
-        var go = new GameObject("SpectateCamera");
-        specCam = go.AddComponent<Camera>();
-        specListener = go.AddComponent<AudioListener>();
+        // 1) 씬 안에서 태그 'match' 카메라 먼저 찾기
+        var sceneTaggedCam = FindObjectsByType<Camera>(FindObjectsSortMode.None)
+            .FirstOrDefault(c => c != null && c.gameObject.CompareTag(SceneCameraTag));
+
+        if (sceneTaggedCam != null)
+        {
+            specCam = sceneTaggedCam;
+            specListener = specCam.GetComponent<AudioListener>() ?? specCam.gameObject.AddComponent<AudioListener>();
+        }
+        else
+        {
+            // 2) 없으면 새로 생성
+            var go = new GameObject("SpectateCamera");
+            specCam = go.AddComponent<Camera>();
+            specListener = go.AddComponent<AudioListener>();
+        }
 
         // 다른 오디오 리스너는 모두 끄고 이 리스너만 사용
         foreach (var al in FindObjectsByType<AudioListener>(FindObjectsSortMode.None))
@@ -117,11 +133,15 @@ public class SpectatorManager : MonoBehaviour
     {
         if (!target) { DetachAndPark(specCam.transform); return; }
 
-        Transform anchor = FindFpsAnchor(target.transform);
+        // 1) 플레이어 자식 중 Tag=match 트랜스폼을 앵커로 우선 사용
+        Transform anchor = FindAnchorByTagInChildren(target.transform, SceneCameraTag);
 
+        // 2) 없으면, 이름 기반 후보
+        if (anchor == null) anchor = FindFpsAnchorByName(target.transform);
+
+        // 3) 그래도 없으면, 타겟 자식의 어떤 카메라 Transform
         if (anchor == null)
         {
-            // 상대 프리팹의 카메라 Transform을 앵커로 사용(켜지 않음)
             var anyCam = target.GetComponentsInChildren<Camera>(true).FirstOrDefault();
             anchor = anyCam ? anyCam.transform : target.transform;
         }
@@ -136,8 +156,16 @@ public class SpectatorManager : MonoBehaviour
         specListener.enabled = true;
     }
 
-    // 앵커 후보 이름으로 찾기
-    Transform FindFpsAnchor(Transform root)
+    // === Tag로 앵커 찾기(자식들만) ===
+    Transform FindAnchorByTagInChildren(Transform root, string tag)
+    {
+        foreach (var tr in root.GetComponentsInChildren<Transform>(true))
+            if (tr.gameObject.CompareTag(tag)) return tr;
+        return null;
+    }
+
+    // === 이름으로 앵커 찾기 ===
+    Transform FindFpsAnchorByName(Transform root)
     {
         var all = root.GetComponentsInChildren<Transform>(true);
         foreach (var name in AnchorNames)
@@ -156,7 +184,7 @@ public class SpectatorManager : MonoBehaviour
         return parent != null && parent.gameObject.activeInHierarchy;
     }
 
-    // 타겟이 없으면 임시 위치로 주차
+    // 타겟이 없으면 임시 위치로 주차(→ 씬 카메라(match) 시점으로 우선 복귀)
     void DetachAndPark(Transform cam)
     {
         if (!cam) return;
@@ -164,18 +192,28 @@ public class SpectatorManager : MonoBehaviour
         UseFallbackCamera(null);
     }
 
-    // 대상이 없거나 앵커를 못 찾았을 때 임시 시점
+    // 대상이 없거나 앵커를 못 찾았을 때: 씬의 Tag=match 카메라 시점 사용
     void UseFallbackCamera(Transform followTarget)
     {
         if (!specCam) EnsureSpectateCamera();
 
-        if (followTarget != null)
+        // 씬 내 Tag=match 카메라가 있으면 그 위치/회전을 그대로 사용
+        var sceneTaggedCam = FindObjectsByType<Camera>(FindObjectsSortMode.None)
+            .FirstOrDefault(c => c != null && c.gameObject.CompareTag(SceneCameraTag));
+
+        if (sceneTaggedCam != null)
+        {
+            specCam.transform.SetParent(null, false);
+            specCam.transform.SetPositionAndRotation(sceneTaggedCam.transform.position, sceneTaggedCam.transform.rotation);
+        }
+        else if (followTarget != null)
         {
             specCam.transform.position = followTarget.position + Vector3.up * 1.7f - followTarget.forward * 3.5f;
             specCam.transform.rotation = Quaternion.LookRotation(followTarget.position + Vector3.up * 1.3f - specCam.transform.position);
         }
         else
         {
+            // 최종 기본값
             specCam.transform.position = new Vector3(0, 10, -10);
             specCam.transform.rotation = Quaternion.Euler(20, 0, 0);
         }
@@ -220,4 +258,11 @@ public class SpectatorManager : MonoBehaviour
         index = (index - 1 + candidates.Count) % candidates.Count;
         AttachToTarget(candidates[index]);
     }
+    public float sensitivity = 2f;
+    private float rotationX = 0f;
+    private float rotationY = 0f;
+    
+    
+
+  
 }
