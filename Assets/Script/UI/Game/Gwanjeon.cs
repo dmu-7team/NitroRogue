@@ -7,7 +7,7 @@ public class Gwanjeon : MonoBehaviour
     public Camera miniMapCamera;
 
     [Header("팔로우 설정")]
-    public float height = 50f;            // 위에서 내려다보는 높이
+   // 위에서 내려다보는 높이
     public float followLerp = 10f;        // 위치 보간(클수록 더 빠르게 붙음)
     public bool rotateWithPlayer = false; // true면 플레이어 방향에 맞춰 미니맵 회전
 
@@ -23,7 +23,7 @@ public class Gwanjeon : MonoBehaviour
 
         // --- 위치 따라가기 ---
         Vector3 desired = target.position;
-        desired.y = height; // 고정 높이
+       
         miniMapCamera.transform.position =
             Vector3.Lerp(miniMapCamera.transform.position, desired, Time.deltaTime * followLerp);
 

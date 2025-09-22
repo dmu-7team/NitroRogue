@@ -31,6 +31,9 @@ public class PlayerStats : CharacterStats
     [SyncVar] private int   killCount   = 0;
     [SyncVar] private float totalDamage = 0f;
     [SyncVar] private string nickName;
+    // 맨 위 다른 SyncVar들 옆에 추가
+    [SyncVar] public bool isAlive = true;   // 서버 생존 추적용
+    [SyncVar] public string matchIdStr;         // 서버에서 매치 식별용 (GUID 문자열)
 
     private MatchManager myMatchManager;
 
@@ -103,6 +106,9 @@ public class PlayerStats : CharacterStats
         {
             myMatchManager.AddPlayer(transform);
         }
+        isDead = false;
+        isAlive = true;
+        matchIdStr = matchId.ToString();
 
         SetHealth(maxHealth, maxHealth);
         originalSpeed = syncedMoveSpeed;
@@ -140,6 +146,14 @@ public class PlayerStats : CharacterStats
             Die();
     }
 
+    // 파일의 다른 TargetRpc들 아래에 추가
+    [TargetRpc]
+    public void TargetShowDefeat(NetworkConnectionToClient conn)
+    {
+        // 프로젝트에 맞는 패배 UI 호출로 바꿔 써도 OK
+        // UIManager.Instance?.ShowResult(false);
+        UIManager.Instance?.ShowDefeatPanel();
+    }
 
     // == 클라이언트 RPC/타겟 RPC ==
     [TargetRpc]
@@ -260,10 +274,20 @@ public class PlayerStats : CharacterStats
 
         Debug.Log("플레이어 사망 처리");
         RpcPlayerDie();
-        if (isServer) NetworkGameState.Instance?.Unregister(this);
+
+        // ★ 추가: 서버에서 전원 사망 판정 트리거
+        if (isServer)
+        {
+            isAlive = false;
+
+            var nm = (CustomNetworkManager_Server)NetworkManager.singleton;
+            // 매치 ID 문자열을 서버에 보고 → 서버가 “전원 사망”이면 TargetRpc로 전원에게 패배 UI 쏨
+            nm.ServerNotifyPlayerDead(matchIdStr);
+
+            NetworkGameState.Instance?.Unregister(this);
+        }
+
         base.Die();
-
-
     }
 
     [ClientRpc]
@@ -278,7 +302,7 @@ public class PlayerStats : CharacterStats
         {
             // 죽은 본인 클라만 관전 + UI 전환
             SpectatorManager.EnterSpectate(this);
-            //UIManager.Instance?.EnterSpectatorHUD();
+            UIManager.Instance?.EnterSpectatorHUD();
             Debug.Log("[UI] EnterSpectatorHUD 호출됨 (로컬 플레이어)");
         }
     }

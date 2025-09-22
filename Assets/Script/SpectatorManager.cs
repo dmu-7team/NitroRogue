@@ -70,7 +70,7 @@ public class SpectatorManager : MonoBehaviour
 
         if (candidates.Count == 0)
         {
-            UIManager.Instance?.ShowDefeatPanel();
+           
             // 아무도 없으면 '씬 카메라(match)'로 주차 시점
             UseFallbackCamera(null);
             return;
