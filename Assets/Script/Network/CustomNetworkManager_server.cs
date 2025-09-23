@@ -23,7 +23,7 @@ public class CustomNetworkManager_Server : NetworkManager
     private List<Transform> availableStartPoints;
     private readonly Dictionary<Guid, List<RoomPlayer>> pendingMatches = new();
     private readonly HashSet<string> finishedMatches = new(); // 전원사망 1회 방송 방지
-
+    private readonly Dictionary<Guid, Transform> matchStartPointMap = new();  // ★ 추가: 매치 시작 지점 기억
     public override void Start()
     {
         base.Start();
@@ -38,7 +38,7 @@ public class CustomNetworkManager_Server : NetworkManager
 
         availableStartPoints = new List<Transform>(matchStartPoints);
         MatchManager.OnManagerReady += HandleManagerReady; // ★ 이벤트 구독
-
+        MatchManager.OnMatchEnded += HandleMatchEnded;
         NetworkServer.RegisterHandler<JoinMatchMessage>(OnJoinMatchMessageReceived);
         NetworkServer.RegisterHandler<RoomListRequestMessage>(OnRoomListRequestMessageReceived);
     }
@@ -47,6 +47,7 @@ public class CustomNetworkManager_Server : NetworkManager
     {
         base.OnStopServer();
         MatchManager.OnManagerReady -= HandleManagerReady; // ★ 이벤트 해제
+        MatchManager.OnMatchEnded -= HandleMatchEnded;
     }
 
     // ===== 로비 진입/리스트 =====
@@ -139,11 +140,39 @@ public class CustomNetworkManager_Server : NetworkManager
         availableStartPoints.RemoveAt(0);
 
         pendingMatches[parsedMatchId] = new List<RoomPlayer>(players);
+        // ★ 추가: 이 매치의 시작 지점 기록 → 종료 시 반납
+        matchStartPointMap[parsedMatchId] = startPoint;
 
         // ★ MatchManager 프리팹 스폰 (여기서는 '맵 인스턴스' 자체만 스폰)
         var matchInstance = Instantiate(matchManagerPrefabs, startPoint.position, startPoint.rotation);
         matchInstance.GetComponent<NetworkMatch>().matchId = parsedMatchId;
         NetworkServer.Spawn(matchInstance);
+    }
+    [Server]
+    private void HandleMatchEnded(Guid matchGuid, bool isVictory)
+    {
+        string matchIdStr = matchGuid.ToString();
+
+        // 1) 해당 matchId의 네트워크 오브젝트 전부 제거
+        foreach (var ni in NetworkServer.spawned.Values.ToList())
+        {
+            if (!ni) continue;
+            var nm = ni.GetComponent<NetworkMatch>();
+            if (nm != null && nm.matchId == matchGuid)
+                NetworkServer.Destroy(ni.gameObject);
+        }
+
+        // 2) 시작 지점 반환
+        if (matchStartPointMap.TryGetValue(matchGuid, out var point))
+        {
+            FreeUpMatchPoint(point);
+            matchStartPointMap.Remove(matchGuid);
+        }
+
+        // 3) 내부 상태 리셋
+        finishedMatches.Remove(matchIdStr);
+
+        Debug.Log($"[서버] Match {matchGuid} 종료 정리 완료 (Victory={isVictory}).");
     }
 
     // ===== MatchManager가 “준비됨”을 알리면 실제 인게임 플레이어를 교체/스폰 =====
@@ -259,6 +288,10 @@ public class CustomNetworkManager_Server : NetworkManager
 
             // TODO: 매치 정리/리셋 필요 시 여기에
             // availableStartPoints.Add(해당 시작점) 등
+        }
+        if (Guid.TryParse(matchIdStr, out var g) && MatchManager.ActiveMatches.TryGetValue(g, out var mm))
+        {
+            mm.EndMatch(false);  // 패배 종료 → HandleMatchEnded로 정리
         }
     }
 

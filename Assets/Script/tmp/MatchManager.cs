@@ -12,6 +12,8 @@ public class MatchManager : NetworkBehaviour
 {
     public static event Action<MatchManager> OnManagerReady;
     public static readonly Dictionary<Guid, MatchManager> ActiveMatches = new Dictionary<Guid, MatchManager>();
+    public static event Action<Guid, bool> OnMatchEnded; // (matchId, isVictory)
+    private bool ended; // 중복 종료 방지
 
     [HideInInspector]
     public Transform startPoint;
@@ -40,6 +42,34 @@ public class MatchManager : NetworkBehaviour
 
     private GameObject currentServerLogicInstance;
     private GameObject currentClientMapInstance;
+
+    [Server]
+    public void EndMatch(bool isVictory)
+    {
+        if (ended) return;
+        ended = true;
+
+        var guid = GetComponent<NetworkMatch>().matchId;
+
+        // 1) 결과창 브로드캐스트 (승리/패배 모두 여기서 처리 가능)
+        foreach (var ni in NetworkServer.spawned.Values)
+        {
+            if (!ni) continue;
+            var nm = ni.GetComponent<NetworkMatch>();
+            if (nm == null || nm.matchId != guid) continue;
+
+            var ps = ni.GetComponent<PlayerStats>();
+            var conn = ps ? ps.connectionToClient : null;
+            if (ps != null && conn != null)
+            {
+                if (isVictory) ps.TargetShowVictory(conn);
+                else ps.TargetShowDefeat(conn);
+            }
+        }
+
+        // 2) NetworkManager에게 “이 매치 끝남” 알림 (오브젝트 정리/시작 지점 반환)
+        OnMatchEnded?.Invoke(guid, isVictory);
+    }
 
     public override void OnStartServer()
     {
@@ -304,7 +334,8 @@ public class MatchManager : NetworkBehaviour
 
         if (stage.nextStageId < 0)
         {
-            RpcGameOver();
+            // 기존: RpcGameOver();
+            EndMatch(true);        // ★ 승리 처리로 교체
             return;
         }
 
@@ -315,6 +346,7 @@ public class MatchManager : NetworkBehaviour
         UpdateDifficultyScaling();
         spawner.ApplyStep(currentDifficultyStep, gameModeConfig.FindStage(currentStageId), gameModeConfig.spawnRule);
     }
+
 
     [ClientRpc] void RpcGameOver()
     {

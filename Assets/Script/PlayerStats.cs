@@ -345,4 +345,10 @@ public class PlayerStats : CharacterStats
         OnExpChanged?.Invoke(currentExp, expToLevelUp);
         OnLevelChanged?.Invoke(level);
     }
+    [TargetRpc]
+    public void TargetShowVictory(NetworkConnectionToClient conn)
+    {
+        // 프로젝트 UI에 맞춰 한 줄 교체 가능
+        UIManager.Instance?.ShowVictoryPanel(); // 또는 ShowVictoryPanel()
+    }
 }

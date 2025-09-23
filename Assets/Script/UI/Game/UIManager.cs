@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
+using Mirror;
 
 public class UIManager : MonoBehaviour
 {
@@ -41,6 +42,22 @@ public class UIManager : MonoBehaviour
     [Header("=== HUD 그룹 ===")]
     [SerializeField] private GameObject inGameHUDRoot;     // 플레이어 HUD 전체 부모
     [SerializeField] private GameObject spectatorHUDRoot;  // 관전자 HUD 부모
+    [Header("Return Buttons (assign both)")]
+    [SerializeField] private Button victoryReturnButton; // 승리 패널의 '처음으로' 버튼
+    [SerializeField] private Button defeatReturnButton;  // 패배 패널의 '처음으로' 버튼
+    public void OnClickReturnToMain()
+    {
+        // 로컬에서 메인 메뉴 UI 다시 띄우기
+        RoomUIManager.Instance?.ShowMainMenu();
+
+        // 현재 플레이어 캐릭터 제거 (선택)
+        if (NetworkClient.isConnected && NetworkClient.localPlayer != null)
+        {
+            NetworkClient.localPlayer.connectionToServer?.Disconnect();
+        }
+    }
+
+
     public void EnterGameplayHUD()
     {
         if (inGameHUDRoot) inGameHUDRoot.SetActive(true);
