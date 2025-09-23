@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using Mirror;
+using UnityEngine.EventSystems;
 
 public class UIManager : MonoBehaviour
 {
@@ -35,10 +36,11 @@ public class UIManager : MonoBehaviour
     private Coroutine chestMessageCoroutine;
     private Coroutine levelUpCoroutine;
     private Coroutine itemEffectCoroutine;
-
+    public bool IsModalUIMode { get; private set; }  // ★ 전역 플래그
     [Header("결과 패널")]
     [SerializeField] private GameObject victoryPanel;
     [SerializeField] private GameObject defeatPanel;
+    public GameObject lobbyPanel;
     [Header("=== HUD 그룹 ===")]
     [SerializeField] private GameObject inGameHUDRoot;     // 플레이어 HUD 전체 부모
     [SerializeField] private GameObject spectatorHUDRoot;  // 관전자 HUD 부모
@@ -49,7 +51,7 @@ public class UIManager : MonoBehaviour
     {
         // 로컬에서 메인 메뉴 UI 다시 띄우기
         RoomUIManager.Instance?.ShowMainMenu();
-
+        IsModalUIMode = false;            // ★ 모달 해제
         // 현재 플레이어 캐릭터 제거 (선택)
         if (NetworkClient.isConnected && NetworkClient.localPlayer != null)
         {
@@ -79,6 +81,7 @@ public class UIManager : MonoBehaviour
     public void ShowDefeatPanel()
     {
             if (defeatPanel) defeatPanel.SetActive(true);
+             IsModalUIMode = true;
             if (spectatorHUDRoot) spectatorHUDRoot.SetActive(false);
             if (victoryPanel) victoryPanel.SetActive(false);
             if (inGameHUDRoot) inGameHUDRoot.SetActive(false);
@@ -226,5 +229,36 @@ private void Awake()
         if (stopwatchText != null)
             stopwatchText.text = $"{minutes:00}:{seconds:00}.{centi:00}";
     }
+    public void ReturnToMainAndLeaveRoom()
+    {
+        // 1) 지금 클릭된 버튼이 들어있는 패널을 직접 찾아 끄기
+        var sel = EventSystem.current ? EventSystem.current.currentSelectedGameObject : null;
+        if (sel != null)
+        {
+            var panel = sel.transform.GetComponentInParent<Canvas>(true);
+            if (panel) panel.gameObject.SetActive(false);
+            else sel.transform.root.gameObject.SetActive(false);
+        }
 
+        // 2) 모달 해제 (로비에서는 마우스 필요)
+        IsModalUIMode = false;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // 3) 기존 RoomUIManager의 방나가기 로직 호출
+        if (RoomUIManager.Instance != null)
+        {
+            RoomUIManager.Instance.OnLeaveRoomButtonClicked();
+        }
+        else
+        {
+            // 혹시 RoomUIManager가 씬에 없을 때를 위한 안전장치(선택)
+            NetworkClient.Disconnect();
+            RoomListUI.matchIdToJoin = "";
+            RoomListUI.enableAutoJoin = false;
+            RoomListUI.triedAutoConnect = false;
+        }
+        if (lobbyPanel) lobbyPanel.SetActive(true);
+        Debug.Log("[UI] ReturnToMainAndLeaveRoom 완료");
+    }
 }

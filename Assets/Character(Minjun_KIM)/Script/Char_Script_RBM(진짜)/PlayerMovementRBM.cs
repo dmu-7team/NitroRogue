@@ -47,6 +47,12 @@ public class PlayerMovementRBM : NetworkBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        // ★ UI 모달 아닐 때만 잠금
+        if (!(UIManager.Instance && UIManager.Instance.IsModalUIMode))
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
 
     void Update()
@@ -55,10 +61,15 @@ public class PlayerMovementRBM : NetworkBehaviour
 
         HandleLook();
         HandleMove();
+        // ★ UI 모달(승/패 패널)일 땐 입력/시점 완전 차단
+        if (UIManager.Instance && UIManager.Instance.IsModalUIMode)
+            return;
     }
 
     public void HandleLook()
     {
+        // ★ 이중 안전장치 (혹시 Update에서 가드 빠져도 보호)
+        if (UIManager.Instance && UIManager.Instance.IsModalUIMode) return;
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 

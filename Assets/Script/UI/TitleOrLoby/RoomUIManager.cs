@@ -14,6 +14,7 @@ public class RoomUIManager : MonoBehaviour
     [Header("UI References")]
 
     public GameObject mainMenuPanel;
+    public GameObject gameHudCanvas;
     public GameObject roomPanel;
     public TextMeshProUGUI roomNameText;
     public GameObject startButton;
@@ -136,6 +137,7 @@ public class RoomUIManager : MonoBehaviour
         {
             Debug.Log("[RoomUIManager] 리더가 아니라 게임 시작 불가");
         }
+
     }
 
 
@@ -148,7 +150,7 @@ public class RoomUIManager : MonoBehaviour
         if (mainMenuCanvas != null)
             mainMenuCanvas.SetActive(false);  // ← Canvas 루트 전체 꺼버림
 
-
+        if (gameHudCanvas) gameHudCanvas.SetActive(true);
 
         Debug.Log("[RoomUIManager] 모든 UI 정리 완료, 게임 HUD만 활성화됨");
         UIManager.Instance.StartStopwatchLocal();

@@ -51,7 +51,7 @@ public class MatchManager : NetworkBehaviour
 
         var guid = GetComponent<NetworkMatch>().matchId;
 
-        // 1) 결과창 브로드캐스트 (승리/패배 모두 여기서 처리 가능)
+        // 1) 결과창 브로드캐스트
         foreach (var ni in NetworkServer.spawned.Values)
         {
             if (!ni) continue;
@@ -67,9 +67,29 @@ public class MatchManager : NetworkBehaviour
             }
         }
 
-        // 2) NetworkManager에게 “이 매치 끝남” 알림 (오브젝트 정리/시작 지점 반환)
-        OnMatchEnded?.Invoke(guid, isVictory);
+        // 2) 2~3초만 기다려서 클라가 패널을 볼 시간 주기 (원하면 0으로)
+        StartCoroutine(ServerCleanupAfterDelay(guid, 2.0f));
     }
+
+    [Server]
+    private System.Collections.IEnumerator ServerCleanupAfterDelay(System.Guid guid, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        // 3) 네트워크 매니저에게 매치 정리 요청
+        if (NetworkManager.singleton is CustomNetworkManager_Server nm)
+        {
+            // 매치에 속한 모든 네트워크 오브젝트 파괴
+            nm.DespawnMatchObjects(guid);
+
+            // 방 목록에서 제거 + 전체에게 리스트 갱신
+            nm.RemoveMatch(guid);
+
+            // (옵션) 이 매치가 차지하던 시작 포인트 반환
+            if (startPoint) nm.FreeUpMatchPoint(startPoint);
+        }
+    }
+
 
     public override void OnStartServer()
     {

@@ -398,4 +398,39 @@ public class CustomNetworkManager_Server : NetworkManager
             Debug.Log($"[서버] StartPoint 반환됨: {pointToFree.name}");
         }
     }
+    // 방 목록에서 제거하고 리스트 갱신
+    [Server]
+    public void RemoveMatch(System.Guid matchGuid)
+    {
+        string key = matchGuid.ToString();
+        if (matchRooms.Remove(key))
+        {
+            Debug.Log($"[서버] matchRooms에서 {key} 제거");
+            SendRoomListToAllClients();
+        }
+    }
+
+    // 해당 matchId의 모든 NetworkIdentity 파괴(플레이어/몬스터/맵 포함)
+    [Server]
+    public void DespawnMatchObjects(System.Guid matchGuid)
+    {
+        // 먼저 목록을 따로 만들고 나서 Destroy (반복 중 변경 방지)
+        var toDestroy = new List<NetworkIdentity>();
+        foreach (var ni in NetworkServer.spawned.Values)
+        {
+            if (!ni) continue;
+            var nm = ni.GetComponent<NetworkMatch>();
+            if (nm != null && nm.matchId == matchGuid)
+                toDestroy.Add(ni);
+        }
+
+        foreach (var ni in toDestroy)
+        {
+            // 플레이어 객체도 파괴(클라엔 승/패 패널만 남음)
+            NetworkServer.Destroy(ni.gameObject);
+        }
+
+        Debug.Log($"[서버] matchId={matchGuid} 오브젝트 {toDestroy.Count}개 정리 완료");
+    }
+
 }

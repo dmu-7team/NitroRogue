@@ -261,8 +261,35 @@ public class SpectatorManager : MonoBehaviour
     public float sensitivity = 2f;
     private float rotationX = 0f;
     private float rotationY = 0f;
-    
-    
+    void Update()
+    {
+        // UI 모달 상태면 카메라 입력/제어를 중단하고 커서도 풀어줌
+        if (UIManager.Instance && UIManager.Instance.IsModalUIMode)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            return;
+        }
 
-  
+        // 평소 관전 시 카메라 회전 로직 (예: 마우스로 회전)
+        HandleSpectateLook();
+    }
+
+    private void HandleSpectateLook()
+    {
+        if (specCam == null) return;
+
+        float mouseX = Input.GetAxis("Mouse X") * sensitivity;
+        float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
+
+        rotationX -= mouseY;
+        rotationX = Mathf.Clamp(rotationX, -80f, 80f);
+        rotationY += mouseX;
+
+        specCam.transform.localRotation = Quaternion.Euler(rotationX, rotationY, 0f);
+    }
+
+
+
+
 }
