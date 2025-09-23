@@ -289,6 +289,16 @@ public class SpectatorManager : MonoBehaviour
         specCam.transform.localRotation = Quaternion.Euler(rotationX, rotationY, 0f);
     }
 
+    public void ResetAll()
+    {
+        alive.Clear();
+        if (specCam)
+        {
+            specCam.transform.SetParent(null);
+            specCam.enabled = false;
+        }
+        if (specListener) specListener.enabled = false;
+    }
 
 
 

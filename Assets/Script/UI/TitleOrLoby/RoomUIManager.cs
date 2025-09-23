@@ -90,7 +90,7 @@ public class RoomUIManager : MonoBehaviour
         RoomListUI.matchIdToJoin = "";
         RoomListUI.enableAutoJoin = false;
         RoomListUI.triedAutoConnect = false;
-
+        SpectatorManager.Instance?.ResetAll();
         // UI 전환 및 새로고침
         RoomUIManager.Instance.ShowMainMenu();
         RoomListUI.Instance.RequestRoomListRefresh();

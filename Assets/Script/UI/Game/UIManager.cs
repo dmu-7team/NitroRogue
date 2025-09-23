@@ -8,7 +8,7 @@ using UnityEngine.EventSystems;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
-
+    private PlayerStats bound;
     [Header("게임 HUD 루트")]
     [SerializeField] public GameObject crosshair;  // HUD 크로스헤어
     [SerializeField] public TextMeshProUGUI ammoText;  // HUD 총알개수
@@ -86,18 +86,24 @@ public class UIManager : MonoBehaviour
             if (victoryPanel) victoryPanel.SetActive(false);
             if (inGameHUDRoot) inGameHUDRoot.SetActive(false);
     }
-private void Awake()
+    private void Awake()
     {
-        if (Instance == null)
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
+
+        // ★ 오브젝트 파괴와 무관하게 패널을 띄우는 안전 경로
+        NetworkClient.RegisterHandler<DefeatMessage>(_ =>
         {
-            Instance = this;
-        }
-        else
+            ResetAllUI();          // 전판 잔재 제거(원하면 주석)
+            ShowDefeatPanel();     // 패배 패널 확실히 표출
+        });
+        NetworkClient.RegisterHandler<VictoryMessage>(_ =>
         {
-            Debug.LogWarning("UIManager는 하나만 존재해야 합니다. 중복 제거됨.");
-            Destroy(gameObject);
-        }
+            ResetAllUI();
+            ShowVictoryPanel();
+        });
     }
+
 
     private void Start()
     {
@@ -108,24 +114,84 @@ private void Awake()
 
     public void RegisterPlayer(PlayerStats stats)
     {
-        if (stats == null)
-        {
-            Debug.LogError("[UIManager] PlayerStats가 null입니다!");
-            return;
-        }
+        if (stats == null) return;
+        if (bound == stats) return;
+        if (bound != null) UnregisterPlayer(bound);
+        bound = stats;
 
         Debug.Log("[UIManager] Player 연결 완료");
 
-        stats.OnSpeedChanged += UpdateSpeedUI;
-        stats.OnPowerChanged += UpdatePowerUI;
+        // 이벤트 구독 확장 (체력/경험/레벨도)
+        bound.OnSpeedChanged += UpdateSpeedUI;
+        bound.OnPowerChanged += UpdatePowerUI;
+        bound.OnHealthChanged += UpdateHealthUI;
+        bound.OnExpChanged += UpdateExpUI;
+        bound.OnLevelChanged += UpdateLevelUI;
 
-        UpdateSpeedUI(stats.MoveSpeed);
-        UpdatePowerUI(stats.AttackDamage);
+        // 즉시 반영
+        UpdateSpeedUI(bound.MoveSpeed);
+        UpdatePowerUI(bound.AttackDamage);
+        UpdateLevelUI(bound.Level);
+        UpdateHealthUI(bound.CurrentHealth, (bound as CharacterStats)?.MaxHealth ?? 100f);
+        UpdateExpUI(bound.CurrentExp, bound.ExpToLevelUp);
 
-        if (levelText != null)
+        EnterGameplayHUD();
+    }
+
+    public void UnregisterPlayer(PlayerStats stats)
+    {
+        if (stats == null) return;
+        if (bound != null && stats != bound) return;
+
+        try
         {
-            levelText.text = $"Lv {stats.Level}";
+            bound.OnSpeedChanged -= UpdateSpeedUI;
+            bound.OnPowerChanged -= UpdatePowerUI;
+            bound.OnHealthChanged -= UpdateHealthUI;
+            bound.OnExpChanged -= UpdateExpUI;
+            bound.OnLevelChanged -= UpdateLevelUI;
         }
+        catch { }
+
+        bound = null;
+        // 값도 같이 지움(잔재 방지)
+        ClearHUDValues();
+    }
+
+    private void ClearHUDValues()
+    {
+        if (healthBarImage) healthBarImage.fillAmount = 0f;
+        if (expBarImage) expBarImage.fillAmount = 0f;
+        if (healthText) healthText.text = "- / -";
+        if (expText) expText.text = "0 / 0";
+        if (levelText) levelText.text = "Lv 0";
+        if (powerText) powerText.text = "파워 0";
+        if (speedText) speedText.text = "스피드 0.0";
+        if (ammoText) ammoText.text = "";
+    }
+
+    private void UpdateHealthUI(float cur, float max)
+    {
+        if (healthBarImage) healthBarImage.fillAmount = max > 0 ? Mathf.Clamp01(cur / max) : 0f;
+        if (healthText) healthText.text = $"{Mathf.RoundToInt(cur)}/{Mathf.RoundToInt(max)}";
+    }
+
+    private void UpdateExpUI(float cur, float toLv)
+    {
+        if (expBarImage) expBarImage.fillAmount = toLv > 0 ? Mathf.Clamp01(cur / toLv) : 0f;
+        if (expText) expText.text = $"{Mathf.RoundToInt(cur)} / {Mathf.RoundToInt(toLv)}";
+    }
+
+    private void UpdateLevelUI(int lv)
+    {
+        if (levelText) levelText.text = $"Lv {lv}";
+    }
+
+    
+    public void ResetResultPanels()
+    {
+        if (victoryPanel) victoryPanel.SetActive(false);
+        if (defeatPanel) defeatPanel.SetActive(false);
     }
 
     private void UpdatePowerUI(float current)
@@ -239,7 +305,10 @@ private void Awake()
             if (panel) panel.gameObject.SetActive(false);
             else sel.transform.root.gameObject.SetActive(false);
         }
-
+        if (NetworkClient.isConnected && NetworkClient.localPlayer != null)
+        {
+            NetworkClient.localPlayer.connectionToServer?.Disconnect();
+        }
         // 2) 모달 해제 (로비에서는 마우스 필요)
         IsModalUIMode = false;
         Cursor.lockState = CursorLockMode.None;
@@ -261,4 +330,52 @@ private void Awake()
         if (lobbyPanel) lobbyPanel.SetActive(true);
         Debug.Log("[UI] ReturnToMainAndLeaveRoom 완료");
     }
+  
+    public void ResetAllUI()
+    {
+        // 바인딩 해제 (전판 이벤트 구독 끊기)
+        if (bound != null)
+        {
+            UnregisterPlayer(bound);
+            bound = null;
+        }
+
+        // 체력/경험치/레벨/스탯
+        if (healthBarImage) healthBarImage.fillAmount = 0;
+        if (expBarImage) expBarImage.fillAmount = 0;
+
+        if (healthText) healthText.text = "0 / 0";
+        if (expText) expText.text = "0 / 0";
+        if (levelText) levelText.text = "Lv 0";
+        if (powerText) powerText.text = "파워 0";
+        if (speedText) speedText.text = "스피드 0.0";
+
+        // 무기 HUD
+        if (ammoText) ammoText.text = "";
+        if (gunIcon) gunIcon.sprite = null;
+        if (crosshair) crosshair.SetActive(false);
+        if (scopeOverlay) scopeOverlay.SetActive(false);
+
+        // 메시지/패널/모달
+        if (msgText) msgText.text = "";
+        chestMessageText?.gameObject.SetActive(false);
+        levelUpMessageText?.gameObject.SetActive(false);
+        itemEffectText?.gameObject.SetActive(false);
+
+        if (victoryPanel) victoryPanel.SetActive(false);
+        if (defeatPanel) defeatPanel.SetActive(false);
+        IsModalUIMode = false;
+
+        // HUD 그룹(상황에 맞게)
+        if (inGameHUDRoot) inGameHUDRoot.SetActive(false);
+        if (spectatorHUDRoot) spectatorHUDRoot.SetActive(false);
+
+        // ★ 팀 리스트/네임태그 전부 제거
+        var teamUI = TeamStatusUIManager.Instance
+                   ?? FindFirstObjectByType<TeamStatusUIManager>(FindObjectsInactive.Include);
+        teamUI?.ClearAll();
+
+        Debug.Log("[UIManager] ResetAllUI 완료");
+    }
+
 }

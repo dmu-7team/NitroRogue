@@ -92,25 +92,49 @@ public class CustomNetworkManager_Server : NetworkManager
 
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
-        string matchId = null;
-
-        if (conn.identity != null)
+        // 1) RoomPlayer 경로 (로비)
+        if (conn.identity && conn.identity.TryGetComponent(out RoomPlayer roomP))
         {
-            var player = conn.identity.GetComponent<RoomPlayer>();
-            if (player != null && matchRooms.ContainsKey(player.matchId))
+            string matchId = roomP.matchId;
+            if (matchRooms.TryGetValue(matchId, out var list))
             {
-                matchId = player.matchId;
-                matchRooms[matchId].Remove(player);
-                if (matchRooms[matchId].Count == 0) matchRooms.Remove(matchId);
-                else if (player.isLeader) matchRooms[matchId][0].isLeader = true;
+                list.Remove(roomP);
+                if (list.Count == 0) matchRooms.Remove(matchId);
+                else if (roomP.isLeader) list[0].isLeader = true;
 
                 SendRoomListToAllClients();
                 BroadcastPlayerList(matchId);
             }
         }
+        // 2) In-Game 경로 (PlayerStats)
+        else if (conn.identity && conn.identity.TryGetComponent(out PlayerStats ps))
+        {
+            var nmComp = ps.GetComponent<NetworkMatch>();
+            if (nmComp != null)
+            {
+                var guid = nmComp.matchId;
+
+                // 이 매치에 남은 플레이어가 더 없는지 확인
+                bool anyConnInThisMatch = NetworkServer.connections.Values
+                    .Any(c =>
+                    {
+                        var id = c?.identity;
+                        return id && id.TryGetComponent(out PlayerStats p2) &&
+                               p2.GetComponent<NetworkMatch>()?.matchId == guid;
+                    });
+
+                if (!anyConnInThisMatch)
+                {
+                    // ★ 매치 내 오브젝트 전부 정리 + 방 목록 갱신
+                    DespawnMatchObjects(guid);
+                    RemoveMatch(guid);
+                }
+            }
+        }
 
         base.OnServerDisconnect(conn);
     }
+
 
     // ===== 매치 시작(로비 리더가 호출) → MatchManager 프리팹 스폰 =====
     public void StartGame(string matchId)
@@ -145,6 +169,8 @@ public class CustomNetworkManager_Server : NetworkManager
 
         // ★ MatchManager 프리팹 스폰 (여기서는 '맵 인스턴스' 자체만 스폰)
         var matchInstance = Instantiate(matchManagerPrefabs, startPoint.position, startPoint.rotation);
+        var mm = matchInstance.GetComponent<MatchManager>();
+        mm.startPoint = startPoint;
         matchInstance.GetComponent<NetworkMatch>().matchId = parsedMatchId;
         NetworkServer.Spawn(matchInstance);
     }
@@ -161,7 +187,7 @@ public class CustomNetworkManager_Server : NetworkManager
             if (nm != null && nm.matchId == matchGuid)
                 NetworkServer.Destroy(ni.gameObject);
         }
-        
+
         // 2) 시작 지점 반환
         if (matchStartPointMap.TryGetValue(matchGuid, out var point))
         {
@@ -171,9 +197,12 @@ public class CustomNetworkManager_Server : NetworkManager
 
         // 3) 내부 상태 리셋
         finishedMatches.Remove(matchIdStr);
-        SendRoomListToAllClients(); // ★ 방 리스트 갱신 메시지 발송
+        matchRooms.Remove(matchIdStr); // 혹시 남아있으면 제거
+
+        SendRoomListToAllClients();
         Debug.Log($"[서버] Match {matchGuid} 종료 정리 완료 (Victory={isVictory}).");
     }
+
 
     // ===== MatchManager가 “준비됨”을 알리면 실제 인게임 플레이어를 교체/스폰 =====
     [Server]
@@ -212,28 +241,37 @@ public class CustomNetworkManager_Server : NetworkManager
             var stats = playerObj.GetComponent<PlayerStats>();
             if (stats != null)
             {
-                stats.NickName = roomPlayer.playerName;
-                stats.isAlive = true;               // 전원사망 판정에 사용
-                stats.matchIdStr = matchId.ToString(); // 문자열 GUID
+                stats.NickName = roomPlayer.playerName;     // 🔸 SyncVar 닉
+                stats.isAlive = true;
+                stats.matchIdStr = matchId.ToString();
+                stats.ServerResetAllStats();                  // 🔸 체력/레벨 등 초기화
             }
 
-            // 클라에 “게임 시작” 타겟 알림 (자기 캐릭터 인덱스/매치ID)
+            // 클라에 “게임 시작” 알림
             roomPlayer.TargetStartGame(conn, index, matchId.ToString());
 
-            // RoomPlayer 파괴 → 인게임 Player로 교체
+            // RoomPlayer 파괴 → 인게임 Player 교체
             NetworkServer.Destroy(roomPlayer.gameObject);
             NetworkServer.ReplacePlayerForConnection(conn, playerObj, new ReplacePlayerOptions());
+
+            // HUD 재바인딩 강제 (로컬 UI 잔상 방지)
+            stats?.TargetBindHUD(conn);
 
             newPlayerTransforms.Add(playerObj.transform);
         }
 
-        // ★ 여기서 실제 매치(맵) 로직 시작
         readyManager.StartMatchWithPlayers(newPlayerTransforms);
 
         // 대기열 정리
         pendingMatches.Remove(matchId);
+        var key = matchId.ToString();
+        if (matchRooms.ContainsKey(key))
+        {
+            matchRooms.Remove(key);
+            SendRoomListToAllClients();
+        }
 
-        // (선택) 미션 매니저 스폰
+        // (선택) 미션 매니저
         if (missionManagerPrefab != null)
         {
             var mmObj = Instantiate(missionManagerPrefab);
@@ -248,6 +286,7 @@ public class CustomNetworkManager_Server : NetworkManager
             Debug.LogWarning("[서버] missionManagerPrefab 미지정 (선택 사항)");
         }
     }
+
 
     // ===== 패배 브로드캐스트 (전원 사망 1회 판정) =====
     [Server]

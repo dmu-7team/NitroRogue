@@ -10,59 +10,60 @@ public class PlayerStats : CharacterStats
     public static event Action<PlayerStats> Despawned;
 
     // === UI 바인딩용 인스턴스 이벤트 ===
-    public event Action<float, float>          OnHealthChanged;
-    public event Action<float, float>          OnExpChanged;    // (현재EXP, 레벨업EXP)
-    public event Action<int>                   OnLevelChanged;
-    public event Action<float>                 OnSpeedChanged;
-    public event Action<float>                 OnPowerChanged;
-
+    public event Action<float, float> OnHealthChanged;
+    public event Action<float, float> OnExpChanged;    // (현재EXP, 레벨업EXP)
+    public event Action<int> OnLevelChanged;
+    public event Action<float> OnSpeedChanged;
+    public event Action<float> OnPowerChanged;
 
     // == 네트워크 동기화 값(SyncVar) + Hook ==
-    [SyncVar(hook = nameof(OnExpSync))]      private float currentExp   = 0f;   // EXP
-    [SyncVar(hook = nameof(OnExpToLvSync))]  private float expToLevelUp = 100f; // 필요 EXP
-    [SyncVar(hook = nameof(OnLevelSync))]    private int level        = 1;    // 레벨
+    [SyncVar(hook = nameof(OnExpSync))] private float currentExp = 0f;     // EXP
+    [SyncVar(hook = nameof(OnExpToLvSync))] private float expToLevelUp = 100f;   // 필요 EXP
+    [SyncVar(hook = nameof(OnLevelSync))] private int level = 1;      // 레벨
 
-    [SyncVar(hook = nameof(OnAttackDamageChanged))]
-    private float syncedAttackDamage = 10f; // 공격력(능력치)
+    [SyncVar(hook = nameof(OnAttackDamageChanged))] private float syncedAttackDamage = 10f;
+    [SyncVar(hook = nameof(OnMoveSpeedChanged))] private float syncedMoveSpeed = 5f;
 
-    [SyncVar(hook = nameof(OnMoveSpeedChanged))]
-    private float syncedMoveSpeed = 5f; // 이동속도(능력치)
-
-    [SyncVar] private int   killCount   = 0;
+    [SyncVar] private int killCount = 0;
     [SyncVar] private float totalDamage = 0f;
-    [SyncVar] private string nickName;
-    // 맨 위 다른 SyncVar들 옆에 추가
+
+    // 🔸 닉네임 SyncVar로 통일
+    [SyncVar(hook = nameof(OnNickSync))] private string nickName;
+
     [SyncVar] public bool isAlive = true;   // 서버 생존 추적용
-    [SyncVar] public string matchIdStr;         // 서버에서 매치 식별용 (GUID 문자열)
+    [SyncVar] public string matchIdStr;         // 서버 매치 식별용 (GUID 문자열)
 
     private MatchManager myMatchManager;
 
     // == 에디터/레퍼런스 ==
     [SerializeField] private Animator animator;
 
-
     // == 런타임 상태/튜닝 값 ==
-    private bool  isDead = false;
-    public  float healthPerLevel = 10f;
-    public  float damagePerLevel = 5f;
-    public  float speedPerLevel = 0.5f;
+    private bool isDead = false;
+    public float healthPerLevel = 10f;
+    public float damagePerLevel = 5f;
+    public float speedPerLevel = 0.5f;
 
     private float originalSpeed;
     private float originalDamage;
 
-
     // == 공개 프로퍼티 ==
-    public float  CurrentExp   => currentExp;
-    public float  ExpToLevelUp => expToLevelUp;
-    public int    Level        => level;
-    public int    KillCount    { get => killCount;   set => killCount = value; }
-    public float  TotalDamage  { get => totalDamage; set => totalDamage = value; }
-    public string NickName     { get; set; }
-    public bool   IsDead       => isDead;
+    public float CurrentExp => currentExp;
+    public float ExpToLevelUp => expToLevelUp;
+    public int Level => level;
+    public int KillCount { get => killCount; set => killCount = value; }
+    public float TotalDamage { get => totalDamage; set => totalDamage = value; }
 
-    public override float MoveSpeed    => syncedMoveSpeed;
+    public string NickName
+    {
+        get => nickName;
+        [Server]
+        set => nickName = value; // SyncVar에 직접 설정
+    }
+
+    public bool IsDead => isDead;
+    public override float MoveSpeed => syncedMoveSpeed;
     public override float AttackDamage => syncedAttackDamage;
-
 
     // == 라이프사이클 ==
     public override void OnStartClient()
@@ -74,56 +75,74 @@ public class PlayerStats : CharacterStats
 
         Spawned?.Invoke(this);
 
-        if (isLocalPlayer) return;
+        // 원격 플레이어 표시/리스트용 등록이 필요하면 유지
+        if (!isLocalPlayer)
             UIManager.Instance?.RegisterPlayer(this);
     }
+
+    // 로컬 권한 획득 시점: HUD를 내 캐릭터로 바인딩
+    public override void OnStartAuthority()
+    {
+        base.OnStartAuthority();
+        // 관전 종료 호출은 네 SpectatorManager에 'Exit'류 API가 없으니 생략
+        // HUD를 게임 HUD로 전환 + UI가 내 스탯을 구독하도록 Register 호출
+        UIManager.Instance?.RegisterPlayer(this);
+        UIManager.Instance?.EnterGameplayHUD();
+        EmitAll(); // 현재 수치 즉시 반영
+    }
+
 
     public override void OnStopClient()
     {
         base.OnStopClient();
 
         if (myMatchManager != null)
-        {
             myMatchManager.RemovePlayer(transform);
-        }
+
+        // HUD 연결 해제
+        UIManager.Instance?.UnregisterPlayer(this);
 
         Despawned?.Invoke(this);
     }
 
 
-    protected override void OnHealthSynced(float cur, float max)
-    {
-        OnHealthChanged?.Invoke(cur, max);
-    }
 
+
+    // == 서버 전용: 초기화/등록 ==
+    [Server]
     public override void OnStartServer()
     {
         base.OnStartServer();
 
-        var matchId = GetComponent<NetworkMatch>().matchId;
+        ServerResetAllStats();
 
-        if (MatchManager.ActiveMatches.TryGetValue(matchId, out myMatchManager))
-        {
-            myMatchManager.AddPlayer(transform);
-        }
-        isDead = false;
-        isAlive = true;
+        var matchId = GetComponent<NetworkMatch>().matchId;
         matchIdStr = matchId.ToString();
 
-        SetHealth(maxHealth, maxHealth);
-        originalSpeed = syncedMoveSpeed;
-        originalDamage = syncedAttackDamage;
+        if (MatchManager.ActiveMatches.TryGetValue(matchId, out myMatchManager))
+            myMatchManager.AddPlayer(transform);
+
         NetworkGameState.Instance?.Register(this);
     }
 
-#if UNITY_EDITOR
-    new private void OnValidate()
+    // 서버 전용: 완전 초기화(스폰 직후 항상 호출)
+    [Server]
+    public void ServerResetAllStats()
     {
+        isDead = false;
+        isAlive = true;
+        killCount = 0;
+        totalDamage = 0f;
+
+        currentExp = 0f;
+        level = 1;
+        expToLevelUp = 100f;
+
+        SetHealth(maxHealth, maxHealth);
+
         originalSpeed = syncedMoveSpeed;
         originalDamage = syncedAttackDamage;
     }
-#endif
-
 
     // == 서버 전용: 체력/피해 처리 ==
     [Server]
@@ -140,38 +159,25 @@ public class PlayerStats : CharacterStats
         currentHealth -= damage;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
-        TargetUpdateHealth(connectionToClient, currentHealth, maxHealth);
+        if (connectionToClient != null)
+            TargetUpdateHealth(connectionToClient, currentHealth, maxHealth);
 
         if (currentHealth <= 0)
             Die();
     }
 
-    // 파일의 다른 TargetRpc들 아래에 추가
-    [TargetRpc]
-    public void TargetShowDefeat(NetworkConnectionToClient conn)
-    {
-        // 프로젝트에 맞는 패배 UI 호출로 바꿔 써도 OK
-        // UIManager.Instance?.ShowResult(false);
-        UIManager.Instance?.ShowDefeatPanel();
-    }
-
-    // == 클라이언트 RPC/타겟 RPC ==
+    // == Target/Client RPC ==
     [TargetRpc]
     public void TargetUpdateHealth(NetworkConnection target, float current, float max)
-    {
-        OnHealthChanged?.Invoke(current, max);
-    }
+        => OnHealthChanged?.Invoke(current, max);
 
     [TargetRpc]
     private void TargetUpdateExp(NetworkConnection target, float current, float toLevelUp)
-    {
-        OnExpChanged?.Invoke(current, toLevelUp);
-    }
+        => OnExpChanged?.Invoke(current, toLevelUp);
 
     [TargetRpc]
     public void TargetTeleport(NetworkConnectionToClient target, Vector3 pos, Quaternion rot)
     {
-        // 이 스크립트가 붙은 "내" 플레이어 오브젝트에서 직접 스냅
         var t = transform;
 
         if (t.TryGetComponent<CharacterController>(out var cc))
@@ -180,18 +186,24 @@ public class PlayerStats : CharacterStats
             t.SetPositionAndRotation(pos, rot);
             cc.enabled = true;
         }
-        else
-        {
-            t.SetPositionAndRotation(pos, rot);
-        }
+        else t.SetPositionAndRotation(pos, rot);
 
         if (t.TryGetComponent<Rigidbody>(out var rb))
         {
             rb.angularVelocity = Vector3.zero;
-            rb.position = pos;
-            rb.rotation = rot;
+            rb.position = pos; rb.rotation = rot;
         }
     }
+
+    [TargetRpc]
+    public void TargetBindHUD(NetworkConnectionToClient conn)
+    {
+        // 관전 종료 API 없음 → HUD만 전환
+        UIManager.Instance?.RegisterPlayer(this);
+        UIManager.Instance?.EnterGameplayHUD();
+        EmitAll();
+    }
+
 
     // == 로컬/공용 API ==
     public void Heal(float amount)
@@ -204,23 +216,18 @@ public class PlayerStats : CharacterStats
     {
         currentExp += exp;
         OnExpChanged?.Invoke(currentExp, expToLevelUp);
-
-        while (currentExp >= expToLevelUp)
-            LevelUp();
+        while (currentExp >= expToLevelUp) LevelUp();
     }
 
     [Server]
     public void GainExp(float amount)
     {
         currentExp += amount;
-
-        // 서버에선 로직만, UI는 클라이언트에 따로 전달
-        TargetUpdateExp(connectionToClient, currentExp, expToLevelUp);
+        if (connectionToClient != null)
+            TargetUpdateExp(connectionToClient, currentExp, expToLevelUp);
 
         if (currentExp >= expToLevelUp)
-        {
             LevelUp();
-        }
     }
 
     public void ApplyItemEffect(ItemData.ItemType itemType, float amount, float duration)
@@ -238,18 +245,14 @@ public class PlayerStats : CharacterStats
         }
     }
 
-    public void ApplySpeedBoost(float amount, float duration)  => StartCoroutine(SpeedBoost(amount, duration));
+    public void ApplySpeedBoost(float amount, float duration) => StartCoroutine(SpeedBoost(amount, duration));
     public void ApplyDamageBoost(float amount, float duration) => StartCoroutine(DamageBoost(amount, duration));
 
-
-    // == 코루틴(버프) ==
     private IEnumerator SpeedBoost(float amount, float duration)
     {
         syncedMoveSpeed = originalSpeed * amount;
         OnSpeedChanged?.Invoke(syncedMoveSpeed);
-
         yield return new WaitForSeconds(duration);
-
         syncedMoveSpeed = originalSpeed;
         OnSpeedChanged?.Invoke(syncedMoveSpeed);
     }
@@ -258,30 +261,25 @@ public class PlayerStats : CharacterStats
     {
         syncedAttackDamage = originalDamage * amount;
         OnPowerChanged?.Invoke(syncedAttackDamage);
-
         yield return new WaitForSeconds(duration);
-
         syncedAttackDamage = originalDamage;
         OnPowerChanged?.Invoke(syncedAttackDamage);
     }
 
-
     // == 사망 처리 ==
     protected override void Die()
     {
-        if (isDead) return;
+        if (isDead) return;         // 중복 방지
         isDead = true;
 
         Debug.Log("플레이어 사망 처리");
         RpcPlayerDie();
 
-        // ★ 추가: 서버에서 전원 사망 판정 트리거
         if (isServer)
         {
-            isAlive = false;
+            if (isAlive) isAlive = false;   // 한 번만 off
 
             var nm = (CustomNetworkManager_Server)NetworkManager.singleton;
-            // 매치 ID 문자열을 서버에 보고 → 서버가 “전원 사망”이면 TargetRpc로 전원에게 패배 UI 쏨
             nm.ServerNotifyPlayerDead(matchIdStr);
 
             NetworkGameState.Instance?.Unregister(this);
@@ -293,32 +291,31 @@ public class PlayerStats : CharacterStats
     [ClientRpc]
     public void RpcPlayerDie()
     {
-        if (animator == null)
-            animator = GetComponent<Animator>();
-
+        if (animator == null) animator = GetComponent<Animator>();
         animator?.SetTrigger("die");
 
         if (isLocalPlayer)
         {
-            // 죽은 본인 클라만 관전 + UI 전환
             SpectatorManager.EnterSpectate(this);
             UIManager.Instance?.EnterSpectatorHUD();
             Debug.Log("[UI] EnterSpectatorHUD 호출됨 (로컬 플레이어)");
         }
     }
 
-
-
-    // == SyncVarHooks ==
+    // == SyncVar Hooks ==
     private void OnExpSync(float oldV, float newV) => OnExpChanged?.Invoke(newV, expToLevelUp);
     private void OnExpToLvSync(float oldV, float newV) => OnExpChanged?.Invoke(currentExp, newV);
     private void OnLevelSync(int oldV, int newV) => OnLevelChanged?.Invoke(newV);
+    private void OnMoveSpeedChanged(float o, float n) => OnSpeedChanged?.Invoke(n);
+    private void OnAttackDamageChanged(float o, float n) => OnPowerChanged?.Invoke(n);
+    
+    private void OnNickSync(string oldName, string newName)
+    {
+        // UIManager에 RefreshNameTag가 없으므로 여기서는 생략
+        // (필요하면 이름표 컴포넌트를 직접 찾아 갱신하세요)
+    }
 
-    void OnMoveSpeedChanged(float oldVal, float newVal)    => OnSpeedChanged?.Invoke(newVal);
-    void OnAttackDamageChanged(float oldVal, float newVal) => OnPowerChanged?.Invoke(newVal);
-
-
-   // == 내부로직: 레벨업 ==
+    // == 내부 로직: 레벨업 ==
     private void LevelUp()
     {
         currentExp -= expToLevelUp;
@@ -339,16 +336,22 @@ public class PlayerStats : CharacterStats
         Debug.Log($"레벨 업! 현재 레벨: {level}");
     }
 
+    // == UI 즉시 반영 ==
     public void EmitAll()
     {
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
         OnExpChanged?.Invoke(currentExp, expToLevelUp);
         OnLevelChanged?.Invoke(level);
+        OnSpeedChanged?.Invoke(syncedMoveSpeed);
+        OnPowerChanged?.Invoke(syncedAttackDamage);
     }
+
+    // (현재 구조 유지용) TargetRpc 기반 승/패
     [TargetRpc]
     public void TargetShowVictory(NetworkConnectionToClient conn)
-    {
-        // 프로젝트 UI에 맞춰 한 줄 교체 가능
-        UIManager.Instance?.ShowVictoryPanel(); // 또는 ShowVictoryPanel()
-    }
+        => UIManager.Instance?.ShowVictoryPanel();
+
+    [TargetRpc]
+    public void TargetShowDefeat(NetworkConnectionToClient conn)
+        => UIManager.Instance?.ShowDefeatPanel();
 }
