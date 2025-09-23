@@ -27,8 +27,9 @@ public class RoomUIManager : MonoBehaviour
     public GameObject roomUI;           // RoomUI
     public GameObject background;       // Background
 
-
  
+
+
     private void Awake()
     {
         Debug.Log("[RoomUIManager] Awake 호출됨");
@@ -53,6 +54,7 @@ public class RoomUIManager : MonoBehaviour
     {
         mainMenuPanel.SetActive(true);
         roomPanel.SetActive(false);
+        Debug.Log("[UI] 메인 로비 패널 복귀");
     }
 
     public void ShowStartButton(bool show)

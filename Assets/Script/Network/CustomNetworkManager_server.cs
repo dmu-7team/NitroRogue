@@ -161,7 +161,7 @@ public class CustomNetworkManager_Server : NetworkManager
             if (nm != null && nm.matchId == matchGuid)
                 NetworkServer.Destroy(ni.gameObject);
         }
-
+        
         // 2) 시작 지점 반환
         if (matchStartPointMap.TryGetValue(matchGuid, out var point))
         {
@@ -171,7 +171,7 @@ public class CustomNetworkManager_Server : NetworkManager
 
         // 3) 내부 상태 리셋
         finishedMatches.Remove(matchIdStr);
-
+        SendRoomListToAllClients(); // ★ 방 리스트 갱신 메시지 발송
         Debug.Log($"[서버] Match {matchGuid} 종료 정리 완료 (Victory={isVictory}).");
     }
 
@@ -253,19 +253,33 @@ public class CustomNetworkManager_Server : NetworkManager
     [Server]
     private List<PlayerStats> GetMatchPlayers(string matchIdStr)
     {
-        var result = new List<PlayerStats>();
-        if (!Guid.TryParse(matchIdStr, out var guid)) return result;
+        var list = new List<PlayerStats>();
+        if (!Guid.TryParse(matchIdStr, out var guid))
+        {
+            Debug.LogError($"[DeadCheck] Guid.Parse 실패: '{matchIdStr}'");
+            return list;
+        }
 
         foreach (var ni in NetworkServer.spawned.Values)
         {
             if (!ni) continue;
             var ps = ni.GetComponent<PlayerStats>();
+            if (ps == null) continue;
+
             var nm = ni.GetComponent<NetworkMatch>();
-            if (ps != null && nm != null && nm.matchId == guid)
-                result.Add(ps);
+            if (nm != null && nm.matchId == guid)
+            {
+                list.Add(ps);
+            }
         }
-        return result;
+
+        // 진단 로그
+        Debug.Log($"[DeadCheck] match={guid} players={list.Count} :: " +
+                  string.Join(", ", list.Select(p => $"{p.NickName}/{p.isAlive}")));
+
+        return list;
     }
+
 
     [Server]
     public void ServerNotifyPlayerDead(string matchIdStr)
@@ -275,7 +289,8 @@ public class CustomNetworkManager_Server : NetworkManager
 
         var players = GetMatchPlayers(matchIdStr);
         bool anyAlive = players.Any(p => p != null && p.isAlive);
-
+        int aliveCount = players.Count(p => p != null && p.isAlive);
+        if (aliveCount > 0) return; // ← 아직 살아있으면 종료 NO
         if (!anyAlive)
         {
             finishedMatches.Add(matchIdStr);
