@@ -61,9 +61,13 @@ public class WeaponControllerClient : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
 
-        TickAim(Input.GetMouseButton(1));
         HandleFireInput();
         HandleReloadInput();
+    }
+    void LateUpdate()
+    {
+        if (!isLocalPlayer) return;
+        TickAim(Input.GetMouseButton(1));
     }
 
     // 式式式式式式式式式 濰雜/掖羹 式式式式式式式式式
@@ -270,7 +274,10 @@ public class WeaponControllerClient : NetworkBehaviour
         if (cameraHolder && target)
         {
             cameraHolder.position = Vector3.Lerp(cameraHolder.position, target.position, Time.deltaTime * camTransitionSpeed);
-            cameraHolder.rotation = Quaternion.Lerp(cameraHolder.rotation, target.rotation, Time.deltaTime * camTransitionSpeed);
+
+            //cameraHolder.rotation = Quaternion.Lerp(cameraHolder.rotation, target.rotation, Time.deltaTime * camTransitionSpeed);
+
+            cameraHolder.rotation = target.rotation;
         }
 
         if (config.aimMode == AimMode.Zoom)
