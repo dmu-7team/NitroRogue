@@ -277,7 +277,7 @@ public class WeaponControllerClient : NetworkBehaviour
 
             //cameraHolder.rotation = Quaternion.Lerp(cameraHolder.rotation, target.rotation, Time.deltaTime * camTransitionSpeed);
 
-            cameraHolder.rotation = target.rotation;
+            cameraHolder.rotation = playerCamera.transform.rotation;
         }
 
         if (config.aimMode == AimMode.Zoom)
