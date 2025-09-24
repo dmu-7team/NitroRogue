@@ -24,7 +24,7 @@ MonoBehaviour:
   burstCount: 3
   burstDelay: 0.1
   pelletCount: 0
-  spreadDeg: 0
+  spreadDeg: 3
   scopedFOV: 30
   fireClip: {fileID: 8300000, guid: 1b145bcffd767854fb0c71c37678ebaa, type: 3}
   reloadClip: {fileID: 8300000, guid: 45e124947dcf2f0429a575270613dee1, type: 3}

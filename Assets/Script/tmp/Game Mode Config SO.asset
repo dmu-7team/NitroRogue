@@ -1,0 +1,133 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4b8d79f00400364b939f0eae61f57c7, type: 3}
+  m_Name: Game Mode Config SO
+  m_EditorClassIdentifier: 
+  spawnRule: {fileID: 11400000, guid: dd9697ac22abee14e8f6c752ab229029, type: 2}
+  stages:
+  - {fileID: 11400000, guid: 4a01fc3f2b5e083488038267af5b9f49, type: 2}
+  - {fileID: 11400000, guid: ef3bef3a4c39a4f4394657614b3f17e3, type: 2}
+  minuteSteps:
+  - thresholdMinute: 0
+    burstMin: 2
+    burstMax: 4
+    burstMode: 3
+    burstCooldownMin: 10
+    burstCooldownMax: 12
+    maxAliveHardCap: 0
+    elitePercent: 5
+    elitePercentPerMin: 5
+    elitePercentMax: 25
+    hpMul: 1
+    hpMulPerMin: 0.2
+    hpMulMax: 2
+    dmgMul: 1
+    dmgMulPerMin: 0.2
+    dmgMulMax: 2
+    moveSpeedMul: 1
+    moveSpeedMulPerMin: 0.05
+    moveSpeedMulMax: 1.5
+  - thresholdMinute: 1
+    burstMin: 2
+    burstMax: 4
+    burstMode: 3
+    burstCooldownMin: 9
+    burstCooldownMax: 11
+    maxAliveHardCap: 0
+    elitePercent: 10
+    elitePercentPerMin: 5
+    elitePercentMax: 25
+    hpMul: 1.2
+    hpMulPerMin: 0.2
+    hpMulMax: 2
+    dmgMul: 1.2
+    dmgMulPerMin: 0.2
+    dmgMulMax: 2
+    moveSpeedMul: 1.05
+    moveSpeedMulPerMin: 0.05
+    moveSpeedMulMax: 1.5
+  - thresholdMinute: 2
+    burstMin: 3
+    burstMax: 5
+    burstMode: 4
+    burstCooldownMin: 7
+    burstCooldownMax: 9
+    maxAliveHardCap: 0
+    elitePercent: 15
+    elitePercentPerMin: 5
+    elitePercentMax: 25
+    hpMul: 1.4
+    hpMulPerMin: 0.2
+    hpMulMax: 2
+    dmgMul: 1.4
+    dmgMulPerMin: 0.2
+    dmgMulMax: 2
+    moveSpeedMul: 1.1
+    moveSpeedMulPerMin: 0.05
+    moveSpeedMulMax: 1.5
+  - thresholdMinute: 3
+    burstMin: 3
+    burstMax: 6
+    burstMode: 4
+    burstCooldownMin: 6
+    burstCooldownMax: 8
+    maxAliveHardCap: 0
+    elitePercent: 20
+    elitePercentPerMin: 5
+    elitePercentMax: 25
+    hpMul: 1.6
+    hpMulPerMin: 0.2
+    hpMulMax: 2
+    dmgMul: 1.6
+    dmgMulPerMin: 0.2
+    dmgMulMax: 2
+    moveSpeedMul: 1.15
+    moveSpeedMulPerMin: 0.05
+    moveSpeedMulMax: 1.5
+  - thresholdMinute: 4
+    burstMin: 4
+    burstMax: 7
+    burstMode: 5
+    burstCooldownMin: 5
+    burstCooldownMax: 7
+    maxAliveHardCap: 0
+    elitePercent: 25
+    elitePercentPerMin: 5
+    elitePercentMax: 25
+    hpMul: 1.8
+    hpMulPerMin: 0.2
+    hpMulMax: 2
+    dmgMul: 1.8
+    dmgMulPerMin: 0.2
+    dmgMulMax: 2
+    moveSpeedMul: 1.2
+    moveSpeedMulPerMin: 0.05
+    moveSpeedMulMax: 1.5
+  - thresholdMinute: 5
+    burstMin: 4
+    burstMax: 7
+    burstMode: 5
+    burstCooldownMin: 5
+    burstCooldownMax: 7
+    maxAliveHardCap: 0
+    elitePercent: 25
+    elitePercentPerMin: 5
+    elitePercentMax: 25
+    hpMul: 2
+    hpMulPerMin: 0.2
+    hpMulMax: 2
+    dmgMul: 2
+    dmgMulPerMin: 0.2
+    dmgMulMax: 2
+    moveSpeedMul: 1.25
+    moveSpeedMulPerMin: 0.05
+    moveSpeedMulMax: 1.5

@@ -2056,8 +2056,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7784acb13103e964b8cdbb589d8d9cc5, type: 2}
   - {fileID: 11400000, guid: 08a80c051e92e5d44b033af436d28edc, type: 2}
   bodyRoot: {fileID: 5850225151214398796}
-  _attackDamage: 10
-  _moveSpeed: 3
+  _attackDamage: 5
+  _moveSpeed: 2.5
   isAttacking: 0
   healthBarCanvas: {fileID: 1376534200277987368}
   healthBarImage: {fileID: 6301278360592238775}
@@ -2077,7 +2077,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: -1372625422
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 2.5
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120

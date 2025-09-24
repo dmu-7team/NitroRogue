@@ -1355,7 +1355,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 774897493373619866}
@@ -2618,10 +2618,9 @@ MonoBehaviour:
   syncInterval: 0
   attackObjs:
   - {fileID: 11400000, guid: 8616cf6ce6bb1844691cdda7b0f763aa, type: 2}
-  - {fileID: 11400000, guid: 6911a1cb3d5510145ac7647349bb7c39, type: 2}
   bodyRoot: {fileID: 809149035338231263}
-  _attackDamage: 10
-  _moveSpeed: 3
+  _attackDamage: 30
+  _moveSpeed: 3.5
   isAttacking: 0
   healthBarCanvas: {fileID: 1544109384739985735}
   healthBarImage: {fileID: 2156153635029454220}

@@ -1411,12 +1411,16 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  currentHealth: 0
-  maxHealth: 100
+  isAlive: 1
+  matchIdStr: 
   animator: {fileID: 0}
   healthPerLevel: 10
-  damagePerLevel: 5
-  speedPerLevel: 0.5
+  damagePerLevel: 1.5
+  speedPerLevel: 0
+  originalSpeed: 5
+  originalDamage: 7
+  baseExpRequirement: 100
+  expIncrement: 25
 --- !u!114 &2872062948060106147
 MonoBehaviour:
   m_ObjectHideFlags: 0

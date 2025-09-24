@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2683a0f00863ea348a0528d03a7edac3, type: 3}
+  m_Name: Stage2Config SO
+  m_EditorClassIdentifier: 
+  stageId: 1
+  displayName: Stage 02
+  mapSpawnSet: {fileID: 11400000, guid: 36863280c739ad941b1e5315308b5ca4, type: 2}
+  nextStageId: -1
+  killsToBoss: 0
+  serverLogicPrefab: {fileID: 4211921512870538455, guid: 5e9aed1bac0d91c4caa9371ac1e96129, type: 3}
+  clientMapPrefab: {fileID: 798025363861805994, guid: cec11347ce3b1f34ca50073c8dfee47a, type: 3}

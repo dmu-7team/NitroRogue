@@ -16,7 +16,7 @@ MonoBehaviour:
   attackDescription: 
   icon: {fileID: 0}
   attackSfx: {fileID: 0}
-  cooldown: 2
+  cooldown: 1
   range: 3.5
   damage: 10
   hitboxName:

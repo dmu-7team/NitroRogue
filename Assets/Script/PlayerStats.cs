@@ -44,8 +44,11 @@ public class PlayerStats : CharacterStats
     public float damagePerLevel = 5f;
     public float speedPerLevel = 0.5f;
 
-    private float originalSpeed;
-    private float originalDamage;
+    [SerializeField] private float originalSpeed = 5.0f;
+    [SerializeField] private float originalDamage;
+
+    [SerializeField] private float baseExpRequirement = 100f;   // 첫 번째 레벨업 필요 EXP
+    [SerializeField] private float expIncrement = 25f;         // 레벨마다 증가하는 값
 
     // == 공개 프로퍼티 ==
     public float CurrentExp => currentExp;
@@ -70,8 +73,8 @@ public class PlayerStats : CharacterStats
     {
         base.OnStartClient();
 
-        originalSpeed = syncedMoveSpeed;
-        originalDamage = syncedAttackDamage;
+        syncedMoveSpeed = originalSpeed;
+        syncedAttackDamage = originalDamage;
 
         Spawned?.Invoke(this);
 
@@ -250,7 +253,8 @@ public class PlayerStats : CharacterStats
 
     private IEnumerator SpeedBoost(float amount, float duration)
     {
-        syncedMoveSpeed = originalSpeed * amount;
+        var tmp = syncedMoveSpeed;
+        syncedMoveSpeed *= amount;
         OnSpeedChanged?.Invoke(syncedMoveSpeed);
         yield return new WaitForSeconds(duration);
         syncedMoveSpeed = originalSpeed;
@@ -259,7 +263,8 @@ public class PlayerStats : CharacterStats
 
     private IEnumerator DamageBoost(float amount, float duration)
     {
-        syncedAttackDamage = originalDamage * amount;
+        var tmp = syncedAttackDamage;
+        syncedAttackDamage *= amount;
         OnPowerChanged?.Invoke(syncedAttackDamage);
         yield return new WaitForSeconds(duration);
         syncedAttackDamage = originalDamage;
@@ -320,7 +325,13 @@ public class PlayerStats : CharacterStats
     {
         currentExp -= expToLevelUp;
         level++;
-        expToLevelUp *= 1.5f;
+        if (level == 2) {
+            expToLevelUp = baseExpRequirement;
+        }
+        else
+        {
+            expToLevelUp = baseExpRequirement + (level - 2) * expIncrement;
+        }
 
         maxHealth += healthPerLevel;
         syncedAttackDamage += damagePerLevel;
@@ -354,4 +365,14 @@ public class PlayerStats : CharacterStats
     [TargetRpc]
     public void TargetShowDefeat(NetworkConnectionToClient conn)
         => UIManager.Instance?.ShowDefeatPanel();
+
+    [Command]
+    public void CmdNotifyMapLoaded()
+    {
+        var match = GetComponent<NetworkMatch>()?.matchId;
+        if (match != null && MatchManager.ActiveMatches.TryGetValue(match.Value, out var manager))
+        {
+            manager.OnClientMapLoaded(connectionToClient);
+        }
+    }
 }

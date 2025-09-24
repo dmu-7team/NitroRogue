@@ -18,12 +18,12 @@ MonoBehaviour:
   type: 0
   fireMode: 1
   aimMode: 1
-  magSize: 15
+  magSize: 5
   reloadTime: 2.667
-  rpm: 50
-  burstCount: 3
-  burstDelay: 0.1
-  pelletCount: 10
+  rpm: 40
+  burstCount: 0
+  burstDelay: 0
+  pelletCount: 0
   spreadDeg: 0
   scopedFOV: 30
   fireClip: {fileID: 8300000, guid: fecc3e7a0166a104cb810435f6fdf37b, type: 3}

@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2683a0f00863ea348a0528d03a7edac3, type: 3}
-  m_Name: New Stage Config SO
+  m_Name: Stage1 Config SO
   m_EditorClassIdentifier: 
   stageId: 0
   displayName: Stage 01
   mapSpawnSet: {fileID: 11400000, guid: aacbed1b290f39a45a5d4ef02d1dd0a9, type: 2}
-  nextStageId: -1
+  nextStageId: 1
   killsToBoss: 0
   serverLogicPrefab: {fileID: 8920380912343991008, guid: cec50938549f7604980bf2e3247fd569, type: 3}
   clientMapPrefab: {fileID: 5953788470316346611, guid: bf1652f24778017458d9cc705e145b7b, type: 3}

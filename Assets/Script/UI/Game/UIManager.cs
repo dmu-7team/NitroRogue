@@ -110,6 +110,7 @@ public class UIManager : MonoBehaviour
         chestMessageText?.gameObject.SetActive(false);
         levelUpMessageText?.gameObject.SetActive(false);
         itemEffectText?.gameObject.SetActive(false);
+        RoomUIManager.Instance?.ShowMainMenu();
     }
 
     public void RegisterPlayer(PlayerStats stats)

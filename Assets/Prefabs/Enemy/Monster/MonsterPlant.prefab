@@ -2282,7 +2282,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 112d12027dd259947924fe1e112ea7bd, type: 2}
   bodyRoot: {fileID: 7149202190715480678}
   _attackDamage: 10
-  _moveSpeed: 3
+  _moveSpeed: 3.5
   isAttacking: 0
   healthBarCanvas: {fileID: 4938467531426900925}
   healthBarImage: {fileID: 5478913777172692854}

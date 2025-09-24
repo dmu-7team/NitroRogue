@@ -3,14 +3,14 @@ using System;
 using System.Collections;
 using System.Linq;
 using Mirror;
+using System.Collections.Generic;
 public struct DefeatMessage : NetworkMessage { public string matchId; }
 public struct VictoryMessage : NetworkMessage { public string matchId; }
 [RequireComponent(typeof(NetworkMatch))]
 public class MatchManager : NetworkBehaviour
 {
     public static event Action<MatchManager> OnManagerReady;
-    public static readonly System.Collections.Generic.Dictionary<Guid, MatchManager> ActiveMatches
-        = new System.Collections.Generic.Dictionary<Guid, MatchManager>();
+    public static readonly Dictionary<Guid, MatchManager> ActiveMatches = new Dictionary<Guid, MatchManager>();
     public static event Action<Guid, bool> OnMatchEnded; // (matchId, isVictory)
 
     private bool ended; // 중복 종료 방지
@@ -29,8 +29,8 @@ public class MatchManager : NetworkBehaviour
 
     private Guid matchId;
 
-    private readonly System.Collections.Generic.List<Transform> playerTransforms = new();
-    private readonly System.Collections.Generic.HashSet<NetworkIdentity> aliveEnemies = new();
+    private readonly List<Transform> playerTransforms = new();
+    private readonly HashSet<NetworkIdentity> aliveEnemies = new();
 
     [SyncVar] private bool isBossAlive;
     private GameObject currentBoss;
@@ -39,6 +39,8 @@ public class MatchManager : NetworkBehaviour
     private BurstSpawner.StepParams currentDifficultyStep;
     private GameObject currentServerLogicInstance;
     private GameObject currentClientMapInstance;
+
+    private readonly HashSet<int> loadedClients = new();
 
     public override void OnStartServer()
     {
@@ -132,13 +134,12 @@ public class MatchManager : NetworkBehaviour
         ApplyStageContent();
         UpdateDifficultyScaling();
         spawner.ApplyStep(currentDifficultyStep, gameModeConfig.FindStage(currentStageId), gameModeConfig.spawnRule);
-
-        TeleportPlayersToSpawnPoints();
     }
 
     [Server]
     private void TeleportPlayersToSpawnPoints()
     {
+        Debug.Log("플레이어 텔레포트1");
         var spawnPoints = GetComponentsInChildren<Transform>()
             .Where(t => t.CompareTag("PlayerSpawnPoint")).ToArray();
 
@@ -148,6 +149,7 @@ public class MatchManager : NetworkBehaviour
             return;
         }
 
+        Debug.Log("플레이어 텔레포트2");
         for (int i = 0; i < playerTransforms.Count; i++)
         {
             Transform playerTransform = playerTransforms[i];
@@ -157,8 +159,14 @@ public class MatchManager : NetworkBehaviour
             var conn = ni != null ? ni.connectionToClient : null;
             if (conn == null) { Debug.LogWarning("Teleport skipped: no owner conn"); continue; }
 
-            var ps = playerTransform.GetComponent<PlayerStats>();
-            if (ps != null) ps.TargetTeleport(conn, sp.position, sp.rotation);
+            Debug.Log("플레이어 텔레포트3");
+            // 플레이어 오브젝트에서 TargetRpc 호출
+            var tele = playerTransform.GetComponent<PlayerStats>();
+            if (tele != null)
+            {
+                Debug.Log("플레이어 텔레포트4");
+                tele.TargetTeleport(conn, sp.position, sp.rotation);
+            }
         }
     }
 
@@ -230,6 +238,25 @@ public class MatchManager : NetworkBehaviour
             Destroy(currentClientMapInstance);
 
         currentClientMapInstance = Instantiate(stage.clientMapPrefab, transform.position, transform.rotation, transform);
+
+        // 로컬플레이어에게서만 서버에 알림 보내기
+        if (NetworkClient.localPlayer != null)
+        {
+            NetworkClient.localPlayer.GetComponent<PlayerStats>()?.CmdNotifyMapLoaded();
+        }
+    }
+
+    [Server]
+    public void OnClientMapLoaded(NetworkConnectionToClient conn)
+    {
+        loadedClients.Add(conn.connectionId);
+        Debug.Log($"클라 {conn.connectionId} 맵 로드 완료 ({loadedClients.Count}/{playerTransforms.Count})");
+
+        if (loadedClients.Count >= playerTransforms.Count)
+        {
+            TeleportPlayersToSpawnPoints();
+            loadedClients.Clear();
+        }
     }
 
     [Server]
