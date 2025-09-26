@@ -4,8 +4,9 @@ using System.Collections;
 using System.Linq;
 using Mirror;
 using System.Collections.Generic;
-public struct DefeatMessage : NetworkMessage { public string matchId; }
-public struct VictoryMessage : NetworkMessage { public string matchId; }
+using UnityEditor;
+// struct DefeatMessage : NetworkMessage { public string matchId; }
+//public struct VictoryMessage : NetworkMessage { public string matchId; }
 [RequireComponent(typeof(NetworkMatch))]
 public class MatchManager : NetworkBehaviour
 {
@@ -79,6 +80,10 @@ public class MatchManager : NetworkBehaviour
     }
 
     // === 엔드 매치: 패널 먼저 → 한 프레임 뒤 이벤트만 통지 (정리는 서버 매니저) ===
+    // 1) 파일 상단의 아래 두 struct 완전히 삭제하세요.
+    // public struct DefeatMessage : NetworkMessage { public string matchId; }
+    // public struct VictoryMessage : NetworkMessage { public string matchId; }
+
     [Server]
     public void EndMatch(bool isVictory)
     {
@@ -87,23 +92,29 @@ public class MatchManager : NetworkBehaviour
 
         var guid = GetComponent<NetworkMatch>().matchId;
 
-        // ★ 모든 해당 플레이어의 connection에 메시지 전송 (오브젝트 파괴와 무관)
-        foreach (var ni in NetworkServer.spawned.Values)
+        foreach (var conn in NetworkServer.connections.Values)
         {
-            if (!ni) continue;
-            var nm = ni.GetComponent<NetworkMatch>();
+            if (conn?.identity == null) continue;
+            var nm = conn.identity.GetComponent<NetworkMatch>();
             if (nm == null || nm.matchId != guid) continue;
 
-            var conn = ni.connectionToClient;
-            if (conn == null) continue;
-
-            if (isVictory) conn.Send(new VictoryMessage { matchId = guid.ToString() });
-            else conn.Send(new DefeatMessage { matchId = guid.ToString() });
+            TargetShowResult(conn, isVictory);
         }
 
-        // 한 프레임 뒤에 서버 정리(네트 객체 파괴)
         StartCoroutine(NotifyEndedNextFrame(guid, isVictory));
     }
+
+    [TargetRpc]
+    void TargetShowResult(NetworkConnectionToClient conn, bool isVictory)
+    {
+        Debug.Log($"[UI] TargetShowResult 수신 isVictory={isVictory}");
+        UIManager.Instance?.ResetAllUI();
+        if (isVictory) UIManager.Instance?.ShowVictoryPanel();
+        else UIManager.Instance?.ShowDefeatPanel();
+    }
+
+
+
 
     [Server]
     private IEnumerator NotifyEndedNextFrame(Guid guid, bool isVictory)
@@ -116,25 +127,74 @@ public class MatchManager : NetworkBehaviour
     [Server] public void AddPlayer(Transform t) { if (!playerTransforms.Contains(t)) playerTransforms.Add(t); }
     [Server] public void RemovePlayer(Transform t) { playerTransforms.Remove(t); }
 
-    // 서버 매니저가 호출
     [Server]
-    public void StartMatchWithPlayers(System.Collections.Generic.List<Transform> initialPlayers)
+    public void StartMatchWithPlayers(List<Transform> initialPlayers)
     {
-        UIManager.Instance?.ResetAllUI();
-        UIManager.Instance?.EnterGameplayHUD();
+        ended = false;                            // ★ 중요
+        var guid = GetComponent<NetworkMatch>().matchId;
+        TargetResetUIForAll(guid);                // ★ 클라 초기화
 
+        // 타이머/단계/보스/카운터 등 전부 초기화
         playerTransforms.Clear();
         playerTransforms.AddRange(initialPlayers);
-
         matchStartTime = Time.time;
+        elapsedMinutes = 0;
+        lastAppliedMinute = -1;
         currentStageId = startStageId;
         isBossAlive = false;
+        currentBoss = null;
         killsThisStage = 0;
+        aliveEnemies.Clear();
+        loadedClients.Clear();
 
         ApplyStageContent();
         UpdateDifficultyScaling();
         spawner.ApplyStep(currentDifficultyStep, gameModeConfig.FindStage(currentStageId), gameModeConfig.spawnRule);
     }
+
+    [Server]
+    void TargetResetUIForAll(Guid guid)
+    {
+        foreach (var conn in NetworkServer.connections.Values)
+        {
+            if (conn?.identity == null) continue;
+            var nm = conn.identity.GetComponent<NetworkMatch>();
+            if (nm != null && nm.matchId == guid)
+                TargetResetUI(conn);
+        }
+    }
+
+    [TargetRpc]
+    void TargetResetUI(NetworkConnectionToClient conn)
+    {
+        Debug.Log("[UI] TargetResetUI 수신");
+        UIManager.Instance?.ResetAllUI();
+        UIManager.Instance?.EnterGameplayHUD();
+    }
+
+
+    [TargetRpc]
+    void TargetResetResultUI(NetworkConnectionToClient conn)
+    {
+        UIManager.Instance?.ResetAllUI();         // 패널/모달/바인딩 모두 해제
+        UIManager.Instance?.EnterGameplayHUD();   // 게임 HUD 켜기
+    }
+
+    // ★ 모든 해당 매치 참가자에게 초기화 쏘기
+    [Server]
+    private void ResetResultUIForAll(Guid guid)
+    {
+        foreach (var ni in NetworkServer.spawned.Values)
+        {
+            if (!ni) continue;
+            var nm = ni.GetComponent<NetworkMatch>();
+            if (nm == null || nm.matchId != guid) continue;
+
+            var conn = ni.connectionToClient;
+            if (conn != null) TargetResetResultUI(conn);
+        }
+    }
+
 
     [Server]
     private void TeleportPlayersToSpawnPoints()
@@ -285,8 +345,17 @@ public class MatchManager : NetworkBehaviour
     public void RequestBossSpawn()
     {
         if (isBossAlive) return;
+
         var stage = gameModeConfig.FindStage(currentStageId);
         if (stage == null || stage.mapSpawnSet == null || stage.mapSpawnSet.bossPrefab == null) return;
+
+        // ★ 기존 보스 이벤트 해제 안전장치
+        if (currentBoss != null)
+        {
+            var old = currentBoss.GetComponent<EnemyBase>();
+            if (old) old.OnDied -= OnBossDied;
+            currentBoss = null;
+        }
 
         GameObject point = GameObject.FindWithTag(stage.mapSpawnSet.bossSpawnPointTag);
         Vector3 pos = point ? point.transform.position : Vector3.zero;
@@ -301,17 +370,25 @@ public class MatchManager : NetworkBehaviour
         if (h) h.OnDied += OnBossDied;
     }
 
+
     [Server]
     private void OnBossDied()
     {
         isBossAlive = false;
-        currentBoss = null;
+
+        if (currentBoss != null)
+        {
+            var h = currentBoss.GetComponent<EnemyBase>();
+            if (h) h.OnDied -= OnBossDied;
+            currentBoss = null;
+        }
+
         var stage = gameModeConfig.FindStage(currentStageId);
         if (stage == null) return;
 
         if (stage.nextStageId < 0)
         {
-            EndMatch(true);   // 승리
+            EndMatch(true);
             return;
         }
 
@@ -322,4 +399,5 @@ public class MatchManager : NetworkBehaviour
         UpdateDifficultyScaling();
         spawner.ApplyStep(currentDifficultyStep, gameModeConfig.FindStage(currentStageId), gameModeConfig.spawnRule);
     }
+
 }

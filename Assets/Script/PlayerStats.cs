@@ -93,6 +93,29 @@ public class PlayerStats : CharacterStats
         UIManager.Instance?.EnterGameplayHUD();
         EmitAll(); // 현재 수치 즉시 반영
     }
+    public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+        StartCoroutine(DeferredBindUI());
+    }
+
+    private IEnumerator DeferredBindUI()
+    {
+        // UI 오브젝트/Canvas 생성 대기
+        yield return null;
+        yield return null;
+
+        var ui = UIManager.Instance
+                 ?? GameObject.FindFirstObjectByType<UIManager>(FindObjectsInactive.Include);
+        if (ui != null)
+        {
+            ui.RegisterPlayer(this);
+            ui.EnterGameplayHUD();
+        }
+
+        // 서버 값 스냅샷 동기화(아래 C 패치 포함 시 생략 가능)
+        EmitAll();
+    }
 
 
     public override void OnStopClient()
@@ -124,10 +147,23 @@ public class PlayerStats : CharacterStats
 
         if (MatchManager.ActiveMatches.TryGetValue(matchId, out myMatchManager))
             myMatchManager.AddPlayer(transform);
-
+        if (connectionToClient != null)
+            TargetSyncAll(connectionToClient, currentHealth, maxHealth, currentExp, expToLevelUp, level, syncedMoveSpeed, syncedAttackDamage);
         NetworkGameState.Instance?.Register(this);
     }
+    [TargetRpc]
+    private void TargetSyncAll(NetworkConnectionToClient conn,
+    float curHp, float maxHp, float exp, float toLv, int lv, float spd, float dmg)
+    {
+        currentHealth = curHp;
+        maxHealth = maxHp;
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
+        OnExpChanged?.Invoke(exp, toLv);
+        OnLevelChanged?.Invoke(lv);
+        OnSpeedChanged?.Invoke(spd);
+        OnPowerChanged?.Invoke(dmg);
+    }
     // 서버 전용: 완전 초기화(스폰 직후 항상 호출)
     [Server]
     public void ServerResetAllStats()
@@ -313,7 +349,7 @@ public class PlayerStats : CharacterStats
     private void OnLevelSync(int oldV, int newV) => OnLevelChanged?.Invoke(newV);
     private void OnMoveSpeedChanged(float o, float n) => OnSpeedChanged?.Invoke(n);
     private void OnAttackDamageChanged(float o, float n) => OnPowerChanged?.Invoke(n);
-    
+
     private void OnNickSync(string oldName, string newName)
     {
         // UIManager에 RefreshNameTag가 없으므로 여기서는 생략
@@ -325,7 +361,8 @@ public class PlayerStats : CharacterStats
     {
         currentExp -= expToLevelUp;
         level++;
-        if (level == 2) {
+        if (level == 2)
+        {
             expToLevelUp = baseExpRequirement;
         }
         else

@@ -44,15 +44,18 @@ public class RoomUIManager : MonoBehaviour
 
 
 
+  
+
     public void ShowRoom(string roomName = "")
     {
+        _startRequested = false;                     // ★ 리셋
         mainMenuPanel.SetActive(false);
         roomPanel.SetActive(true);
         roomNameText.text = $"방 이름: {roomName}";
     }
-
     public void ShowMainMenu()
     {
+        _startRequested = false;                     // ★ 리셋
         mainMenuPanel.SetActive(true);
         roomPanel.SetActive(false);
         Debug.Log("[UI] 메인 로비 패널 복귀");
@@ -82,7 +85,7 @@ public class RoomUIManager : MonoBehaviour
     public void OnLeaveRoomButtonClicked()
     {
         Debug.Log("[RoomUIManager] 방 나가기 버튼 클릭됨");
-
+        _startRequested = false;
         // 서버 연결 종료
         NetworkClient.Disconnect();
 
@@ -113,9 +116,11 @@ public class RoomUIManager : MonoBehaviour
         text.text = label;
     }
 
-
+    bool _startRequested = false;
     public void OnClickGameStart()
     {
+        if (_startRequested) return;
+        _startRequested = true;
         var conn = NetworkClient.connection;
         Debug.Log($"[DEBUG] 연결된 클라이언트: {conn}");
 
@@ -123,6 +128,7 @@ public class RoomUIManager : MonoBehaviour
         if (localPlayer == null)
         {
             Debug.LogWarning("[RoomUIManager] 로컬 플레이어를 찾을 수 없습니다.");
+            _startRequested = false;
             return;
         }
 
@@ -136,6 +142,7 @@ public class RoomUIManager : MonoBehaviour
         else
         {
             Debug.Log("[RoomUIManager] 리더가 아니라 게임 시작 불가");
+            _startRequested = false;
         }
 
     }

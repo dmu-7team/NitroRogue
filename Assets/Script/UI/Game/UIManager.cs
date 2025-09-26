@@ -45,6 +45,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject inGameHUDRoot;     // 플레이어 HUD 전체 부모
     [SerializeField] private GameObject spectatorHUDRoot;  // 관전자 HUD 부모
     [Header("Return Buttons (assign both)")]
+    [SerializeField] private GameObject resultCanvasRoot; // ← paenlcanvas 드래그
     [SerializeField] private Button victoryReturnButton; // 승리 패널의 '처음으로' 버튼
     [SerializeField] private Button defeatReturnButton;  // 패배 패널의 '처음으로' 버튼
     public void OnClickReturnToMain()
@@ -71,37 +72,43 @@ public class UIManager : MonoBehaviour
         if (inGameHUDRoot) inGameHUDRoot.SetActive(false);
         if (spectatorHUDRoot) spectatorHUDRoot.SetActive(true);
     }
+    private void EnterModal()
+    {
+        IsModalUIMode = true;
+        if (inGameHUDRoot) inGameHUDRoot.SetActive(false);
+        if (spectatorHUDRoot) spectatorHUDRoot.SetActive(false);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
 
+    }
     public void ShowVictoryPanel()
     {
+        if (resultCanvasRoot && !resultCanvasRoot.activeSelf) resultCanvasRoot.SetActive(true); // ★
         if (victoryPanel) victoryPanel.SetActive(true);
         if (defeatPanel) defeatPanel.SetActive(false);
+
+        EnterModal(); // ★ 패배 패널과 동일하게 모달 처리
     }
 
     public void ShowDefeatPanel()
     {
-            if (defeatPanel) defeatPanel.SetActive(true);
-             IsModalUIMode = true;
-            if (spectatorHUDRoot) spectatorHUDRoot.SetActive(false);
-            if (victoryPanel) victoryPanel.SetActive(false);
-            if (inGameHUDRoot) inGameHUDRoot.SetActive(false);
+        if (resultCanvasRoot && !resultCanvasRoot.activeSelf) resultCanvasRoot.SetActive(true); // ★
+        if (defeatPanel) defeatPanel.SetActive(true);
+        IsModalUIMode = true;
+        if (spectatorHUDRoot) spectatorHUDRoot.SetActive(false);
+        if (victoryPanel) victoryPanel.SetActive(false);
+        if (inGameHUDRoot) inGameHUDRoot.SetActive(false);
+
+        EnterModal(); // ★ 패배 패널과 동일하게 모달 처리
     }
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
 
-        // ★ 오브젝트 파괴와 무관하게 패널을 띄우는 안전 경로
-        NetworkClient.RegisterHandler<DefeatMessage>(_ =>
-        {
-            ResetAllUI();          // 전판 잔재 제거(원하면 주석)
-            ShowDefeatPanel();     // 패배 패널 확실히 표출
-        });
-        NetworkClient.RegisterHandler<VictoryMessage>(_ =>
-        {
-            ResetAllUI();
-            ShowVictoryPanel();
-        });
+        
+
     }
 
 

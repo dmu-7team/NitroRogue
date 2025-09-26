@@ -139,6 +139,24 @@ public class CustomNetworkManager_Server : NetworkManager
     // ===== 매치 시작(로비 리더가 호출) → MatchManager 프리팹 스폰 =====
     public void StartGame(string matchId)
     {
+        // 이미 매치가 진행 중이면 두 번 스폰 방지
+        if (!Guid.TryParse(matchId, out var guid))
+        {
+            Debug.LogError($"[서버] matchId 파싱 실패: {matchId}");
+            return;
+        }
+
+        if (MatchManager.ActiveMatches.ContainsKey(guid))
+        {
+            Debug.LogWarning($"[서버] StartGame 무시: 이미 MatchManager가 존재함 ({guid})");
+            return;
+        }
+
+        if (pendingMatches.ContainsKey(guid))
+        {
+            Debug.LogWarning($"[서버] StartGame 무시: 이미 pendingMatches에 등록됨 ({guid})");
+            return;
+        }
         Debug.Log($"[서버] StartGame() 호출됨 - matchId: {matchId}");
 
         if (!matchRooms.TryGetValue(matchId, out var players) || players.Count == 0)
@@ -251,11 +269,18 @@ public class CustomNetworkManager_Server : NetworkManager
             roomPlayer.TargetStartGame(conn, index, matchId.ToString());
 
             // RoomPlayer 파괴 → 인게임 Player 교체
+            // RoomPlayer → InGame Player 교체 직후
             NetworkServer.Destroy(roomPlayer.gameObject);
             NetworkServer.ReplacePlayerForConnection(conn, playerObj, new ReplacePlayerOptions());
 
-            // HUD 재바인딩 강제 (로컬 UI 잔상 방지)
-            stats?.TargetBindHUD(conn);
+            // 1) 먼저 HUD 바인딩을 시킨다 (이 타이밍에 UI 이벤트 구독 완료)
+            stats.TargetBindHUD(conn);
+
+            // 2) 그 다음 “실제 값”을 스냅샷으로 밀어넣는다 (초기값 손실 방지)
+            //stats.TargetInitHUDSnapshot(conn,
+             //   stats.CurrentHealth /* or currentHealth */, stats.MaxHealth /* or maxHealth */,
+            //    stats.CurrentExp, stats.ExpToLevelUp, stats.Level,
+           //     stats.MoveSpeed, stats.AttackDamage);
 
             newPlayerTransforms.Add(playerObj.transform);
         }

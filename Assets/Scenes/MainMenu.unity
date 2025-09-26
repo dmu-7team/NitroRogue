@@ -398,6 +398,7 @@ MonoBehaviour:
   lobbyPanel: {fileID: 1537265160}
   inGameHUDRoot: {fileID: 1385047422}
   spectatorHUDRoot: {fileID: 716488780}
+  resultCanvasRoot: {fileID: 1451535133}
   victoryReturnButton: {fileID: 0}
   defeatReturnButton: {fileID: 0}
   stopwatchText: {fileID: 920941146}

@@ -187,10 +187,13 @@ public class RoomPlayer : NetworkBehaviour
     [TargetRpc]
     public void TargetStartGame(NetworkConnection target, int characterIndex, string matchId)
     {
-        Debug.Log($"[클라이언트] TargetStartGame 호출됨 - 캐릭터: {characterIndex}, 매치ID: {matchId}");
-
-  
+        Debug.Log($"[클라이언트] TargetStartGame: idx={characterIndex}, match={matchId}");
+        RoomUIManager.Instance?.HideRoomUI();
+        // 혹시 남아있을 수 있으니:
+        typeof(RoomUIManager).GetField("_startRequested", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.SetValue(RoomUIManager.Instance, false);
     }
+
 
     private void SpawnLocalPlayerCharacter(int characterIndex)
     {
