@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4b8d79f00400364b939f0eae61f57c7, type: 3}
+  m_Name: Test Game Mode Config SO
+  m_EditorClassIdentifier: 
+  spawnRule: {fileID: 11400000, guid: dd9697ac22abee14e8f6c752ab229029, type: 2}
+  stages:
+  - {fileID: 11400000, guid: 4a01fc3f2b5e083488038267af5b9f49, type: 2}
+  - {fileID: 11400000, guid: ef3bef3a4c39a4f4394657614b3f17e3, type: 2}
+  minuteSteps:
+  - thresholdMinute: 0
+    burstMin: 1
+    burstMax: 2
+    burstMode: 1
+    burstCooldownMin: 10000
+    burstCooldownMax: 10000
+    maxAliveHardCap: 0
+    elitePercent: 0
+    elitePercentPerMin: 0
+    elitePercentMax: 0
+    hpMul: 0
+    hpMulPerMin: 0
+    hpMulMax: 0
+    dmgMul: 0
+    dmgMulPerMin: 0
+    dmgMulMax: 0
+    moveSpeedMul: 0
+    moveSpeedMulPerMin: 0
+    moveSpeedMulMax: 0

@@ -44,7 +44,7 @@ public class MainStatusUI : MonoBehaviour
     {
         PlayerStats.Spawned += OnPlayerSpawned;
         PlayerStats.Despawned += OnPlayerDespawned;
-        Bind(stats); // 재활성화 시 안전 반영
+        SetTarget(stats);
     }
 
     void OnDisable()
@@ -57,24 +57,43 @@ public class MainStatusUI : MonoBehaviour
 
     private void OnPlayerSpawned(PlayerStats s)
     {
-        if (s && s.isLocalPlayer)
-            Bind(s);
+        if (s != null && s.isLocalPlayer)
+        {
+            SetTarget(s);
+        }
     }
 
     private void OnPlayerDespawned(PlayerStats s)
     {
-        if (s == stats) Unbind();
-        StopAllVisualCoroutines();
-        ClearUI();
+        if (s != null && s == stats)
+        {
+            Unbind();
+            StopAllVisualCoroutines();
+            ClearUI();
+        }
+    }
+
+    public void SetTarget(PlayerStats newTarget)
+    {
+        // 재활성화 시 null 타겟으로 초기화되는 경우를 방지
+        if (newTarget == null)
+        {
+            if (stats != null) ClearUI();
+            return;
+        }
+
+        // 이미 같은 대상을 추적 중이면 아무것도 안함
+        if (stats == newTarget) return;
+
+        Unbind();
+        Bind(newTarget);
     }
 
     public void Bind(PlayerStats newStats)
     {
-        if (stats == newStats || !newStats) return;
-        Unbind();
+        if (stats == newStats) return;
 
         stats = newStats;
-
         stats.OnHealthChanged += OnHealth;
         stats.OnExpChanged += OnExp;
         stats.OnLevelChanged += OnLevel;

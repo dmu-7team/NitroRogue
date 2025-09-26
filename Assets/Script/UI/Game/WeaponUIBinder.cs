@@ -35,6 +35,7 @@ public class WeaponUIBinder : MonoBehaviour
 
     private void OnPlayerDespawned(PlayerStats stats)
     {
+        if (!stats.isLocalPlayer) return;
         Unbind();
         ClearUI();
     }
