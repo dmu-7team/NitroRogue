@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,31 +20,38 @@ public class WeaponUIBinder : MonoBehaviour
     {
         PlayerStats.Spawned += OnPlayerSpawned;
         PlayerStats.Despawned += OnPlayerDespawned;
-        Bind(weapon);
     }
 
     void OnDisable()
     {
         PlayerStats.Spawned -= OnPlayerSpawned;
         PlayerStats.Despawned -= OnPlayerDespawned;
-        Unbind();
     }
-    private void OnPlayerSpawned(PlayerStats stats)
+    private void OnPlayerSpawned(PlayerStats s)
     {
-        if (stats.isLocalPlayer) Bind(GetWeapon(stats));
+        if (s != null && s.isLocalPlayer)
+        {
+            Debug.Log("스폰 무기장착시작" + s.gameObject.name);
+            Bind(GetWeapon(s));
+        }
     }
 
-    private void OnPlayerDespawned(PlayerStats stats)
+    private void OnPlayerDespawned(PlayerStats s)
     {
-        if (!stats.isLocalPlayer) return;
-        Unbind();
-        ClearUI();
+        if (s != null && GetWeapon(s) == weapon)
+        {
+            Debug.Log("디스폰 무기장착해제");
+            Unbind();
+            ClearUI();
+        }
     }
 
 
     public void Bind(WeaponControllerClient newWeapon)
     {
-        if (weapon == newWeapon || !newWeapon) return;
+        if (weapon == newWeapon || !newWeapon) {
+            return;
+        }
         Unbind();
 
         weapon = newWeapon;
@@ -55,7 +63,8 @@ public class WeaponUIBinder : MonoBehaviour
         // ★ 초기 동기화: 현재 상태를 즉시 한 번 받기
         weapon.EmitAll();
 
-        if (weaponIcon && weapon.Config) weaponIcon.sprite = weapon.Config.icon;
+        if (weaponIcon && weapon.Config) 
+            weaponIcon.sprite = weapon.Config.icon;
     }
 
     public void Unbind()
@@ -76,9 +85,20 @@ public class WeaponUIBinder : MonoBehaviour
         if (crosshair) crosshair.SetActive(true);
     }
 
-    void OnAmmo(int cur, int max) { if (ammoText) ammoText.text = $"{cur} / {max}"; }
-    void OnScoped(bool on) { if (scopeOverlay) scopeOverlay.SetActive(on); if (crosshair) crosshair.SetActive(!on); }
-    void OnWeapon(int id) { if (weaponIcon && weapon && weapon.Config) weaponIcon.sprite = weapon.Config.icon; }
+    void OnAmmo(int cur, int max) {
+        if (ammoText)
+        {
+            ammoText.text = $"{cur} / {max}";
+        }
+    }
+    void OnScoped(bool on) {
+        if (scopeOverlay) scopeOverlay.SetActive(on); 
+        if (crosshair) crosshair.SetActive(!on); 
+    }
+    void OnWeapon(int id) {
+        if (weaponIcon && weapon && weapon.Config) 
+            weaponIcon.sprite = weapon.Config.icon;
+    }
     void OnReloading(bool isReloading) { /* 인디케이터 토글 */ }
 
     private WeaponControllerClient GetWeapon(PlayerStats stats)

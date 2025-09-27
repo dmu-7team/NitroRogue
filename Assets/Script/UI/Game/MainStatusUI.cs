@@ -44,7 +44,7 @@ public class MainStatusUI : MonoBehaviour
     {
         PlayerStats.Spawned += OnPlayerSpawned;
         PlayerStats.Despawned += OnPlayerDespawned;
-        SetTarget(stats);
+        Bind(stats);
     }
 
     void OnDisable()
@@ -59,7 +59,7 @@ public class MainStatusUI : MonoBehaviour
     {
         if (s != null && s.isLocalPlayer)
         {
-            SetTarget(s);
+            Bind(s);
         }
     }
 
@@ -73,7 +73,7 @@ public class MainStatusUI : MonoBehaviour
         }
     }
 
-    public void SetTarget(PlayerStats newTarget)
+    public void Bind(PlayerStats newTarget)
     {
         // 재활성화 시 null 타겟으로 초기화되는 경우를 방지
         if (newTarget == null)
@@ -86,14 +86,8 @@ public class MainStatusUI : MonoBehaviour
         if (stats == newTarget) return;
 
         Unbind();
-        Bind(newTarget);
-    }
 
-    public void Bind(PlayerStats newStats)
-    {
-        if (stats == newStats) return;
-
-        stats = newStats;
+        stats = newTarget;
         stats.OnHealthChanged += OnHealth;
         stats.OnExpChanged += OnExp;
         stats.OnLevelChanged += OnLevel;
