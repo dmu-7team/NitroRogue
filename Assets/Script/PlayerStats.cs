@@ -181,8 +181,8 @@ public class PlayerStats : CharacterStats
 
         SetHealth(maxHealth, maxHealth);
 
-        originalSpeed = syncedMoveSpeed;
-        originalDamage = syncedAttackDamage;
+        syncedMoveSpeed = originalSpeed;
+        syncedAttackDamage = originalDamage;
     }
 
     // == 서버 전용: 체력/피해 처리 ==
