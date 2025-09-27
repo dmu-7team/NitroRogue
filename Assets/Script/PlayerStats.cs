@@ -76,6 +76,7 @@ public class PlayerStats : CharacterStats
         syncedMoveSpeed = originalSpeed;
         syncedAttackDamage = originalDamage;
 
+        Debug.Log("스폰로그 보내기");
         Spawned?.Invoke(this);
 
         // 원격 플레이어 표시/리스트용 등록이 필요하면 유지
@@ -157,12 +158,13 @@ public class PlayerStats : CharacterStats
     {
         currentHealth = curHp;
         maxHealth = maxHp;
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        EmitAll();
+        //OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
-        OnExpChanged?.Invoke(exp, toLv);
-        OnLevelChanged?.Invoke(lv);
-        OnSpeedChanged?.Invoke(spd);
-        OnPowerChanged?.Invoke(dmg);
+        //OnExpChanged?.Invoke(exp, toLv);
+        //OnLevelChanged?.Invoke(lv);
+        //OnSpeedChanged?.Invoke(spd);
+        //OnPowerChanged?.Invoke(dmg);
     }
     // 서버 전용: 완전 초기화(스폰 직후 항상 호출)
     [Server]
@@ -189,30 +191,30 @@ public class PlayerStats : CharacterStats
     {
         currentHealth = current;
         maxHealth = max;
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        //OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
     [Server]
     public override void TakeDamage(float damage, GameObject attacker = null)
     {
         currentHealth -= damage;
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        //OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
-        if (connectionToClient != null)
-            TargetUpdateHealth(connectionToClient, currentHealth, maxHealth);
+        //if (connectionToClient != null)
+        //    TargetUpdateHealth(connectionToClient, currentHealth, maxHealth);
 
         if (currentHealth <= 0)
             Die();
     }
 
     // == Target/Client RPC ==
-    [TargetRpc]
-    public void TargetUpdateHealth(NetworkConnection target, float current, float max)
-        => OnHealthChanged?.Invoke(current, max);
+    //[TargetRpc]
+    //public void TargetUpdateHealth(NetworkConnection target, float current, float max)
+    //    => OnHealthChanged?.Invoke(current, max);
 
-    [TargetRpc]
-    private void TargetUpdateExp(NetworkConnection target, float current, float toLevelUp)
-        => OnExpChanged?.Invoke(current, toLevelUp);
+    //[TargetRpc]
+    //private void TargetUpdateExp(NetworkConnection target, float current, float toLevelUp)
+    //    => OnExpChanged?.Invoke(current, toLevelUp);
 
     [TargetRpc]
     public void TargetTeleport(NetworkConnectionToClient target, Vector3 pos, Quaternion rot)
@@ -248,13 +250,13 @@ public class PlayerStats : CharacterStats
     public void Heal(float amount)
     {
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        //OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
     public void AddExp(float exp)
     {
         currentExp += exp;
-        OnExpChanged?.Invoke(currentExp, expToLevelUp);
+        //OnExpChanged?.Invoke(currentExp, expToLevelUp);
         while (currentExp >= expToLevelUp) LevelUp();
     }
 
@@ -262,8 +264,8 @@ public class PlayerStats : CharacterStats
     public void GainExp(float amount)
     {
         currentExp += amount;
-        if (connectionToClient != null)
-            TargetUpdateExp(connectionToClient, currentExp, expToLevelUp);
+        //if (connectionToClient != null)
+        //    TargetUpdateExp(connectionToClient, currentExp, expToLevelUp);
 
         if (currentExp >= expToLevelUp)
             LevelUp();
@@ -291,20 +293,20 @@ public class PlayerStats : CharacterStats
     {
         var tmp = syncedMoveSpeed;
         syncedMoveSpeed *= amount;
-        OnSpeedChanged?.Invoke(syncedMoveSpeed);
+        //OnSpeedChanged?.Invoke(syncedMoveSpeed);
         yield return new WaitForSeconds(duration);
         syncedMoveSpeed = originalSpeed;
-        OnSpeedChanged?.Invoke(syncedMoveSpeed);
+        //OnSpeedChanged?.Invoke(syncedMoveSpeed);
     }
 
     private IEnumerator DamageBoost(float amount, float duration)
     {
         var tmp = syncedAttackDamage;
         syncedAttackDamage *= amount;
-        OnPowerChanged?.Invoke(syncedAttackDamage);
+        //OnPowerChanged?.Invoke(syncedAttackDamage);
         yield return new WaitForSeconds(duration);
         syncedAttackDamage = originalDamage;
-        OnPowerChanged?.Invoke(syncedAttackDamage);
+        //OnPowerChanged?.Invoke(syncedAttackDamage);
     }
 
     // == 사망 처리 ==
@@ -344,6 +346,7 @@ public class PlayerStats : CharacterStats
     }
 
     // == SyncVar Hooks ==
+    protected override void OnHealthSynced(float cur, float max) => OnHealthChanged?.Invoke(cur, max);
     private void OnExpSync(float oldV, float newV) => OnExpChanged?.Invoke(newV, expToLevelUp);
     private void OnExpToLvSync(float oldV, float newV) => OnExpChanged?.Invoke(currentExp, newV);
     private void OnLevelSync(int oldV, int newV) => OnLevelChanged?.Invoke(newV);
@@ -375,11 +378,11 @@ public class PlayerStats : CharacterStats
         syncedMoveSpeed += speedPerLevel;
 
         SetHealth(maxHealth, maxHealth);
-
-        OnExpChanged?.Invoke(currentExp, expToLevelUp);
-        OnLevelChanged?.Invoke(level);
-        OnSpeedChanged?.Invoke(syncedMoveSpeed);
-        OnPowerChanged?.Invoke(syncedAttackDamage);
+        EmitAll();
+        //OnExpChanged?.Invoke(currentExp, expToLevelUp);
+        //OnLevelChanged?.Invoke(level);
+        //OnSpeedChanged?.Invoke(syncedMoveSpeed);
+        //OnPowerChanged?.Invoke(syncedAttackDamage);
 
         Debug.Log($"레벨 업! 현재 레벨: {level}");
     }

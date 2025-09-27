@@ -20,7 +20,6 @@ public class PlayerStatusRow : MonoBehaviour
         p.OnLevelChanged += OnLevel;
         p.OnHealthChanged += OnHp;
 
-        // 초기값 즉시 반영
         nameText.text = p.NickName;
         OnLevel(p.Level);
         OnHp(p.CurrentHealth, p.MaxHealth);

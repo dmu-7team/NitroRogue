@@ -1,4 +1,5 @@
 using System.Collections;
+using Mirror;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -44,7 +45,12 @@ public class MainStatusUI : MonoBehaviour
     {
         PlayerStats.Spawned += OnPlayerSpawned;
         PlayerStats.Despawned += OnPlayerDespawned;
-        Bind(stats);
+        var localObj = NetworkClient.localPlayer;
+        if (localObj)
+        {
+            var stats = localObj.GetComponent<PlayerStats>();
+            if (stats) Bind(stats);
+        }
     }
 
     void OnDisable()

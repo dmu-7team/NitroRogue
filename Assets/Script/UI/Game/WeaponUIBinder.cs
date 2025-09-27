@@ -1,7 +1,7 @@
 using TMPro;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.UI;
+using Mirror;
 
 /// <summary>
 /// 무기 컨트롤러 이벤트만 구독해서 HUD 반영.
@@ -20,6 +20,12 @@ public class WeaponUIBinder : MonoBehaviour
     {
         PlayerStats.Spawned += OnPlayerSpawned;
         PlayerStats.Despawned += OnPlayerDespawned;
+        var localObj = NetworkClient.localPlayer;
+        if (localObj)
+        {
+            var stats = localObj.GetComponent<PlayerStats>();
+            if (stats) Bind(GetWeapon(stats));
+        }
     }
 
     void OnDisable()
@@ -31,7 +37,6 @@ public class WeaponUIBinder : MonoBehaviour
     {
         if (s != null && s.isLocalPlayer)
         {
-            Debug.Log("스폰 무기장착시작" + s.gameObject.name);
             Bind(GetWeapon(s));
         }
     }

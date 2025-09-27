@@ -379,9 +379,9 @@ public class UIManager : MonoBehaviour
         if (spectatorHUDRoot) spectatorHUDRoot.SetActive(false);
 
         // ★ 팀 리스트/네임태그 전부 제거
-        var teamUI = TeamStatusUIManager.Instance
-                   ?? FindFirstObjectByType<TeamStatusUIManager>(FindObjectsInactive.Include);
-        teamUI?.ClearAll();
+        //var teamUI = TeamStatusUIManager.Instance
+        //           ?? FindFirstObjectByType<TeamStatusUIManager>(FindObjectsInactive.Include);
+        //teamUI?.ClearAll();
 
         Debug.Log("[UIManager] ResetAllUI 완료");
     }
