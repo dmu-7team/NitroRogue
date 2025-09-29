@@ -136,6 +136,7 @@ public class BurstSpawner : NetworkBehaviour
 
         // EnemyBase 컴포넌트가 있는지 확인하고 이벤트 연결
         var h = go.GetComponent<EnemyBase>();
+        h.ApplyMultipliers(step.hpMul, step.dmgMul, step.moveMul);
         if (h)
         {
             h.OnDied += () =>

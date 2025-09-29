@@ -14,25 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnRule: {fileID: 11400000, guid: dd9697ac22abee14e8f6c752ab229029, type: 2}
   stages:
-  - {fileID: 11400000, guid: 4a01fc3f2b5e083488038267af5b9f49, type: 2}
+  - {fileID: 11400000, guid: a1d72a0018fec7a4abed54b473c1d4c4, type: 2}
   - {fileID: 11400000, guid: ef3bef3a4c39a4f4394657614b3f17e3, type: 2}
   minuteSteps:
   - thresholdMinute: 0
     burstMin: 1
-    burstMax: 2
+    burstMax: 1
     burstMode: 1
-    burstCooldownMin: 10000
-    burstCooldownMax: 10000
+    burstCooldownMin: 20
+    burstCooldownMax: 20
     maxAliveHardCap: 0
     elitePercent: 0
     elitePercentPerMin: 0
     elitePercentMax: 0
-    hpMul: 0
-    hpMulPerMin: 0
-    hpMulMax: 0
-    dmgMul: 0
-    dmgMulPerMin: 0
-    dmgMulMax: 0
-    moveSpeedMul: 0
-    moveSpeedMulPerMin: 0
-    moveSpeedMulMax: 0
+    hpMul: 1
+    hpMulPerMin: 2
+    hpMulMax: 5
+    dmgMul: 1
+    dmgMulPerMin: 2
+    dmgMulMax: 5
+    moveSpeedMul: 1
+    moveSpeedMulPerMin: 0.1
+    moveSpeedMulMax: 5

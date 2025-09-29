@@ -19,6 +19,7 @@ MonoBehaviour:
   cooldown: 2
   range: 20
   damage: 10
+  damageCoefficient: 0.7
   duration: 10
   attackEntity: {fileID: 100006, guid: 37fefb19538c00d418188ceb218ebd63, type: 3}
   spawnPoint: SpawnPoint

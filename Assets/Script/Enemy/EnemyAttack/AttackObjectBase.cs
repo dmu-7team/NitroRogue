@@ -12,6 +12,7 @@ public abstract class AttackObjectBase : ScriptableObject
     public float cooldown;
     public float range;
     public float damage;
+    public float damageCoefficient;
 
     public abstract AttackBase CreateAttackInstance();
 }

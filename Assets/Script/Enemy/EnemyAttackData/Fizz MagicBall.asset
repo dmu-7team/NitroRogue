@@ -15,9 +15,11 @@ MonoBehaviour:
   attackName: Fizz MagicBall
   attackDescription: 
   icon: {fileID: 0}
+  attackSfx: {fileID: 0}
   cooldown: 3
   range: 20
   damage: 10
+  damageCoefficient: 0.7
   duration: 10
   attackEntity: {fileID: 4309751744975563182, guid: 979b619f5b86679468daab11019484f6, type: 3}
   spawnPoint: SpawnPoint

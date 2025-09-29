@@ -19,5 +19,6 @@ MonoBehaviour:
   cooldown: 1
   range: 2.5
   damage: 5
+  damageCoefficient: 1
   hitboxName:
   - MeleeCollider

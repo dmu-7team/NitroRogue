@@ -15,9 +15,11 @@ MonoBehaviour:
   attackName: 
   attackDescription: 
   icon: {fileID: 0}
+  attackSfx: {fileID: 0}
   cooldown: 5
   range: 10
   damage: 1
+  damageCoefficient: 2
   duration: 2.3
   attackEntity: {fileID: 2615926316999149427, guid: 91e080080aff5da4c9d01326b9073743, type: 3}
   spawnPoint: BreathSpawnPoint

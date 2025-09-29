@@ -15,8 +15,10 @@ MonoBehaviour:
   attackName: Bat Melee
   attackDescription: 
   icon: {fileID: 0}
+  attackSfx: {fileID: 0}
   cooldown: 1
   range: 3
   damage: 2
+  damageCoefficient: 1
   hitboxName:
   - MeleeCollider

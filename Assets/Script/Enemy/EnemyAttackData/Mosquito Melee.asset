@@ -15,8 +15,10 @@ MonoBehaviour:
   attackName: Mosquito Melee
   attackDescription: 
   icon: {fileID: 0}
+  attackSfx: {fileID: 0}
   cooldown: 0.5
   range: 2
   damage: 2
+  damageCoefficient: 1
   hitboxName:
   - MeleeHitbox

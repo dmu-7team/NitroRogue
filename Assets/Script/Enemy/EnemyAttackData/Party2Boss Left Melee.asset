@@ -19,5 +19,6 @@ MonoBehaviour:
   cooldown: 2
   range: 4
   damage: 10
+  damageCoefficient: 1
   hitboxName:
   - LeftMeeleeHitbox

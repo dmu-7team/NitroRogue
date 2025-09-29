@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9250068098f946b4890b809e96b4a25c, type: 3}
+  m_Name: Test Map Spawn Set SO
+  m_EditorClassIdentifier: 
+  normalList:
+  - prefab: {fileID: 558294534666759081, guid: b4c609bc45b58cf49b3cb96b5efd6206, type: 3}
+    chance: 100
+  eliteList: []
+  bossPrefab: {fileID: 7727047731534598215, guid: e07a4cea8010f0a43b01e72039c2f147, type: 3}
+  bossSpawnPointTag: BossSpawnPoint

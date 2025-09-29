@@ -19,6 +19,7 @@ MonoBehaviour:
   cooldown: 1
   range: 3.5
   damage: 10
+  damageCoefficient: 2
   hitboxName:
   - Left_MeleeCollider
   - Right_MeleeCollider

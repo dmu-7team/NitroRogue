@@ -45,7 +45,6 @@ public class GroundSmashAttack : MeleeAttack
 
         var casterMatch = cachedCaster.GetComponent<NetworkMatch>();
         var projMatch = effect.GetComponent<NetworkMatch>();
-        Debug.Log("¿Ö ¾ÈµÊ");
 
         if (casterMatch != null && projMatch != null)
         {

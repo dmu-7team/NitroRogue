@@ -1118,7 +1118,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.14, y: 0.7, z: 0.7}
+  m_Size: {x: 1.14, y: 1.2, z: 1.2}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2030497783565321015
 MonoBehaviour:
@@ -1627,7 +1627,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.14, y: 0.7, z: 0.7}
+  m_Size: {x: 1.14, y: 1.2, z: 1.2}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &4688371025317937580
 MonoBehaviour:
@@ -2619,8 +2619,9 @@ MonoBehaviour:
   attackObjs:
   - {fileID: 11400000, guid: 8616cf6ce6bb1844691cdda7b0f763aa, type: 2}
   bodyRoot: {fileID: 809149035338231263}
-  _attackDamage: 30
-  _moveSpeed: 3.5
+  baseAttackDamage: 25
+  baseMoveSpeed: 3
+  baseMaxHealth: 1000
   isAttacking: 0
   healthBarCanvas: {fileID: 1544109384739985735}
   healthBarImage: {fileID: 2156153635029454220}

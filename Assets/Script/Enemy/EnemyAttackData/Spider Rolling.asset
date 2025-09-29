@@ -15,8 +15,10 @@ MonoBehaviour:
   attackName: Spider Melee
   attackDescription: 
   icon: {fileID: 0}
+  attackSfx: {fileID: 0}
   cooldown: 5
   range: 3
   damage: 10
+  damageCoefficient: 1.3
   hitboxName:
   - MeleeCollider

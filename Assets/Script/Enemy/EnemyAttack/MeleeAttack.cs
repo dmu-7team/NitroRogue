@@ -15,9 +15,11 @@ public class MeleeAttack : AttackBase
         Vector3 direction = (target.transform.position - caster.transform.position).normalized;
         caster.transform.forward = direction;
         cachedCaster = caster;
+        float casterAtk = caster.GetComponent<EnemyBase>().AttackDamage;
+        float finalDamage = casterAtk * attackObj.damageCoefficient;
         foreach (var hitbox in hitboxes)
         {
-            hitbox.Initialize(attackObj.damage, 0f,caster);
+            hitbox.Initialize(casterAtk * attackObj.damageCoefficient, 0f,caster);
         }
 
         return true;

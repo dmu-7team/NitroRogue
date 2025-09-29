@@ -2013,8 +2013,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8dd8d4372994fe64cbc13dec05c21a48, type: 2}
   - {fileID: 11400000, guid: ce0e73dd5e21e8a4eb9f002737976e29, type: 2}
   bodyRoot: {fileID: 1929473711582035897}
-  _attackDamage: 10
-  _moveSpeed: 3.5
+  baseAttackDamage: 8
+  baseMoveSpeed: 3.5
+  baseMaxHealth: 50
   isAttacking: 0
   healthBarCanvas: {fileID: 5696082063530031216}
   healthBarImage: {fileID: 5155910697916394683}

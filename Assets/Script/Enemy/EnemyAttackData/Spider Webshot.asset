@@ -15,9 +15,11 @@ MonoBehaviour:
   attackName: 
   attackDescription: 
   icon: {fileID: 0}
+  attackSfx: {fileID: 0}
   cooldown: 5
   range: 5
   damage: 10
+  damageCoefficient: 0.7
   duration: 5
   attackEntity: {fileID: 7578368588734243847, guid: 974a2fbbae532fa4686ba792d520907e, type: 3}
   spawnPoint: Spawn Point

@@ -422,7 +422,14 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.6965699
+      - time: 0.44402987
+        functionName: OnAnimationEvent
+        data: OnGroundEffect
+        objectReferenceParameter: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.8006795
         functionName: OnAnimationEvent
         data: DisableAttackEntity
         objectReferenceParameter: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
@@ -432,13 +439,6 @@ ModelImporter:
       - time: 1
         functionName: OnAttackAnimationEnd
         data: 
-        objectReferenceParameter: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
-      - time: 0.44402987
-        functionName: OnAnimationEvent
-        data: OnGroundEffect
         objectReferenceParameter: {fileID: 11500000, guid: 9715c89e850772c478e3f07c0b100a12, type: 3}
         floatParameter: 0
         intParameter: 0

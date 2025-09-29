@@ -16,11 +16,16 @@ public class EnemyBase : CharacterStats
     private AttackBase currentAttack;
     [SerializeField] private GameObject bodyRoot;
 
-    [SerializeField] private float _attackDamage = 10f;
-    [SerializeField] private float _moveSpeed = 3f;
+    [SerializeField] private float baseAttackDamage = 10f;
+    [SerializeField] private float baseMoveSpeed = 3f;
+    [SerializeField] private float baseMaxHealth = 3f;
 
-    public override float AttackDamage => _attackDamage;
-    public override float MoveSpeed => _moveSpeed;
+    private float currentAttackDamage;
+    private float currentMoveSpeed;
+
+    public override float AttackDamage => currentAttackDamage;
+    public override float MoveSpeed => currentMoveSpeed;
+    public override float MaxHealth => base.MaxHealth;
 
     [Header("애니메이션/AI")]
     private Animator animator;
@@ -113,6 +118,11 @@ public class EnemyBase : CharacterStats
     {
         base.OnStartServer();
 
+        currentAttackDamage = baseAttackDamage;
+        currentMoveSpeed = baseMoveSpeed;
+
+        SetHealth(baseMaxHealth, baseMaxHealth);
+
         behavior = GetComponent<BehaviorGraphAgent>();
         navMeshAgent = GetComponent<NavMeshAgent>();
 
@@ -129,6 +139,20 @@ public class EnemyBase : CharacterStats
         }
 
         RpcUpdateHealthBar(CurrentHealth, MaxHealth);
+    }
+
+    [Server]
+    public void ApplyMultipliers(float hpMul, float dmgMul, float moveMul)
+    {
+        currentAttackDamage = baseAttackDamage * dmgMul;
+        currentMoveSpeed = baseMoveSpeed * moveMul;
+
+
+        float newMaxHealth = baseMaxHealth * hpMul;
+        SetHealth(newMaxHealth, newMaxHealth);
+
+        if (navMeshAgent != null)
+            navMeshAgent.speed = currentMoveSpeed;
     }
 
     [Server]

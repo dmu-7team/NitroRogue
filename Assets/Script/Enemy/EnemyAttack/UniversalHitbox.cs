@@ -104,18 +104,21 @@ public class UniversalHitbox : NetworkBehaviour
         if (rotate)
             transform.Rotate(0, 0, rotateAmount * Time.deltaTime, Space.Self);
     }
+
     private bool ShouldIgnoreCollision(Collider other)
     {
-        if (!isServer || !initialized) return true;
-        if (other.gameObject == owner) return true;
-        if (!other.CompareTag("Player")) return true;
+        if (!isServer) { Debug.Log("서버 아님"); return true; }
+        if (!initialized) { Debug.Log("히트박스 초기화 안 됨"); return true; }
+        if (other.gameObject == owner) { Debug.Log("자기 자신"); return true; }
+        if (!other.transform.root.CompareTag("Player")) { Debug.Log($"태그 불일치: {other.name}"); return true; }
 
         var otherMatch = other.GetComponent<NetworkMatch>();
-        if (ownerMatch == null || otherMatch == null) return true;
-        if (ownerMatch.matchId != otherMatch.matchId) return true;
+        if (ownerMatch == null) { Debug.Log("ownerMatch 없음"); return true; }
+        if (otherMatch == null) { Debug.Log("상대 match 없음"); return true; }
+        if (ownerMatch.matchId != otherMatch.matchId) { Debug.Log("매치 아이디 불일치"); return true; }
+
         return false;
     }
-
     /// <summary>
     /// 지속 피해용 OnTriggerStay 처리
     /// </summary>
@@ -158,11 +161,12 @@ public class UniversalHitbox : NetworkBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (ShouldIgnoreCollision(other)) return;
-
+        Debug.Log("플레이어랑 충돌");
         // 단발 피해일 경우 즉시 데미지 및 종료 처리
         if (tickInterval <= 0f)
         {
             var playerStats = other.GetComponent<PlayerStats>();
+            Debug.Log("플레이어한테 " + damage + " 줬음");
             if (playerStats != null)
                 playerStats.TakeDamage(damage);
             else

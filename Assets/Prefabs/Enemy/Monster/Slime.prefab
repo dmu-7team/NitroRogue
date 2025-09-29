@@ -302,8 +302,9 @@ MonoBehaviour:
   attackObjs:
   - {fileID: 11400000, guid: cc0a8c9298e8a5e439be8fcc23914d53, type: 2}
   bodyRoot: {fileID: 698216279277231275}
-  _attackDamage: 10
-  _moveSpeed: 3.5
+  baseAttackDamage: 8
+  baseMoveSpeed: 3.5
+  baseMaxHealth: 50
   isAttacking: 0
   healthBarCanvas: {fileID: 694925149388579232}
   healthBarImage: {fileID: 82520265637344619}

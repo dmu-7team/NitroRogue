@@ -1,8 +1,5 @@
-using System.Security.Principal;
 using Mirror;
 using UnityEngine;
-using UnityEngine.UIElements;
-
 
 public class MagicBallAttack : AttackBase
 {
@@ -10,6 +7,7 @@ public class MagicBallAttack : AttackBase
     Transform spawnPoint;
     GameObject cachedCaster;
     Vector3 cachedDirection;
+
     public override bool Execute(GameObject caster, GameObject target)
     {
         if (target == null) return false;
@@ -63,6 +61,8 @@ public class MagicBallAttack : AttackBase
     {
         if (cachedCaster == null || attackEntity == null) return;
 
+        float casterAtk = cachedCaster.GetComponent<EnemyBase>().AttackDamage;
+        float finalDamage = casterAtk * attackObj.damageCoefficient;
         GameObject projObj;
 
         if (MagicBallObj.followSpawner && spawnPoint != null)
@@ -111,7 +111,7 @@ public class MagicBallAttack : AttackBase
         NetworkServer.Spawn(projObj);
 
         if (projObj.TryGetComponent(out UniversalHitbox ub))
-            ub.Initialize(attackObj.damage, MagicBallObj.duration, cachedCaster);
+            ub.Initialize(finalDamage, MagicBallObj.duration, cachedCaster);
         else
             Debug.LogWarning($"[{projObj.name}]에 Hitbox가 없습니다.");
     }

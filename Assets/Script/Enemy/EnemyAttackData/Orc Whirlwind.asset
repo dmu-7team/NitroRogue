@@ -19,5 +19,6 @@ MonoBehaviour:
   cooldown: 5
   range: 4.5
   damage: 2
+  damageCoefficient: 2
   hitboxName:
   - Whirlwind MeleeCollider

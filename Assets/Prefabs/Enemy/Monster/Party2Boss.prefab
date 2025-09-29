@@ -5098,8 +5098,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b35cb025274f3bc45b625401a0c212c6, type: 2}
   - {fileID: 11400000, guid: b994da004c5d4e14fb7372d0487d19e6, type: 2}
   bodyRoot: {fileID: 5498234120888459819}
-  _attackDamage: 30
-  _moveSpeed: 3.5
+  baseAttackDamage: 25
+  baseMoveSpeed: 3
+  baseMaxHealth: 1000
   isAttacking: 0
   healthBarCanvas: {fileID: 2543211486379374560}
   healthBarImage: {fileID: 3330200572464821082}

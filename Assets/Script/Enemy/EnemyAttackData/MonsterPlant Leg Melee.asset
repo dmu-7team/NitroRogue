@@ -19,5 +19,6 @@ MonoBehaviour:
   cooldown: 5
   range: 4.2
   damage: 5
+  damageCoefficient: 1.3
   hitboxName:
   - Leg_MeleeCollider

@@ -15,8 +15,10 @@ MonoBehaviour:
   attackName: Skeleton Melee
   attackDescription: 
   icon: {fileID: 0}
+  attackSfx: {fileID: 0}
   cooldown: 2
   range: 3
   damage: 7
+  damageCoefficient: 1
   hitboxName:
   - MeleeCollider
