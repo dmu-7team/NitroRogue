@@ -60,7 +60,16 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void ShowSpectatorPanel(bool on)
+    {
+        if (resultCanvasRoot && !resultCanvasRoot.activeSelf) resultCanvasRoot.SetActive(true); // ★
+        if (spectatorHUDRoot != null) spectatorHUDRoot.SetActive(on);
 
+        // 관전 들어갈 때 일반 HUD를 끄고 싶으면 아래 추가
+        if (inGameHUDRoot != null) inGameHUDRoot.SetActive(!on);
+
+        Debug.Log($"[UIManager] spectatorHUDRoot {(on ? "ON" : "OFF")}");
+    }
     public void EnterGameplayHUD()
     {
         if (inGameHUDRoot) inGameHUDRoot.SetActive(true);

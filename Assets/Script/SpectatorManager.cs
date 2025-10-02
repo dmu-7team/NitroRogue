@@ -51,7 +51,7 @@ public class SpectatorManager : MonoBehaviour
     {
         if (Instance == null) return;
         Instance.InternalEnter(me);
-
+        UIManager.Instance?.ShowSpectatorPanel(true);
     }
 
     // ===== 관전 진입 =====
