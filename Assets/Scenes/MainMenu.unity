@@ -11485,13 +11485,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   miniMapCamera: {fileID: 1486244652}
-  worldSize: {x: 100, y: 100}
-  miniMapSize: {x: 230, y: 230}
   miniMapRect: {fileID: 1368679396}
   iconParent: {fileID: 474176310}
   playerIconPrefab: {fileID: 8044589448884410226, guid: 6a244892e676dd1488525172b85c2002, type: 3}
-  enemyIconPrefab: {fileID: 7623013578433739315, guid: 5b14fb2e022b4d04fa1db1a872c165ed, type: 3}
   playerIconPrefabGray: {fileID: 8044589448884410226, guid: 130f044bfd028d24f9e181d6bd8858d2, type: 3}
+  enemyIconPrefab: {fileID: 7623013578433739315, guid: 5b14fb2e022b4d04fa1db1a872c165ed, type: 3}
+  rescanInterval: 0.5
 --- !u!4 &1895593288
 Transform:
   m_ObjectHideFlags: 0
