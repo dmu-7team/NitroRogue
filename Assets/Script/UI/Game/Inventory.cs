@@ -70,10 +70,11 @@ public class Inventory : NetworkBehaviour
         if (boxInRange)
         {
             TryPickupBox();
-        } else if (bossAltarInRange)
-        {
-            CmdRequestSpawnBoss();
-        }
+        } 
+        //else if (bossAltarInRange)
+        //{
+        //    CmdRequestSpawnBoss();
+        //}
     }
     [Command]
     private void CmdRequestSpawnBoss()
