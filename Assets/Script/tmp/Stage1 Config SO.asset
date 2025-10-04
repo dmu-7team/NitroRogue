@@ -16,6 +16,6 @@ MonoBehaviour:
   displayName: Stage 01
   mapSpawnSet: {fileID: 11400000, guid: aacbed1b290f39a45a5d4ef02d1dd0a9, type: 2}
   nextStageId: 1
-  killsToBoss: 0
+  killsToBoss: 10
   serverLogicPrefab: {fileID: 8920380912343991008, guid: cec50938549f7604980bf2e3247fd569, type: 3}
   clientMapPrefab: {fileID: 5953788470316346611, guid: bf1652f24778017458d9cc705e145b7b, type: 3}
