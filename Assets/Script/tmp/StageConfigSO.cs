@@ -19,4 +19,8 @@ public class StageConfigSO : ScriptableObject
 
     [Header("클라이언트용 맵 프리팹")]
     public GameObject clientMapPrefab;
+
+    [Header("스폰 관련 설정")]
+    [Tooltip("스테이지 시작 후 첫 몬스터 스폰까지 지연 시간(초)")]
+    public float initialSpawnDelay = 10f;
 }

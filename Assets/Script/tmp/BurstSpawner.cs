@@ -233,4 +233,10 @@ public class BurstSpawner : NetworkBehaviour
         }
         return mode;
     }
+
+    [Server]
+    public void OverrideNextBurst(float time)
+    {
+        nextBurstTime = time;
+    }
 }

@@ -130,9 +130,9 @@ public class MatchManager : NetworkBehaviour
     [Server]
     public void StartMatchWithPlayers(List<Transform> initialPlayers)
     {
-        ended = false;                            // ★ 중요
+        ended = false;
         var guid = GetComponent<NetworkMatch>().matchId;
-        TargetResetUIForAll(guid);                // ★ 클라 초기화
+        TargetResetUIForAll(guid);
 
         // 타이머/단계/보스/카운터 등 전부 초기화
         playerTransforms.Clear();
@@ -149,7 +149,12 @@ public class MatchManager : NetworkBehaviour
 
         ApplyStageContent();
         UpdateDifficultyScaling();
-        spawner.ApplyStep(currentDifficultyStep, gameModeConfig.FindStage(currentStageId), gameModeConfig.spawnRule);
+
+        var stage = gameModeConfig.FindStage(currentStageId);
+        spawner.ApplyStep(currentDifficultyStep, stage, gameModeConfig.spawnRule);
+
+        if (stage != null)
+            spawner.OverrideNextBurst(Time.time + stage.initialSpawnDelay);
     }
 
     [Server]
@@ -382,6 +387,7 @@ public class MatchManager : NetworkBehaviour
             if (h) h.OnDied -= OnBossDied;
             currentBoss = null;
         }
+        ClearAllEnemies();
 
         var stage = gameModeConfig.FindStage(currentStageId);
         if (stage == null) return;
@@ -397,7 +403,24 @@ public class MatchManager : NetworkBehaviour
 
         ApplyStageContent();
         UpdateDifficultyScaling();
-        spawner.ApplyStep(currentDifficultyStep, gameModeConfig.FindStage(currentStageId), gameModeConfig.spawnRule);
+
+        var nextStage = gameModeConfig.FindStage(currentStageId);
+        spawner.ApplyStep(currentDifficultyStep, nextStage, gameModeConfig.spawnRule);
+
+        if (nextStage != null)
+            spawner.OverrideNextBurst(Time.time + nextStage.initialSpawnDelay);
     }
 
+    [Server]
+    private void ClearAllEnemies()
+    {
+        foreach (var enemy in aliveEnemies.ToList())
+        {
+            if (enemy != null && enemy.gameObject != null)
+            {
+                NetworkServer.Destroy(enemy.gameObject);
+            }
+        }
+        aliveEnemies.Clear();
+    }
 }
