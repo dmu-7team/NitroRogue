@@ -52,6 +52,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: ClusterBomb
       objectReference: {fileID: 0}
+    - target: {fileID: 3451118302482216456, guid: 19167af14a724ee419dc46fde74afd84, type: 3}
+      propertyPath: m_Convex
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3451118302482216456, guid: 19167af14a724ee419dc46fde74afd84, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 13400000, guid: fc53950f3f182fc46bf014d257267e86, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -127,7 +135,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 0
-  _assetId: 776578685
+  _assetId: 564181098
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
@@ -140,7 +148,7 @@ Rigidbody:
   m_GameObject: {fileID: 6245746679358221637}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0
+  m_Drag: 0.1
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}

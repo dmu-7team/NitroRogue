@@ -1195,6 +1195,8 @@ GameObject:
   - component: {fileID: 398416214304943837}
   - component: {fileID: -8142146443056901152}
   - component: {fileID: 5908927174589690975}
+  - component: {fileID: 2484472292495432164}
+  - component: {fileID: -912253243480483621}
   m_Layer: 0
   m_Name: 0Player_ver_AR
   m_TagString: Player
@@ -1632,6 +1634,40 @@ MonoBehaviour:
   bulletTrailPrefab: {fileID: 235673213667241877, guid: 6c4ffb140e19fe6439d7075e4941926d, type: 3}
   audioSource: {fileID: -8142146443056901152}
   animator: {fileID: 3456327250828170975}
+--- !u!114 &2484472292495432164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2460976672058901519}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9e8041baf44e1242907291a862d10ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  skills:
+  - {fileID: 11400000, guid: 57c33e7b11cc2db4f8bf30bddf3b05b4, type: 2}
+  playerCamera: {fileID: 0}
+--- !u!114 &-912253243480483621
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2460976672058901519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcecd02b7ecf7dc4585141e7f47dc1d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  prefabToTest: {fileID: 5485618447753468225, guid: d9dbcd160267d96428cec9ccdabdd781, type: 3}
 --- !u!1 &2518677131893347981
 GameObject:
   m_ObjectHideFlags: 0

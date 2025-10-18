@@ -4,17 +4,17 @@ using System.Collections.Generic;
 
 public class SkillController : NetworkBehaviour
 {
-    [Header("��ų ����")]
+    [Header("스킬 슬롯")]
     [SerializeField] private List<SkillConfig> skills;
 
-    [Header("�ʼ� ����")]
-    [SerializeField] private Camera playerCamera; // << ���⿡ ī�޶� ���� ������ ���� �߰�!
+    [Header("필수 연결")]
+    [SerializeField] private Camera playerCamera; // << 여기에 카메라를 직접 연결할 변수 추가!
 
-    // ��Ÿ�� ������
+    // 런타임 데이터
     private Dictionary<int, SkillConfig> skillDictionary;
     private Dictionary<int, float> skillCooldowns;
 
-    #region �ʱ�ȭ (���� & Ŭ���̾�Ʈ)
+    #region 초기화 (서버 & 클라이언트)
     public override void OnStartServer()
     {
         base.OnStartServer();
@@ -65,23 +65,23 @@ public class SkillController : NetworkBehaviour
         {
             skillCooldowns[skill.skillId] = Time.time;
 
-            // --- ���Ⱑ �����Ǿ����ϴ� ---
+            // --- 여기가 수정되었습니다 ---
             if (playerCamera == null)
             {
-                Debug.LogError("[Ŭ���̾�Ʈ] Player Camera�� SkillController�� �Ҵ���� �ʾҽ��ϴ�!");
+                Debug.LogError("[클라이언트] Player Camera가 SkillController에 할당되지 않았습니다!");
                 return;
             }
 
             Transform camTransform = playerCamera.transform;
-            // ���� ��ġ�� ī�޶� ��ġ �ٷ� ������ ��¦ �����Ͽ� ���� ���� ������ ����
+            // 생성 위치를 카메라 위치 바로 앞으로 살짝 조정하여 벽에 끼는 현상을 방지
             Vector3 spawnPos = camTransform.position + camTransform.forward * 0.5f;
             CmdUseSkill(skill.skillId, spawnPos, camTransform.rotation);
-            // --- ������� ���� ---
+            // --- 여기까지 수정 ---
         }
         else
         {
             float remaining = (skillCooldowns[skill.skillId] + skill.cooldown) - Time.time;
-            Debug.Log($"{skill.skillName} ��Ÿ��: {remaining:F1}�� ����");
+            Debug.Log($"{skill.skillName} 쿨타임: {remaining:F1}초 남음");
         }
     }
 
@@ -90,7 +90,7 @@ public class SkillController : NetworkBehaviour
     {
         if (skillDictionary == null || !skillDictionary.TryGetValue(skillId, out SkillConfig skill))
         {
-            Debug.LogError($"[����] ID�� {skillId}�� ��ų�� ã�� �� ���ų� ��ųʸ��� �ʱ�ȭ���� �ʾҽ��ϴ�.");
+            Debug.LogError($"[서버] ID가 {skillId}인 스킬을 찾을 수 없거나 딕셔너리가 초기화되지 않았습니다.");
             return;
         }
 
@@ -107,7 +107,7 @@ public class SkillController : NetworkBehaviour
     {
         if (skill.projectilePrefab == null)
         {
-            Debug.LogError("[����] projectilePrefab�� SkillConfig�� �Ҵ���� �ʾҽ��ϴ�!");
+            Debug.LogError("[서버] projectilePrefab이 SkillConfig에 할당되지 않았습니다!");
             return;
         }
 
@@ -116,7 +116,7 @@ public class SkillController : NetworkBehaviour
         var clusterBomb = bombInstance.GetComponent<ClusterBomb>();
         if (clusterBomb == null)
         {
-            Debug.LogError("[����] ��ź �����տ� ClusterBomb.cs ��ũ��Ʈ�� �����ϴ�!");
+            Debug.LogError("[서버] 폭탄 프리팹에 ClusterBomb.cs 스크립트가 없습니다!");
             NetworkServer.Destroy(bombInstance);
             return;
         }
@@ -129,7 +129,7 @@ public class SkillController : NetworkBehaviour
         var rb = bombInstance.GetComponent<Rigidbody>();
         if (rb == null)
         {
-            Debug.LogError("[����] ��ź �����տ� Rigidbody ������Ʈ�� �����ϴ�!");
+            Debug.LogError("[서버] 폭탄 프리팹에 Rigidbody 컴포넌트가 없습니다!");
             NetworkServer.Destroy(bombInstance);
             return;
         }
@@ -137,6 +137,6 @@ public class SkillController : NetworkBehaviour
         rb.linearVelocity = spawnRot * Vector3.forward * skill.launchForce;
 
         NetworkServer.Spawn(bombInstance);
-        Debug.Log("[����] Ŭ������ ��ź ���� �� �߻� ����!");
+        Debug.Log("[서버] 클러스터 폭탄 생성 및 발사 성공!");
     }
 }

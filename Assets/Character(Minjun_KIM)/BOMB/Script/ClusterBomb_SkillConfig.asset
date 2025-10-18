@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5bbfbda938049a41a3dc5a17c7da7ea, type: 3}
+  m_Name: ClusterBomb_SkillConfig
+  m_EditorClassIdentifier: 
+  type: 0
+  skillId: 1
+  skillName: "\uD074\uB7EC\uC2A4\uD130 \uD3ED\uD0C4"
+  skillIcon: {fileID: 0}
+  description: 
+  cooldown: 10
+  projectilePrefab: {fileID: 6245746679358221637, guid: bd16bc912d898814795bd9c70b727bd3, type: 3}
+  launchForce: 15
+  childProjectilePrefab: {fileID: 5485618447753468225, guid: d9dbcd160267d96428cec9ccdabdd781, type: 3}
+  childProjectileCount: 4
+  childLaunchForce: 15
