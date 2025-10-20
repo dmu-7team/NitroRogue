@@ -238,6 +238,11 @@ public class WeaponControllerClient : NetworkBehaviour
     {
         if (target && target.TryGetComponent(out EnemyBase enemy))
             enemy.TakeDamage(damage, gameObject);
+
+        if (TryGetComponent(out PlayerStats ps))
+        {
+            ps.TotalDamage += damage;
+        }
     }
 
     [Command] void CmdReportShotFX(Vector3 end) => RpcPlayShotFX(end);

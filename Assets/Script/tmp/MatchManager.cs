@@ -5,6 +5,7 @@ using System.Linq;
 using Mirror;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEngine.Tilemaps;
 // struct DefeatMessage : NetworkMessage { public string matchId; }
 //public struct VictoryMessage : NetworkMessage { public string matchId; }
 [RequireComponent(typeof(NetworkMatch))]
@@ -91,12 +92,27 @@ public class MatchManager : NetworkBehaviour
         ended = true;
 
         var guid = GetComponent<NetworkMatch>().matchId;
-
+        var firebase = FirebaseManagerServer.Instance;
         foreach (var conn in NetworkServer.connections.Values)
         {
             if (conn?.identity == null) continue;
             var nm = conn.identity.GetComponent<NetworkMatch>();
             if (nm == null || nm.matchId != guid) continue;
+
+            if (firebase != null)
+            {
+                var stats = conn.identity.GetComponent<PlayerStats>();
+                if (stats != null)
+                {
+                    firebase.UploadMatchResult(
+                        stats.UserId,
+                        stats.TotalKills,
+                        stats.IsDead ? 1 : 0,
+                        Mathf.RoundToInt(stats.totalDamage),
+                        isVictory
+                    );
+                }
+            }
 
             TargetShowResult(conn, isVictory);
         }
@@ -112,9 +128,6 @@ public class MatchManager : NetworkBehaviour
         if (isVictory) UIManager.Instance?.ShowVictoryPanel();
         else UIManager.Instance?.ShowDefeatPanel();
     }
-
-
-
 
     [Server]
     private IEnumerator NotifyEndedNextFrame(Guid guid, bool isVictory)

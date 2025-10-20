@@ -259,7 +259,7 @@ public class CustomNetworkManager_Server : NetworkManager
             var stats = playerObj.GetComponent<PlayerStats>();
             if (stats != null)
             {
-                stats.NickName = roomPlayer.playerName;     // 🔸 SyncVar 닉
+                stats.Nickname = roomPlayer.playerName;     // 🔸 SyncVar 닉
                 stats.isAlive = true;
                 stats.matchIdStr = matchId.ToString();
                 stats.ServerResetAllStats();                  // 🔸 체력/레벨 등 초기화
@@ -339,7 +339,7 @@ public class CustomNetworkManager_Server : NetworkManager
 
         // 진단 로그
         Debug.Log($"[DeadCheck] match={guid} players={list.Count} :: " +
-                  string.Join(", ", list.Select(p => $"{p.NickName}/{p.isAlive}")));
+                  string.Join(", ", list.Select(p => $"{p.Nickname}/{p.isAlive}")));
 
         return list;
     }

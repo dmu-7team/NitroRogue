@@ -264,7 +264,7 @@ public class EnemyBase : CharacterStats
 
         if (killer != null && killer.TryGetComponent<PlayerStats>(out var killerStats))
         {
-            killerStats.KillCount++;
+            killerStats.TotalKills++;
             killerStats.GainExp(expReward);
         }
 

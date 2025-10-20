@@ -24,11 +24,12 @@ public class PlayerStats : CharacterStats
     [SyncVar(hook = nameof(OnAttackDamageChanged))] private float syncedAttackDamage = 10f;
     [SyncVar(hook = nameof(OnMoveSpeedChanged))] private float syncedMoveSpeed = 5f;
 
-    [SyncVar] private int killCount = 0;
-    [SyncVar] private float totalDamage = 0f;
+    [SyncVar] private int totalKills = 0;
+    [SyncVar] public float totalDamage = 0f;
 
     // 🔸 닉네임 SyncVar로 통일
-    [SyncVar(hook = nameof(OnNickSync))] private string nickName;
+    [SyncVar] private string nickname;
+    [SyncVar] private string userId;
 
     [SyncVar] public bool isAlive = true;   // 서버 생존 추적용
     [SyncVar] public string matchIdStr;         // 서버 매치 식별용 (GUID 문자열)
@@ -54,15 +55,10 @@ public class PlayerStats : CharacterStats
     public float CurrentExp => currentExp;
     public float ExpToLevelUp => expToLevelUp;
     public int Level => level;
-    public int KillCount { get => killCount; set => killCount = value; }
+    public int TotalKills { get => totalKills; set => totalKills = value; }
     public float TotalDamage { get => totalDamage; set => totalDamage = value; }
-
-    public string NickName
-    {
-        get => nickName;
-        [Server]
-        set => nickName = value; // SyncVar에 직접 설정
-    }
+    public string Nickname { get => nickname; set => nickname = value; }
+    public string UserId { get => userId; set => userId = value; }
 
     public bool IsDead => isDead;
     public override float MoveSpeed => syncedMoveSpeed;
@@ -98,6 +94,20 @@ public class PlayerStats : CharacterStats
     {
         base.OnStartLocalPlayer();
         StartCoroutine(DeferredBindUI());
+
+
+        userId = PlayerPrefs.GetString("userId", System.Guid.NewGuid().ToString());
+        nickname = PlayerPrefs.GetString("nickname", "Player");
+
+        // 서버에 전달
+        CmdRegisterPlayer(userId, nickname);
+    }
+
+    [Command]
+    void CmdRegisterPlayer(string uid, string nick)
+    {
+        userId = uid;
+        nickname = nick;
     }
 
     private IEnumerator DeferredBindUI()
@@ -172,7 +182,7 @@ public class PlayerStats : CharacterStats
     {
         isDead = false;
         isAlive = true;
-        killCount = 0;
+        totalKills = 0;
         totalDamage = 0f;
 
         currentExp = 0f;
@@ -202,7 +212,7 @@ public class PlayerStats : CharacterStats
 
         //if (connectionToClient != null)
         //    TargetUpdateHealth(connectionToClient, currentHealth, maxHealth);
-
+        
         if (currentHealth <= 0)
             Die();
     }
@@ -352,12 +362,6 @@ public class PlayerStats : CharacterStats
     private void OnLevelSync(int oldV, int newV) => OnLevelChanged?.Invoke(newV);
     private void OnMoveSpeedChanged(float o, float n) => OnSpeedChanged?.Invoke(n);
     private void OnAttackDamageChanged(float o, float n) => OnPowerChanged?.Invoke(n);
-
-    private void OnNickSync(string oldName, string newName)
-    {
-        // UIManager에 RefreshNameTag가 없으므로 여기서는 생략
-        // (필요하면 이름표 컴포넌트를 직접 찾아 갱신하세요)
-    }
 
     // == 내부 로직: 레벨업 ==
     private void LevelUp()
