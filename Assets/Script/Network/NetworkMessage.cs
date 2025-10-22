@@ -10,6 +10,7 @@ namespace NetworkMessages
     {
         public string matchId;
         public string roomName;
+        public string nickname;
     }
 
     [Serializable]

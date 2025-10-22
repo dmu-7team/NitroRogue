@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using NetworkMessages;
+using System.Collections;
 
 public class CustomNetworkManager_Server : NetworkManager
 {
@@ -65,7 +66,7 @@ public class CustomNetworkManager_Server : NetworkManager
         var roomPlayer = playerObj.GetComponent<RoomPlayer>();
         roomPlayer.matchId = msg.matchId;
         roomPlayer.roomName = msg.roomName;
-        roomPlayer.playerName = $"플레이어{matchRooms[msg.matchId].Count + 1}";
+        roomPlayer.playerName = msg.nickname;
         roomPlayer.isLeader = matchRooms[msg.matchId].Count == 0;
 
         NetworkServer.AddPlayerForConnection(conn, playerObj);

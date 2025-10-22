@@ -65,11 +65,19 @@ public class CustomNetworkManager : NetworkManager
 
         if (!string.IsNullOrEmpty(RoomListUI.matchIdToJoin))
         {
+            string nickname = PlayerPrefs.GetString("nickname", "");
+            if (string.IsNullOrEmpty(nickname))
+            {
+                nickname = $"게스트{UnityEngine.Random.Range(1000, 9999)}";
+                PlayerPrefs.SetString("nickname", nickname);
+            }
+
             Debug.Log($"[Client] OnClientConnect → 자동 참가 요청: {RoomListUI.matchIdToJoin}");
             var joinMsg = new JoinMatchMessage
             {
                 matchId = RoomListUI.matchIdToJoin,
-                roomName = RoomListUI.matchIdToJoin
+                roomName = RoomListUI.matchIdToJoin,
+                nickname = nickname,
             };
             NetworkClient.Send(joinMsg);
         }

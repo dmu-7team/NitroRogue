@@ -138,10 +138,17 @@ public class RoomListUI : MonoBehaviour
         matchIdToJoin = newMatchId;
         enableAutoJoin = true;
 
+        string nickname = PlayerPrefs.GetString("nickname", "");
+        if (string.IsNullOrEmpty(nickname))
+        {
+            nickname = $"게스트{UnityEngine.Random.Range(1000, 9999)}";
+            PlayerPrefs.SetString("nickname", nickname);
+        }
         JoinMatchMessage msg = new JoinMatchMessage
         {
             matchId = newMatchId,
-            roomName = roomName
+            roomName = roomName,
+            nickname = nickname,
         };
 
         NetworkClient.Send(msg);

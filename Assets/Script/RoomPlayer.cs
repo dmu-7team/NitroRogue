@@ -14,7 +14,7 @@ public class RoomPlayer : NetworkBehaviour
     [SyncVar] public int maxPlayers;
 
     [SyncVar(hook = nameof(OnReadyChanged))] public bool isReady = false;
-    [SyncVar] public string playerName = "플레이어";
+    [SyncVar] public string playerName;
     [SyncVar(hook = nameof(OnLeaderChanged))] public bool isLeader = false;
     [SyncVar] public int selectedCharacter = -1;
 
