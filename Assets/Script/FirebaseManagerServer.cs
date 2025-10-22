@@ -3,122 +3,87 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
-/// <summary>
-/// 서버 전용: 경기별 통계 업로드 + 누적(summary) 갱신
-/// </summary>
 public class FirebaseManagerServer : MonoBehaviour
 {
     public static FirebaseManagerServer Instance;
     private const string baseUrl = "https://nitrorogue-24e5c-default-rtdb.firebaseio.com/";
 
-    void Awake() => Instance = this;
+    void Awake()
+    {
+        Instance = this;
+    }
 
-    /// <summary>
-    /// 한 경기의 결과 업로드 및 summary 누적 갱신
-    /// </summary>
+    // === 매치 종료 시 서버에서 호출 ===
     public void UploadMatchResult(string userId, int kills, int deaths, int damage, bool isWin)
     {
-        if (string.IsNullOrEmpty(userId))
-        {
-            Debug.LogError("[Firebase] userId가 없음");
-            return;
-        }
-
         string matchId = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss_fff");
 
-        // --- (1) 개별 매치 기록 ---
-        var matchData = new
-        {
-            kills,
-            deaths,
-            damage,
-            result = isWin ? "Win" : "Lose",
-            timestamp = DateTime.UtcNow.ToString("o")
-        };
-
-        string matchJson = JsonUtility.ToJson(matchData);
-        string matchUrl = $"{baseUrl}users/{userId}/matches/{matchId}.json";
-        StartCoroutine(Put(matchUrl, matchJson));
-
-        // --- (2) summary 누적 갱신 ---
-        UpdateSummary(userId, kills, deaths, damage, isWin);
-    }
-
-    /// <summary>
-    /// 총합(summary) 데이터 갱신 (누적)
-    /// </summary>
-    private void UpdateSummary(string userId, int kills, int deaths, int damage, bool isWin)
-    {
-        string url = $"{baseUrl}users/{userId}/summary.json";
-
-        // PATCH 요청으로 해당 필드만 갱신
-        string json = $@"
+        // ① 개별 매치 기록 저장
+        string matchJson = $@"
         {{
-            ""totalKills"": {{"".sv"": ""increment"", ""by"": {kills}}},
-            ""totalDeaths"": {{"".sv"": ""increment"", ""by"": {deaths}}},
-            ""totalDamage"": {{"".sv"": ""increment"", ""by"": {damage}}},
-            ""totalMatches"": {{"".sv"": ""increment"", ""by"": 1}},
-            ""totalWins"": {{"".sv"": ""increment"", ""by"": {(isWin ? 1 : 0)}}},
-            ""lastPlayed"": ""{DateTime.UtcNow:o}""
+            ""kills"": {kills},
+            ""deaths"": {deaths},
+            ""damage"": {damage},
+            ""result"": ""{(isWin ? "Win" : "Lose")}"",
+            ""timestamp"": ""{DateTime.UtcNow:O}""
         }}";
 
-        // Realtime Database의 REST API는 .sv를 직접 지원하지 않음.
-        // 따라서 REST만 쓴다면 기존 summary를 읽고 직접 계산해야 함.
-        StartCoroutine(PatchSummaryManual(url, kills, deaths, damage, isWin));
+        StartCoroutine(Put($"{baseUrl}users/{userId}/matches/{matchId}.json", matchJson));
+
+        // ② 요약 통계 업데이트
+        StartCoroutine(UpdateSummary(userId, kills, deaths, damage, isWin));
     }
 
-    /// <summary>
-    /// PATCH 대신 summary를 직접 불러와서 누적 계산 (REST만 사용할 때 필요)
-    /// </summary>
-    private IEnumerator PatchSummaryManual(string url, int kills, int deaths, int damage, bool isWin)
+    // === 기존 summary 불러와서 누적 ===
+    private IEnumerator UpdateSummary(string userId, int kills, int deaths, int damage, bool isWin)
     {
-        using UnityWebRequest getReq = UnityWebRequest.Get(url);
+        string summaryUrl = $"{baseUrl}users/{userId}/summary.json";
+
+        // 기존 summary 가져오기
+        UnityWebRequest getReq = UnityWebRequest.Get(summaryUrl);
         yield return getReq.SendWebRequest();
 
-        int totalKills = 0, totalDeaths = 0, totalDamage = 0, totalMatches = 0, totalWins = 0;
-        if (getReq.result == UnityWebRequest.Result.Success && !string.IsNullOrEmpty(getReq.downloadHandler.text))
+        int totalKills = kills;
+        int totalDeaths = deaths;
+        int totalDamage = damage;
+        int totalMatches = 1;
+        int totalWins = isWin ? 1 : 0;
+
+        if (getReq.result == UnityWebRequest.Result.Success && !string.IsNullOrEmpty(getReq.downloadHandler.text) && getReq.downloadHandler.text != "null")
         {
-            var data = JsonUtility.FromJson<SummaryData>(getReq.downloadHandler.text);
-            if (data != null)
+            try
             {
-                totalKills = data.totalKills;
-                totalDeaths = data.totalDeaths;
-                totalDamage = data.totalDamage;
-                totalMatches = data.totalMatches;
-                totalWins = data.totalWins;
+                var oldData = JsonUtility.FromJson<SummaryData>(getReq.downloadHandler.text);
+                if (oldData != null)
+                {
+                    totalKills += oldData.totalKills;
+                    totalDeaths += oldData.totalDeaths;
+                    totalDamage += oldData.totalDamage;
+                    totalMatches += oldData.totalMatches;
+                    totalWins += oldData.totalWins;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("[Firebase] 기존 summary 파싱 실패: " + e.Message);
             }
         }
 
-        totalKills += kills;
-        totalDeaths += deaths;
-        totalDamage += damage;
-        totalMatches += 1;
-        if (isWin) totalWins += 1;
+        string newJson = $@"
+        {{
+            ""totalKills"": {totalKills},
+            ""totalDeaths"": {totalDeaths},
+            ""totalDamage"": {totalDamage},
+            ""totalMatches"": {totalMatches},
+            ""totalWins"": {totalWins},
+            ""lastPlayed"": ""{DateTime.UtcNow:O}""
+        }}";
 
-        var updated = new SummaryData
-        {
-            totalKills = totalKills,
-            totalDeaths = totalDeaths,
-            totalDamage = totalDamage,
-            totalMatches = totalMatches,
-            totalWins = totalWins,
-            lastPlayed = DateTime.UtcNow.ToString("o")
-        };
-
-        string json = JsonUtility.ToJson(updated);
-
-        using UnityWebRequest putReq = UnityWebRequest.Put(url, json);
-        putReq.method = "PUT";
-        putReq.SetRequestHeader("Content-Type", "application/json");
-        yield return putReq.SendWebRequest();
-
-        if (putReq.result == UnityWebRequest.Result.Success)
-            Debug.Log("[Firebase] summary 누적 갱신 성공");
-        else
-            Debug.LogError($"[Firebase] summary 누적 갱신 실패: {putReq.error}");
+        StartCoroutine(Put(summaryUrl, newJson));
     }
 
-    IEnumerator Put(string url, string json)
+    // === PUT 요청 공용 함수 ===
+    private IEnumerator Put(string url, string json)
     {
         using UnityWebRequest req = UnityWebRequest.Put(url, json);
         req.method = "PUT";
@@ -126,9 +91,9 @@ public class FirebaseManagerServer : MonoBehaviour
         yield return req.SendWebRequest();
 
         if (req.result == UnityWebRequest.Result.Success)
-            Debug.Log($"[Firebase] 매치 업로드 성공");
+            Debug.Log($"[Firebase] 업로드 성공: {url}");
         else
-            Debug.LogError($"[Firebase] 매치 업로드 실패: {req.error}");
+            Debug.LogError($"[Firebase] 업로드 실패: {req.error}");
     }
 
     [Serializable]
@@ -139,6 +104,5 @@ public class FirebaseManagerServer : MonoBehaviour
         public int totalDamage;
         public int totalMatches;
         public int totalWins;
-        public string lastPlayed;
     }
 }

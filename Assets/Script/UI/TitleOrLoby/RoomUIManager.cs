@@ -10,15 +10,16 @@ public class RoomUIManager : MonoBehaviour
 {
     public static RoomUIManager Instance;
     
-
     [Header("UI References")]
 
     public GameObject mainMenuPanel;
+    public GameObject lobyPanel;
     public GameObject gameHudCanvas;
     public GameObject roomPanel;
     public TextMeshProUGUI roomNameText;
     public GameObject startButton;
     public GameObject createRoomPopup; // <- 이 줄 추가
+
     [Header("플레이어 리스트 UI")]
     public Transform playerListParent;
     public GameObject playerListItemPrefab;
@@ -28,9 +29,6 @@ public class RoomUIManager : MonoBehaviour
     public GameObject roomUI;           // RoomUI
     public GameObject background;       // Background
 
- 
-
-
     private void Awake()
     {
         Debug.Log("[RoomUIManager] Awake 호출됨");
@@ -39,17 +37,21 @@ public class RoomUIManager : MonoBehaviour
         else Destroy(gameObject);
 
         mainMenuPanel.SetActive(true);
+        lobyPanel.SetActive(false);
         roomPanel.SetActive(false);
     }
 
-
-
-  
-
+    public void ShowLoby()
+    {
+        mainMenuPanel.SetActive(false);
+        lobyPanel.SetActive(true);
+        roomPanel.SetActive(false);
+    }
     public void ShowRoom(string roomName = "")
     {
         _startRequested = false;                     // ★ 리셋
         mainMenuPanel.SetActive(false);
+        lobyPanel.SetActive(false);
         roomPanel.SetActive(true);
         roomNameText.text = $"방 이름: {roomName}";
     }
@@ -57,6 +59,7 @@ public class RoomUIManager : MonoBehaviour
     {
         _startRequested = false;                     // ★ 리셋
         mainMenuPanel.SetActive(true);
+        lobyPanel.SetActive(false);
         roomPanel.SetActive(false);
         Debug.Log("[UI] 메인 로비 패널 복귀");
     }
@@ -95,7 +98,7 @@ public class RoomUIManager : MonoBehaviour
         RoomListUI.triedAutoConnect = false;
         SpectatorManager.Instance?.ResetAll();
         // UI 전환 및 새로고침
-        RoomUIManager.Instance.ShowMainMenu();
+        RoomUIManager.Instance.ShowLoby();
         RoomListUI.Instance.RequestRoomListRefresh();
     }
     public void AddPlayerToList(string name, bool isLeader, bool isMe)
@@ -147,8 +150,6 @@ public class RoomUIManager : MonoBehaviour
 
     }
 
-
-
     public void SwitchToGameUI()
     {
         Debug.Log("[RoomUIManager] SwitchToGameUI() 호출됨");
@@ -162,10 +163,6 @@ public class RoomUIManager : MonoBehaviour
         Debug.Log("[RoomUIManager] 모든 UI 정리 완료, 게임 HUD만 활성화됨");
         UIManager.Instance.StartStopwatchLocal();
     }
-
-   
-
-
 
     private void OnJoinResultMessageReceived(JoinResultMessage msg)
     {
@@ -187,6 +184,7 @@ public class RoomUIManager : MonoBehaviour
             Debug.LogWarning("[Client] 방 참가 실패");
         }
     }
+
     public void UpdateRoomUI(string roomName)
     {
         if (RoomUIManager.Instance == null)
@@ -206,8 +204,6 @@ public class RoomUIManager : MonoBehaviour
         }
     }
 
-
-
     public void RebuildPlayerList()
     {
         ClearPlayerList();
@@ -222,7 +218,6 @@ public class RoomUIManager : MonoBehaviour
 
     public Button[] characterButtons;
     public TextMeshProUGUI[] characterButtonTexts;
-
 
     public void UpdateCharacterSelection(int index, string playerName)
     {
@@ -274,7 +269,6 @@ public class RoomUIManager : MonoBehaviour
         }
     }
 
-
     public void OnCharacterButtonClicked(int index)
     {
         var player = NetworkClient.connection.identity.GetComponent<RoomPlayer>();
@@ -308,9 +302,8 @@ public class RoomUIManager : MonoBehaviour
     public void HideRoomUI()
     {
         roomPanel?.SetActive(false);     // RoomUI: 방 이름/리스트 패널
+        lobyPanel.SetActive(false);
         mainMenuPanel?.SetActive(false); // Panel: 방 생성/입장 패널
         background?.SetActive(false);    // Background: 전체 회색 배경
     }
-
-
 }

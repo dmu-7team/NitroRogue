@@ -48,6 +48,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject resultCanvasRoot; // ← paenlcanvas 드래그
     [SerializeField] private Button victoryReturnButton; // 승리 패널의 '처음으로' 버튼
     [SerializeField] private Button defeatReturnButton;  // 패배 패널의 '처음으로' 버튼
+
     public void OnClickReturnToMain()
     {
         // 로컬에서 메인 메뉴 UI 다시 띄우기
