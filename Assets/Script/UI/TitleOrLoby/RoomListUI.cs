@@ -89,7 +89,7 @@ public class RoomListUI : MonoBehaviour
             Debug.Log("[RoomListUI] 자동 서버 연결 시도 (localhost:7777)");
 
             var nm = NetworkManager.singleton;
-            nm.networkAddress = "localhost";         // 내부망이면 192.168.x.x로
+            nm.networkAddress = "4.217.235.248";         // 내부망이면 192.168.x.x로
             var tp = nm.GetComponent<TelepathyTransport>();
             if (tp != null) tp.port = 7777;
 
@@ -174,7 +174,7 @@ public class RoomListUI : MonoBehaviour
 
             // 주소/포트 로컬로 고정
             var nm = NetworkManager.singleton;
-            nm.networkAddress = "localhost"; // 또는 서버 PC의 내부 IP (예: 192.168.x.x)
+            nm.networkAddress = "4.217.235.248"; // 또는 서버 PC의 내부 IP (예: 192.168.x.x)
 
             // Telepathy 포트 맞추기
             var tp = nm.GetComponent<TelepathyTransport>();

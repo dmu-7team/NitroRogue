@@ -62,7 +62,7 @@ public class MainMenuUI : MonoBehaviour
 
         RoomListUI.matchIdToJoin = matchId;
 
-        NetworkManager.singleton.networkAddress = "127.0.0.1";
+        NetworkManager.singleton.networkAddress = "4.217.235.248";
         NetworkManager.singleton.StartClient();
 
         Debug.Log($"[MainMenuUI] 서버 연결 및 Join 시도: {matchId}");
