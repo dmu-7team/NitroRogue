@@ -416,14 +416,12 @@ public class CustomNetworkManager_Server : NetworkManager
     public void SendSelectionsTo(NetworkConnectionToClient conn, string matchId)
     {
         var (selected, names) = BuildSelectionSnapshot(matchId);
-
-        RoomPlayer rp = (conn != null && conn.identity != null)
-            ? conn.identity.GetComponent<RoomPlayer>()
-            : null;
+        var rp = conn?.identity ? conn.identity.GetComponent<RoomPlayer>() : null;
         if (rp == null) return;
 
-        rp.TargetUpdateCharacterButtons(conn, selected, names);
-        Debug.Log($"[Server→Target] snapshot to conn={conn.connectionId} matchId={matchId} names={string.Join(", ", names)}");
+        // ★ matchId 추가
+        rp.TargetUpdateCharacterButtons(conn, matchId, selected, names);
+        Debug.Log($"[Server→Target] snapshot to conn={conn.connectionId} matchId={matchId}");
     }
 
     public void BroadcastSelections(string matchId)
@@ -434,10 +432,15 @@ public class CustomNetworkManager_Server : NetworkManager
         foreach (var rp in list)
         {
             var c = rp.connectionToClient;
-            if (c != null) rp.TargetUpdateCharacterButtons(c, selected, names);
+            if (c != null)
+            {
+                // ★ matchId 추가
+                rp.TargetUpdateCharacterButtons(c, matchId, selected, names);
+            }
         }
-        Debug.Log($"[Server→All] broadcast matchId={matchId} names={string.Join(", ", names)}");
+        Debug.Log($"[Server→All] broadcast matchId={matchId}");
     }
+
 
     private void SendRoomListToAllClients()
     {

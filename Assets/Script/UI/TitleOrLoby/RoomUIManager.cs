@@ -208,13 +208,20 @@ public class RoomUIManager : MonoBehaviour
     {
         ClearPlayerList();
 
-        var players = Object.FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
+        var local = NetworkClient.connection?.identity?.GetComponent<RoomPlayer>();
+        if (local == null) return;
+
+        var players = Object.FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None)
+                            .Where(p => p.matchId == local.matchId);
+
         foreach (var p in players)
         {
-            bool isMe = p.isLocalPlayer; // 본인인지 체크
+            bool isMe = p.isLocalPlayer;
             AddPlayerToList(p.playerName, p.isLeader, isMe);
         }
     }
+
+
 
     public Button[] characterButtons;
     public TextMeshProUGUI[] characterButtonTexts;
@@ -271,33 +278,17 @@ public class RoomUIManager : MonoBehaviour
 
     public void OnCharacterButtonClicked(int index)
     {
-        var player = NetworkClient.connection.identity.GetComponent<RoomPlayer>();
+        var local = NetworkClient.connection?.identity?.GetComponent<RoomPlayer>();
+        if (local == null) return;
 
-        // 중복 체크
-        foreach (var p in FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None))
-        {
-            if (p.selectedCharacter == index && !p.isLocalPlayer)
-            {
-                Debug.Log("이미 선택된 캐릭터입니다.");
-                return;
-            }
-        }
-
-        player.CmdSelectCharacter(index);
-
-        // 선택 상태 수동 갱신 (로컬에서도 미리 적용)
-        var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
-        int[] selectedCharacters = new int[players.Length];
-        string[] playerNames = new string[players.Length];
-
-        for (int i = 0; i < players.Length; i++)
-        {
-            selectedCharacters[i] = players[i].selectedCharacter;
-            playerNames[i] = players[i].playerName;
-        }
-
-        UpdateCharacterButtonStates(selectedCharacters, playerNames);
+        // 전역 스캔 금지. 그냥 서버에 위임.
+        local.CmdSelectCharacter(index);
     }
+
+
+
+
+
 
     public void HideRoomUI()
     {

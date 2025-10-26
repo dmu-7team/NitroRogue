@@ -101,44 +101,32 @@ public class RoomPlayer : NetworkBehaviour
         RoomUIManager.Instance?.RebuildPlayerList();
     }
 
+    // RoomPlayer.cs
     [Command]
     public void CmdSelectCharacter(int index)
     {
-        var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
-        foreach (var p in players)
-        {
-            if (p != this && p.selectedCharacter == index)
-                return; // 중복 선택 불가
-        }
+        var server = NetworkManager.singleton as CustomNetworkManager_Server;
+        if (server == null) return;
+        if (!server.matchRooms.TryGetValue(matchId, out var roomPlayers) || roomPlayers == null) return;
+
+        foreach (var p in roomPlayers)
+            if (p && p != this && p.selectedCharacter == index) return; // 같은 방에서만 중복 방지
 
         selectedCharacter = index;
-
-        // 선택 상태 수집
-        int[] selectedCharacters = new int[players.Length];
-        string[] playerNames = new string[players.Length];
-
-        for (int i = 0; i < players.Length; i++)
-        {
-            selectedCharacters[i] = players[i].selectedCharacter;
-            playerNames[i] = players[i].playerName;
-        }
-
-        // 모든 클라이언트에게 버튼 상태 갱신 요청
-        foreach (var conn in NetworkServer.connections.Values)
-        {
-            if (conn.identity != null)
-            {
-                var p = conn.identity.GetComponent<RoomPlayer>();
-                p?.TargetUpdateCharacterButtons(conn, selectedCharacters, playerNames); //  이렇게 수정
-            }
-        }
+        server.BroadcastSelections(matchId); // 같은 방에게만 방송
     }
+
+
+
 
 
     public void OnStartGameButtonClicked()
     {
-        var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
-        foreach (var p in players)
+        var server = NetworkManager.singleton as CustomNetworkManager_Server;
+        if (server == null) return;
+        if (!server.matchRooms.TryGetValue(matchId, out var roomPlayers) || roomPlayers == null) return;
+
+        foreach (var p in roomPlayers)
         {
             if (p.selectedCharacter == -1)
             {
@@ -147,24 +135,22 @@ public class RoomPlayer : NetworkBehaviour
             }
         }
 
-        players.First(p => p.isLeader).CmdStartGame();
+        roomPlayers.First(p => p.isLeader).CmdStartGame();
     }
+
     [Command]
     public void CmdStartGame()
     {
         Debug.Log($"[서버] CmdStartGame 호출됨 by {playerName} (리더: {isLeader})");
+        if (!isLeader) { Debug.LogWarning("[서버] 리더가 아니라 실행 중단"); return; }
 
-        if (!isLeader)
-        {
-            Debug.LogWarning("[서버] 리더가 아니라 실행 중단");
-            return;
-        }
+        var server = NetworkManager.singleton as CustomNetworkManager_Server;
+        if (server == null) return;
+        if (!server.matchRooms.TryGetValue(matchId, out var roomPlayers) || roomPlayers == null) return;
 
-        var players = FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None);
-        foreach (var p in players)
+        foreach (var p in roomPlayers)
         {
             Debug.Log($"[서버] {p.playerName} 선택 캐릭터 인덱스: {p.selectedCharacter}");
-
             if (p.selectedCharacter < 0)
             {
                 Debug.LogWarning($"[서버] {p.playerName} 캐릭터 미선택 → 게임 시작 중단");
@@ -172,17 +158,17 @@ public class RoomPlayer : NetworkBehaviour
             }
         }
 
-        var netManager = NetworkManager.singleton as CustomNetworkManager_Server;
-        if (netManager != null && netManager.matchRooms.ContainsKey(matchId))
+        if (server.matchRooms.ContainsKey(matchId))
         {
             Debug.Log($"[서버] StartGame() 호출 with matchId: {matchId}");
-            netManager.StartGame(matchId);
+            server.StartGame(matchId);
         }
         else
         {
             Debug.LogError("[서버] StartGame 실패: matchId 불일치");
         }
     }
+
 
     [TargetRpc]
     public void TargetStartGame(NetworkConnection target, int characterIndex, string matchId)
@@ -295,9 +281,12 @@ public class RoomPlayer : NetworkBehaviour
     }
 
     [TargetRpc]
-    public void TargetUpdateCharacterButtons(NetworkConnection target, int[] selectedCharacters, string[] playerNames)
+    public void TargetUpdateCharacterButtons(NetworkConnection conn, string matchId, int[] selected, string[] names)
     {
-        RoomUIManager.Instance?.UpdateCharacterButtonStates(selectedCharacters, playerNames);
+        // 내가 속한 방이 아니면 적용 금지 (다른 방 스냅샷 차단)
+        if (this.matchId != matchId) return;
+
+        RoomUIManager.Instance?.UpdateCharacterButtonStates(selected, names);
     }
 
 }
