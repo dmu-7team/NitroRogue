@@ -227,69 +227,101 @@ public class CustomNetworkManager_Server : NetworkManager
     [Server]
     private void HandleManagerReady(MatchManager readyManager)
     {
+        // 매치 ID 가져오기
         var matchId = readyManager.GetComponent<NetworkMatch>().matchId;
-        if (!pendingMatches.TryGetValue(matchId, out var playersToSpawn)) return;
 
-        Debug.Log($"Manager for match [{matchId}] is ready. Spawning {playersToSpawn.Count} players...");
+        // 이 매치에 대기 중인(Room 상태였던) 플레이어들 목록
+        if (!pendingMatches.TryGetValue(matchId, out var playersToSpawn))
+            return;
 
+        Debug.Log($"[서버] HandleManagerReady -> match {matchId} 준비. {playersToSpawn.Count}명 스폰 예정");
+
+        // 여기 들어간 Transform들이 나중에 MatchManager.StartMatchWithPlayers()로 넘어가서
+        // TeleportPlayersToSpawnPoints(), spawner 등에서 참조됨
         var newPlayerTransforms = new List<Transform>();
 
-        foreach (var roomPlayer in playersToSpawn)
+        // ★ 이 매치가 차지한 시작 지점 (StartGame()에서 뽑아서 readyManager.startPoint에 넣어줬던 그거)
+        // 없으면 fallback으로 Vector3.zero
+        Vector3 baseSpawnPos = readyManager.startPoint != null
+            ? readyManager.startPoint.position
+            : Vector3.zero;
+
+        Debug.Log($"[서버] baseSpawnPos = {baseSpawnPos}");
+
+        // 각 플레이어에 대해 전투용 캐릭터 프리팹을 생성하고, RoomPlayer를 교체
+        for (int i = 0; i < playersToSpawn.Count; i++)
         {
+            var roomPlayer = playersToSpawn[i];
             if (roomPlayer == null) continue;
 
             var conn = roomPlayer.connectionToClient;
-            int index = roomPlayer.selectedCharacter;
+            int charIndex = roomPlayer.selectedCharacter;
 
-            if (index < 0 || index >= characterPrefabs.Length)
+            // 선택된 캐릭터 인덱스 유효성 체크
+            if (charIndex < 0 || charIndex >= characterPrefabs.Length)
             {
-                Debug.LogError($"[서버] 잘못된 캐릭터 인덱스: {index}");
+                Debug.LogError($"[서버] 잘못된 캐릭터 인덱스: {charIndex}");
                 continue;
             }
 
-            var playerPrefab = characterPrefabs[index];
+            var playerPrefab = characterPrefabs[charIndex];
             if (playerPrefab == null)
             {
-                Debug.LogError($"[서버] characterPrefabs[{index}]가 null임");
+                Debug.LogError($"[서버] characterPrefabs[{charIndex}]가 null임");
                 continue;
             }
 
-            var playerObj = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+            // ★ 플레이어마다 약간씩 벌려주기 (겹침 / 캐릭터컨트롤러 충돌튀김 방지)
+            float spreadRadius = 1.0f;
+            float angleRad = (i * 40f) * Mathf.Deg2Rad;
+            Vector3 offset = new Vector3(Mathf.Cos(angleRad), 0, Mathf.Sin(angleRad)) * spreadRadius;
+
+            // ★ 최종 스폰 위치
+            Vector3 spawnHere = baseSpawnPos + offset;
+
+            // y는 startPoint의 y를 그대로 사용해서 공중/바닥 틀어짐 최소화
+            spawnHere.y = baseSpawnPos.y;
+
+            Debug.Log($"[서버] player {i} ({roomPlayer.playerName}) -> spawnHere={spawnHere}");
+
+            // ★ 이제는 Vector3.zero 대신 spawnHere 사용
+            var playerObj = Instantiate(playerPrefab, spawnHere, Quaternion.identity);
+
+            // 매치 ID 세팅 (Mirror의 NetworkMatch용)
             playerObj.GetComponent<NetworkMatch>().matchId = matchId;
 
+            // 스탯 초기화
             var stats = playerObj.GetComponent<PlayerStats>();
             if (stats != null)
             {
-                stats.Nickname = roomPlayer.playerName;     // 🔸 SyncVar 닉
+                stats.Nickname = roomPlayer.playerName;
                 stats.isAlive = true;
                 stats.matchIdStr = matchId.ToString();
-                stats.ServerResetAllStats();                  // 🔸 체력/레벨 등 초기화
+                stats.ServerResetAllStats();
             }
 
-            // 클라에 “게임 시작” 알림
-            roomPlayer.TargetStartGame(conn, index, matchId.ToString());
+            // 클라 UI/상태 전환 알림 (Room UI → 게임 HUD)
+            roomPlayer.TargetStartGame(conn, charIndex, matchId.ToString());
 
-            // RoomPlayer 파괴 → 인게임 Player 교체
-            // RoomPlayer → InGame Player 교체 직후
+            // RoomPlayer 오브젝트 제거하고, 진짜 전투용 플레이어 오브젝트로 교체
             NetworkServer.Destroy(roomPlayer.gameObject);
             NetworkServer.ReplacePlayerForConnection(conn, playerObj, new ReplacePlayerOptions());
 
-            // 1) 먼저 HUD 바인딩을 시킨다 (이 타이밍에 UI 이벤트 구독 완료)
-            stats.TargetBindHUD(conn);
+            // HUD 바인딩 (TargetRpc)
+            if (stats != null)
+                stats.TargetBindHUD(conn);
 
-            // 2) 그 다음 “실제 값”을 스냅샷으로 밀어넣는다 (초기값 손실 방지)
-            //stats.TargetInitHUDSnapshot(conn,
-             //   stats.CurrentHealth /* or currentHealth */, stats.MaxHealth /* or maxHealth */,
-            //    stats.CurrentExp, stats.ExpToLevelUp, stats.Level,
-           //     stats.MoveSpeed, stats.AttackDamage);
-
+            // MatchManager한테 넘길 Transform들 모아둠
             newPlayerTransforms.Add(playerObj.transform);
         }
 
+        // ★ MatchManager에 "이 플레이어들이 이번 매치 참가자야"라고 알려주고
+        //    내부 타이머/스폰러/텔레포트 로직 시작하게 함
         readyManager.StartMatchWithPlayers(newPlayerTransforms);
 
-        // 대기열 정리
+        // === 매치 준비 큐 / 로비 상태 정리 ===
         pendingMatches.Remove(matchId);
+
         var key = matchId.ToString();
         if (matchRooms.ContainsKey(key))
         {
@@ -297,12 +329,13 @@ public class CustomNetworkManager_Server : NetworkManager
             SendRoomListToAllClients();
         }
 
-        // (선택) 미션 매니저
+        // (선택) 미션 매니저도 같은 matchId로 스폰
         if (missionManagerPrefab != null)
         {
             var mmObj = Instantiate(missionManagerPrefab);
             var mmMatch = mmObj.GetComponent<NetworkMatch>();
-            if (mmMatch != null) mmMatch.matchId = matchId;
+            if (mmMatch != null)
+                mmMatch.matchId = matchId;
 
             NetworkServer.Spawn(mmObj);
             Debug.Log($"[서버] MissionManager 스폰 완료 (matchId={matchId})");
@@ -312,6 +345,7 @@ public class CustomNetworkManager_Server : NetworkManager
             Debug.LogWarning("[서버] missionManagerPrefab 미지정 (선택 사항)");
         }
     }
+
 
 
     // ===== 패배 브로드캐스트 (전원 사망 1회 판정) =====
