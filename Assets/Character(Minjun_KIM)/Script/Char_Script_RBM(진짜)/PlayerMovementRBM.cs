@@ -21,6 +21,7 @@ public class PlayerMovementRBM : NetworkBehaviour
 
     private Rigidbody rb;
     private float xRotation = 0f;
+    private float yaw = 0f;    // ← 새로 추가: 좌우 누적
     private bool isGrounded;
     private WeaponSystemRBM weaponSystem;
     private PlayerStats stats;
@@ -43,11 +44,12 @@ public class PlayerMovementRBM : NetworkBehaviour
         weaponSystem = GetComponent<WeaponSystemRBM>();
         stats = GetComponent<PlayerStats>();
         audioSource = GetComponent<AudioSource>();
-        audioSource.playOnAwake = false;
+        if (audioSource != null) audioSource.playOnAwake = false;
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        // ★ UI 모달 아닐 때만 잠금
+        // 현재 Y 각도부터 시작하도록 초기화
+        yaw = transform.eulerAngles.y;
+
+        // 커서 잠금
         if (!(UIManager.Instance && UIManager.Instance.IsModalUIMode))
         {
             Cursor.lockState = CursorLockMode.Locked;
@@ -59,25 +61,33 @@ public class PlayerMovementRBM : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
 
-        HandleLook();
-        HandleMove();
-        // ★ UI 모달(승/패 패널)일 땐 입력/시점 완전 차단
+        // 🔒 모달(승/패 패널 등)일 때 입력/시점 완전 차단
         if (UIManager.Instance && UIManager.Instance.IsModalUIMode)
             return;
+
+        HandleLook();
+        HandleMove();
     }
 
     public void HandleLook()
     {
-        // ★ 이중 안전장치 (혹시 Update에서 가드 빠져도 보호)
+        // (2중 가드 — 안전)
         if (UIManager.Instance && UIManager.Instance.IsModalUIMode) return;
+
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
+        // 상하 회전: 카메라 pitch
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-
         cameraHolder.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        transform.Rotate(Vector3.up * mouseX);
+
+        // 좌우 회전: 본체 yaw
+        yaw += mouseX;
+        transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+
+        // 디버깅 원하면:
+        // Debug.Log($"mx={mouseX:F3}, yaw={yaw:F1}, nowY={transform.eulerAngles.y:F1}");
     }
 
     public void HandleMove()
@@ -88,14 +98,20 @@ public class PlayerMovementRBM : NetworkBehaviour
         Vector3 moveDirection = transform.right * x + transform.forward * z;
         bool isMoving = moveDirection.magnitude > 0.1f;
 
-        bool isSprinting = Input.GetKey(KeyCode.LeftShift) && z > 0f && isMoving && !weaponSystem.IsReloading();
-        float currentSpeed = isSprinting ? stats.MoveSpeed * 1.5f : stats.MoveSpeed;
+        bool isSprinting = Input.GetKey(KeyCode.LeftShift)
+                           && z > 0f
+                           && isMoving
+                           && !weaponSystem.IsReloading();
+
+        float currentSpeed = isSprinting
+            ? stats.MoveSpeed * 1.5f
+            : stats.MoveSpeed;
 
         Vector3 velocity = moveDirection.normalized * currentSpeed;
         velocity.y = rb.linearVelocity.y;
         rb.linearVelocity = velocity;
 
-        // 로컬 애니메이션 적용 + 서버 동기화
+        // 애니 동기화
         SetMoveAnim(isMoving, isSprinting);
 
         animator?.SetFloat("moveX", x);
@@ -124,7 +140,6 @@ public class PlayerMovementRBM : NetworkBehaviour
     private void PlayFootstepSound()
     {
         if (footstepClips.Length == 0 || audioSource == null) return;
-
         int index = Random.Range(0, footstepClips.Length);
         audioSource.PlayOneShot(footstepClips[index]);
     }
@@ -134,8 +149,8 @@ public class PlayerMovementRBM : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded && !weaponSystem.IsReloading())
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            animator?.SetTrigger("jump"); // 로컬용
-            CmdPlayJumpAnim(); // 동기화용
+            animator?.SetTrigger("jump"); // 로컬 애니
+            CmdPlayJumpAnim();            // 네트워크 브로드캐스트
         }
     }
 
@@ -144,10 +159,7 @@ public class PlayerMovementRBM : NetworkBehaviour
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
     }
 
-    // ==============================
-    // 애니메이션 동기화 (Move / Jump)
-    // ==============================
-
+    // 애니메이션 동기화
     void SetMoveAnim(bool isMoving, bool isSprinting)
     {
         animator?.SetBool("isMoving", isMoving);
@@ -165,7 +177,7 @@ public class PlayerMovementRBM : NetworkBehaviour
     [ClientRpc]
     void RpcSetMoveAnim(bool isMoving, bool isSprinting)
     {
-        if (isLocalPlayer) return; // 로컬은 이미 실행했음
+        if (isLocalPlayer) return; // 로컬은 이미 처리함
         animator?.SetBool("isMoving", isMoving);
         animator?.SetBool("isSprinting", isSprinting);
     }
