@@ -20,7 +20,11 @@ public class PlayerStatusRow : MonoBehaviour
         p.OnLevelChanged += OnLevel;
         p.OnHealthChanged += OnHp;
 
-        nameText.text = p.Nickname;
+        // ★ 닉네임 변경 이벤트 구독
+        p.OnNicknameChangedEvt += OnName;
+
+        // 초기 표시
+        OnName(p.Nickname);
         OnLevel(p.Level);
         OnHp(p.CurrentHealth, p.MaxHealth);
     }
@@ -30,6 +34,7 @@ public class PlayerStatusRow : MonoBehaviour
         if (bound == null) return;
         bound.OnLevelChanged -= OnLevel;
         bound.OnHealthChanged -= OnHp;
+        bound.OnNicknameChangedEvt -= OnName;     // ★ 해제
     }
 
     void Update()
@@ -38,6 +43,7 @@ public class PlayerStatusRow : MonoBehaviour
             hpFill.fillAmount = Mathf.Lerp(hpFill.fillAmount, targetFill, Time.deltaTime * lerpSpeed);
     }
 
+    void OnName(string nick) => nameText.text = string.IsNullOrEmpty(nick) ? "-" : nick;
     void OnLevel(int v) => levelText.text = $"LV.{v}";
     void OnHp(float hp, float max) => targetFill = (max <= 0f) ? 0f : hp / max;
 }

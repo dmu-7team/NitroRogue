@@ -1148,7 +1148,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nicknamePanel: {fileID: 1812130549}
-  nicknameInput: {fileID: 561970628}
+  nicknameInput: {fileID: 0}
   confirmButton: {fileID: 705305201}
   resetButton: {fileID: 1899584022}
 --- !u!1 &222327619
@@ -11308,7 +11308,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 183.37, y: -28.9}
+  m_AnchoredPosition: {x: 183.37, y: -28.900024}
   m_SizeDelta: {x: 200, y: 60}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1754544326
