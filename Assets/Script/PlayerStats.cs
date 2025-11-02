@@ -282,8 +282,7 @@ public class PlayerStats : CharacterStats
         {
             if (isAlive) isAlive = false;
 
-            var nm = (CustomNetworkManager_Server)NetworkManager.singleton;
-            nm.ServerNotifyPlayerDead(matchIdStr);
+            myMatchManager?.ServerNotifyPlayerDead(this);
 
             NetworkGameState.Instance?.Unregister(this);
         }
@@ -338,9 +337,6 @@ public class PlayerStats : CharacterStats
         OnPowerChanged?.Invoke(syncedAttackDamage);
     }
 
-    [TargetRpc] public void TargetShowVictory(NetworkConnectionToClient conn) => UIManager.Instance?.ShowVictoryPanel();
-    [TargetRpc] public void TargetShowDefeat(NetworkConnectionToClient conn) => UIManager.Instance?.ShowDefeatPanel();
-
     [Command]
     public void CmdNotifyMapLoaded()
     {
@@ -354,4 +350,35 @@ public class PlayerStats : CharacterStats
     {
         OnNicknameChangedEvt?.Invoke(newV);
     }
+}
+    public PlayerMatchRecord GetRecord(float matchDuration)
+    {
+        var weaponController = GetComponent<WeaponControllerClient>();
+        WeaponConfig currentWeapon = weaponController ? weaponController.Config : null;
+
+        Debug.Log(currentWeapon ? currentWeapon.displayName : "Unknown");
+
+        return new PlayerMatchRecord
+        {
+            userId = userId,
+            nickname = nickname,
+            level = level,
+            weaponName = currentWeapon ? currentWeapon.displayName : "Unknown",
+            kills = totalKills,
+            damage = totalDamage,
+            survivalTime = matchDuration
+        };
+    }
+}
+
+[Serializable]
+public struct PlayerMatchRecord
+{
+    public string userId;
+    public string nickname;
+    public int level;
+    public string weaponName;
+    public int kills;
+    public float damage;
+    public float survivalTime;
 }

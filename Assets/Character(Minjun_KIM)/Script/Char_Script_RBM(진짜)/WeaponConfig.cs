@@ -11,6 +11,7 @@ public class WeaponConfig : ScriptableObject
     public int id;
     public string displayName;
     public Sprite icon;
+    public Sprite resultIcon;
 
     [Header("Type & Modes")]
     public WeaponType type = WeaponType.AR;

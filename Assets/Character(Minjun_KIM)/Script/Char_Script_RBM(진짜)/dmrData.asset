@@ -15,6 +15,7 @@ MonoBehaviour:
   id: 2
   displayName: dmr
   icon: {fileID: 464137037, guid: 6753f41929102bb408bf0be641ce0212, type: 3}
+  resultIcon: {fileID: 1180391443, guid: fa696cad6c9b4144f8a35aadb7d484cc, type: 3}
   type: 0
   fireMode: 1
   aimMode: 1

@@ -107,7 +107,7 @@ public class UniversalHitbox : NetworkBehaviour
 
     private bool ShouldIgnoreCollision(Collider other)
     {
-        if (!isServer) { Debug.Log("서버 아님"); return true; }
+        if (!isServer) return true;
         if (!initialized) { Debug.Log("히트박스 초기화 안 됨"); return true; }
         if (other.gameObject == owner) { Debug.Log("자기 자신"); return true; }
         if (!other.transform.root.CompareTag("Player")) { Debug.Log($"태그 불일치: {other.name}"); return true; }

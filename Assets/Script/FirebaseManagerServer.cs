@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -7,34 +8,32 @@ public class FirebaseManagerServer : MonoBehaviour
 {
     public static FirebaseManagerServer Instance;
 
-    // ¡Ú ÇÊ¼ö: º»ÀÎ ÇÁ·ÎÁ§Æ® DB URL·Î ±³Ã¼ (¸Ç³¡¿¡ ½½·¡½Ã OK)
+    [Header("Firebase RTDB")]
     [SerializeField] private string baseUrl = "https://nitrorogue-24e5c-default-rtdb.firebaseio.com/";
-    // ¡Ú ¼±ÅÃ: RTDB ±ÔÄ¢ÀÌ ÀÎÁõ ÇÊ¿äÇÏ¸é ÅäÅ« ³Ö±â (¾øÀ¸¸é ºó ¹®ÀÚ¿­)
-    [SerializeField] private string authToken = ""; // e.g., "eyJhbGciOi..." (ID ÅäÅ«/Ä¿½ºÅÒ ÅäÅ« µî)
+    [SerializeField] private string authToken = ""; // í•„ìš” ì‹œ ?auth=í† í°
 
+    [Header("Network")]
     [SerializeField] private int requestTimeoutSec = 10;
     [SerializeField] private int maxRetry = 2;
 
-    void Awake() => Instance = this;
+    private void Awake() => Instance = this;
 
-    // ========= °ø°³ API =========
-    /// <summary>
-    /// ¸ÅÄ¡ Á¾·á ½Ã ¼­¹ö¿¡¼­ È£Ãâ (¼­¹ö ½º·¹µå)
-    /// </summary>
+    // ===============================
+    // ìœ ì €ë³„ ê²½ê¸° ê²°ê³¼ ì—…ë¡œë“œ
+    // ===============================
     public void UploadMatchResult(string userId, int kills, int deaths, int damage, bool isWin)
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
-            Debug.LogError("[Firebase] userId°¡ ºñ¾î ÀÖ½À´Ï´Ù.");
+            Debug.LogError("[Firebase] userIdê°€ ë¹„ì–´ ìžˆìŠµë‹ˆë‹¤.");
             return;
         }
         StartCoroutine(CoUpload(userId, kills, deaths, damage, isWin));
     }
 
-    // ========= ³»ºÎ ±¸Çö =========
     private IEnumerator CoUpload(string userId, int kills, int deaths, int damage, bool isWin)
     {
-        // ¨ç °³º° ¸ÅÄ¡ ±â·Ï: POST·Î °íÀ¯Å°(push id) »ý¼º (µ¿½Ã¼º ¾ÈÀü)
+        // 1) ê²½ê¸° ë°ì´í„° (POST)
         string matchesUrl = BuildUrl($"users/{Escape(userId)}/matches.json");
         string matchJson = $@"
         {{
@@ -44,10 +43,10 @@ public class FirebaseManagerServer : MonoBehaviour
             ""result"": ""{(isWin ? "Win" : "Lose")}"",
             ""timestamp"": ""{DateTime.UtcNow:O}""
         }}";
-        yield return SendJson(matchesUrl, matchJson, method: "POST");  // ¡Ú POST
 
-        // ¨è ¿ä¾à Åë°è: ¿øÀÚÀû Áõ°¡(atomic increment)·Î ·¹ÀÌ½º ¹æÁö
-        // RTDB REST: {".sv":{"increment": N}} ÇüÅÂ
+        yield return SendJson(matchesUrl, matchJson, "POST");
+
+        // 2) ìš”ì•½ í†µê³„ (PATCH ì¦ë¶„)
         string summaryUrl = BuildUrl($"users/{Escape(userId)}/summary.json");
         string patchJson = $@"
         {{
@@ -59,69 +58,63 @@ public class FirebaseManagerServer : MonoBehaviour
             ""lastPlayed"": ""{DateTime.UtcNow:O}""
         }}";
 
-        // PATCH´Â UnityWebRequest¿¡¼± X-HTTP-Method-Override=PATCH ¶Ç´Â custom method Áö¿ø
-        yield return SendJson(summaryUrl, patchJson, method: "PATCH");
+        yield return SendJson(summaryUrl, patchJson, "PATCH");
 
-        Debug.Log("[Firebase] ¸ÅÄ¡ ¾÷·Îµå ¹× summary ¾÷µ¥ÀÌÆ® ¿Ï·á");
+        Debug.Log("[Firebase] ê²½ê¸° ì—…ë¡œë“œ ë° ìš”ì•½ ì™„ë£Œ");
     }
 
-    // ========= °øÅë ¼Û½Å À¯Æ¿ =========
+    // ===============================
+    // ê³µí†µ ì „ì†¡
+    // ===============================
     private IEnumerator SendJson(string url, string json, string method)
     {
         int attempt = 0;
+
         while (true)
         {
-            using (UnityWebRequest req = new UnityWebRequest(url, method))
+            using (var req = new UnityWebRequest(url, method))
             {
-                byte[] body = System.Text.Encoding.UTF8.GetBytes(json ?? "{}");
+                byte[] body = System.Text.Encoding.UTF8.GetBytes(string.IsNullOrEmpty(json) ? "{}" : json);
                 req.uploadHandler = new UploadHandlerRaw(body);
                 req.downloadHandler = new DownloadHandlerBuffer();
                 req.SetRequestHeader("Content-Type", "application/json; charset=utf-8");
                 req.timeout = requestTimeoutSec;
 
-                // À¯´ÏÆ¼ ÀÏºÎ ·±Å¸ÀÓ¿¡¼­ PATCH ¹ÌÁö¿ø ½Ã ´ëºñ
                 if (method == "PATCH")
                     req.SetRequestHeader("X-HTTP-Method-Override", "PATCH");
 
                 yield return req.SendWebRequest();
 
                 if (req.result == UnityWebRequest.Result.Success)
-                {
-                    // Debug.Log($"[Firebase] {method} OK: {url} -> {req.downloadHandler.text}");
                     yield break;
-                }
 
                 attempt++;
-                Debug.LogWarning($"[Firebase] {method} ½ÇÆÐ({attempt}/{maxRetry + 1}): {req.error} url={url}");
+                Debug.LogWarning($"[Firebase] {method} ì‹¤íŒ¨({attempt}/{maxRetry + 1}): {req.error}");
                 if (attempt > maxRetry)
                 {
-                    Debug.LogError($"[Firebase] {method} ÃÖÁ¾ ½ÇÆÐ: {req.error}\nurl={url}\nbody={json}");
+                    Debug.LogError($"[Firebase] {method} ìµœì¢… ì‹¤íŒ¨: {req.error}\n{url}\n{json}");
                     yield break;
                 }
 
-                // °£´ÜÇÑ Áö¼ö ¹é¿ÀÇÁ
                 yield return new WaitForSeconds(0.5f * attempt);
             }
         }
     }
 
-    // ========= URL/ÀÎÄÚµù À¯Æ¿ =========
+    // ===============================
+    // URL / í‚¤ ìœ í‹¸
+    // ===============================
     private string BuildUrl(string pathWithJsonSuffix)
     {
-        // baseUrl + path(.json) + ?auth=token (¿É¼Ç)
         string sep = baseUrl.EndsWith("/") ? "" : "/";
         string url = baseUrl + sep + pathWithJsonSuffix.TrimStart('/');
         if (!string.IsNullOrEmpty(authToken))
-        {
             url += (url.Contains("?") ? "&" : "?") + "auth=" + UnityWebRequest.EscapeURL(authToken);
-        }
         return url;
     }
 
-    // Firebase °æ·Î¿¡¼­ ¾ÈÀüÇÑ ¹®ÀÚ¸¸ »ç¿ë (°£´Ü ÀÌ½ºÄÉÀÌÇÁ)
     private string Escape(string s)
     {
-        // RTDB Å° Á¦¾à: ".", "#", "$", "[", "]" ±ÝÁö. ÇÊ¿ä½Ã Ä¡È¯.
         return s.Replace(".", "_").Replace("#", "_").Replace("$", "_").Replace("[", "_").Replace("]", "_");
     }
 }

@@ -313,30 +313,35 @@ public class CustomNetworkManager_Server : NetworkManager
         return list;
     }
 
-    [Server]
-    public void ServerNotifyPlayerDead(string matchIdStr)
-    {
-        if (string.IsNullOrEmpty(matchIdStr)) return;
-        if (finishedMatches.Contains(matchIdStr)) return;
 
-        var players = GetMatchPlayers(matchIdStr);
-        bool anyAlive = players.Any(p => p != null && p.isAlive);
-        int aliveCount = players.Count(p => p != null && p.isAlive);
-        if (aliveCount > 0) return;
+    //[Server]
+    //public void ServerNotifyPlayerDead(string matchIdStr)
+    //{
+    //    if (string.IsNullOrEmpty(matchIdStr)) return;
+    //    if (finishedMatches.Contains(matchIdStr)) return; // 이미 끝난 매치면 무시
 
-        if (!anyAlive)
-        {
-            finishedMatches.Add(matchIdStr);
-            foreach (var ps in players)
-            {
-                var conn = ps?.connectionToClient;
-                if (conn != null) ps.TargetShowDefeat(conn);
-            }
-        }
+    //    var players = GetMatchPlayers(matchIdStr);
+    //    bool anyAlive = players.Any(p => p != null && p.isAlive);
+    //    int aliveCount = players.Count(p => p != null && p.isAlive);
+    //    if (aliveCount > 0) return; // ← 아직 살아있으면 종료 NO
+    //    if (!anyAlive)
+    //    {
+    //        finishedMatches.Add(matchIdStr);
 
-        if (Guid.TryParse(matchIdStr, out var g) && MatchManager.ActiveMatches.TryGetValue(g, out var mm))
-            mm.EndMatch(false);
-    }
+    //        foreach (var ps in players)
+    //        {
+    //            var conn = ps?.connectionToClient;
+    //            if (conn != null) ps.TargetShowDefeat(conn); // PlayerStats.TargetRpc
+    //        }
+
+    //        // TODO: 매치 정리/리셋 필요 시 여기에
+    //        // availableStartPoints.Add(해당 시작점) 등
+    //    }
+    //    if (Guid.TryParse(matchIdStr, out var g) && MatchManager.ActiveMatches.TryGetValue(g, out var mm))
+    //    {
+    //        mm.EndMatch(false);  // 패배 종료 → HandleMatchEnded로 정리
+    //    }
+    //}
 
     public void BroadcastPlayerList(string matchId)
     {
