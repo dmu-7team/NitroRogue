@@ -13,7 +13,9 @@ public class MatchManager : NetworkBehaviour
 {
     public static event Action<MatchManager> OnManagerReady;
     public static readonly Dictionary<Guid, MatchManager> ActiveMatches = new Dictionary<Guid, MatchManager>();
-    public static event Action<Guid, bool> OnMatchEnded; // (matchId, isVictory)
+    public static event Action<List<PlayerMatchRecord>, bool> OnMatchSummaryReady;
+    public static event Action<Guid, bool> OnMatchEnded;
+    public static event Action<int, float> OnTopRankUpdated;
 
     private bool ended; // 중복 종료 방지
     [HideInInspector] public Transform startPoint;
@@ -43,6 +45,8 @@ public class MatchManager : NetworkBehaviour
     private GameObject currentClientMapInstance;
 
     private readonly HashSet<int> loadedClients = new();
+
+    private List<PlayerMatchRecord> collectedRecords;
 
     public override void OnStartServer()
     {
@@ -86,54 +90,132 @@ public class MatchManager : NetworkBehaviour
     // public struct VictoryMessage : NetworkMessage { public string matchId; }
 
     [Server]
+    public void ServerNotifyPlayerDead(PlayerStats dead)
+    {
+        if (ended) return;
+
+        // matchId를 기반으로 현재 매치 내 PlayerStats 전부 조회
+        var allPlayers = NetworkServer.spawned.Values
+            .Select(id => id.GetComponent<PlayerStats>())
+            .Where(p => p != null && p.matchIdStr == dead.matchIdStr)
+            .ToList();
+
+        int aliveCount = allPlayers.Count(p => p.isAlive);
+        Debug.Log($"[MatchManager] 플레이어 사망 감지: {dead.Nickname}, 남은 생존자: {aliveCount}");
+
+        if (aliveCount <= 0)
+        {
+            Debug.Log("[MatchManager] 전원 사망 → 패배 처리");
+            EndMatch(false);
+        }
+    }
+
+    [Server]
     public void EndMatch(bool isVictory)
     {
         if (ended) return;
         ended = true;
 
         var guid = GetComponent<NetworkMatch>().matchId;
-        var firebase = FirebaseManagerServer.Instance;
+        float matchDuration = Time.time - matchStartTime;
+
+        collectedRecords = new List<PlayerMatchRecord>();
+
         foreach (var conn in NetworkServer.connections.Values)
         {
             if (conn?.identity == null) continue;
             var nm = conn.identity.GetComponent<NetworkMatch>();
             if (nm == null || nm.matchId != guid) continue;
 
-            if (firebase != null)
-            {
-                var stats = conn.identity.GetComponent<PlayerStats>();
-                if (stats != null)
-                {
-                    firebase.UploadMatchResult(
-                        stats.UserId,
-                        stats.TotalKills,
-                        stats.IsDead ? 1 : 0,
-                        Mathf.RoundToInt(stats.totalDamage),
-                        isVictory
-                    );
-                }
-            }
+            var stats = conn.identity.GetComponent<PlayerStats>();
+            if (stats == null) continue;
 
-            TargetShowResult(conn, isVictory);
+            collectedRecords.Add(stats.GetRecord(matchDuration));
         }
 
-        StartCoroutine(NotifyEndedNextFrame(guid, isVictory));
+        StartCoroutine(CoEndFlow(guid, isVictory, matchDuration));
     }
 
-    [TargetRpc]
-    void TargetShowResult(NetworkConnectionToClient conn, bool isVictory)
+
+    [Server]
+    private IEnumerator CoEndFlow(Guid matchGuid, bool isVictory, float matchDuration)
     {
-        Debug.Log($"[UI] TargetShowResult 수신 isVictory={isVictory}");
-        UIManager.Instance?.ResetAllUI();
-        if (isVictory) UIManager.Instance?.ShowVictoryPanel();
-        else UIManager.Instance?.ShowDefeatPanel();
+        RpcShowMatchSummary(collectedRecords, isVictory);
+
+        var firebase = FirebaseManagerServer.Instance;
+
+        if (firebase != null && collectedRecords.Count > 0)
+        {
+            yield return firebase.CoUploadAndGetRankings(
+                matchGuid.ToString(),
+                collectedRecords,
+                isVictory,
+                matchDuration,
+                this
+            );
+        }
+
+        // 4) 모든 전송 끝난 뒤에만 종료 트리거
+        FinalizeEnd(matchGuid.ToString(), isVictory);
     }
 
     [Server]
-    private IEnumerator NotifyEndedNextFrame(Guid guid, bool isVictory)
+    public void ShowSummaryOnly(bool isVictory)
     {
-        yield return null; // 필요 시 WaitForSeconds(0.5f~2f)
-        OnMatchEnded?.Invoke(guid, isVictory); // ★ 정리는 CustomNetworkManager_Server가 수행
+        RpcShowMatchSummary(collectedRecords, isVictory);
+    }
+
+    [Server]
+    public void FinalizeEnd(string matchId, bool isVictory)
+    {
+        Guid guid = Guid.Parse(matchId);
+        OnMatchEnded?.Invoke(guid, isVictory);
+    }
+
+    [Server]
+    public void OnRankingResult(string userId, int rank, float percentile)
+    {
+        if (TryGetPlayerConn(userId, out var conn))
+        {
+            TargetShowRanking(conn, rank, percentile);
+        }
+        else
+        {
+            Debug.LogWarning($"[MatchManager] OnRankingResult: userId={userId} conn 미발견");
+        }
+    }
+
+    [Server]
+    private bool TryGetPlayerConn(string userId, out NetworkConnectionToClient conn)
+    {
+        conn = null;
+
+        foreach (var c in NetworkServer.connections.Values)
+        {
+            if (c?.identity == null) continue;
+            var stats = c.identity.GetComponent<PlayerStats>();
+            if (stats == null) continue;
+
+            // UserId 매칭 기준은 프로젝트 규칙에 맞게 조정
+            if (!string.IsNullOrEmpty(stats.UserId) && stats.UserId == userId)
+            {
+                conn = c;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    [TargetRpc]
+    private void TargetShowRanking(NetworkConnectionToClient connt, int rank, float percent)
+    {
+        OnTopRankUpdated?.Invoke(rank, percent);
+    }
+
+    [ClientRpc]
+    void RpcShowMatchSummary(List<PlayerMatchRecord> records, bool isVictory)
+    {
+        OnMatchSummaryReady?.Invoke(records, isVictory);
     }
 
     // 플레이어 등록/해제
@@ -198,7 +280,7 @@ public class MatchManager : NetworkBehaviour
         UIManager.Instance?.EnterGameplayHUD();   // 게임 HUD 켜기
     }
 
-    // ★ 모든 해당 매치 참가자에게 초기화 쏘기
+    // 모든 해당 매치 참가자에게 초기화 쏘기
     [Server]
     private void ResetResultUIForAll(Guid guid)
     {
@@ -217,7 +299,6 @@ public class MatchManager : NetworkBehaviour
     [Server]
     private void TeleportPlayersToSpawnPoints()
     {
-        Debug.Log("플레이어 텔레포트1");
         var spawnPoints = GetComponentsInChildren<Transform>()
             .Where(t => t.CompareTag("PlayerSpawnPoint")).ToArray();
 
@@ -227,7 +308,6 @@ public class MatchManager : NetworkBehaviour
             return;
         }
 
-        Debug.Log("플레이어 텔레포트2");
         for (int i = 0; i < playerTransforms.Count; i++)
         {
             Transform playerTransform = playerTransforms[i];
@@ -237,12 +317,9 @@ public class MatchManager : NetworkBehaviour
             var conn = ni != null ? ni.connectionToClient : null;
             if (conn == null) { Debug.LogWarning("Teleport skipped: no owner conn"); continue; }
 
-            Debug.Log("플레이어 텔레포트3");
-            // 플레이어 오브젝트에서 TargetRpc 호출
             var tele = playerTransform.GetComponent<PlayerStats>();
             if (tele != null)
             {
-                Debug.Log("플레이어 텔레포트4");
                 tele.TargetTeleport(conn, sp.position, sp.rotation);
             }
         }

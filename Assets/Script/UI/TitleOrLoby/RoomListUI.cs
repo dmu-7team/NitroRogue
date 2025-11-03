@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using NetworkMessages;
+using UnityEditor.Rendering;
 
 public class RoomListUI : MonoBehaviour
 {
@@ -175,7 +176,6 @@ public class RoomListUI : MonoBehaviour
             // 주소/포트 로컬로 고정
             var nm = NetworkManager.singleton;
             nm.networkAddress = "4.217.235.248"; // 또는 서버 PC의 내부 IP (예: 192.168.x.x)
-
             // Telepathy 포트 맞추기
             var tp = nm.GetComponent<TelepathyTransport>();
             if (tp != null) tp.port = 7777;

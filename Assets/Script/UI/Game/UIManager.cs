@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections;
 using Mirror;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
@@ -37,9 +38,11 @@ public class UIManager : MonoBehaviour
     private Coroutine levelUpCoroutine;
     private Coroutine itemEffectCoroutine;
     public bool IsModalUIMode { get; private set; }  // ★ 전역 플래그
+
     [Header("결과 패널")]
-    [SerializeField] private GameObject victoryPanel;
-    [SerializeField] private GameObject defeatPanel;
+    [SerializeField] private GameObject scoreboardPanel;
+    [SerializeField] private GameObject topScorePanel;
+
     public GameObject lobbyPanel;
     [Header("=== HUD 그룹 ===")]
     [SerializeField] private GameObject inGameHUDRoot;     // 플레이어 HUD 전체 부모
@@ -91,34 +94,27 @@ public class UIManager : MonoBehaviour
         Cursor.visible = true;
 
     }
-    public void ShowVictoryPanel()
-    {
-        if (resultCanvasRoot && !resultCanvasRoot.activeSelf) resultCanvasRoot.SetActive(true); // ★
-        if (victoryPanel) victoryPanel.SetActive(true);
-        if (defeatPanel) defeatPanel.SetActive(false);
 
-        EnterModal(); // ★ 패배 패널과 동일하게 모달 처리
-    }
-
-    public void ShowDefeatPanel()
+    public void ShowScoreboard()
     {
-        if (resultCanvasRoot && !resultCanvasRoot.activeSelf) resultCanvasRoot.SetActive(true); // ★
-        if (defeatPanel) defeatPanel.SetActive(true);
-        IsModalUIMode = true;
+        ResetAllUI();
+        if (resultCanvasRoot && !resultCanvasRoot.activeSelf) resultCanvasRoot.SetActive(true);
+        if (scoreboardPanel) scoreboardPanel.SetActive(true);
         if (spectatorHUDRoot) spectatorHUDRoot.SetActive(false);
-        if (victoryPanel) victoryPanel.SetActive(false);
         if (inGameHUDRoot) inGameHUDRoot.SetActive(false);
 
-        EnterModal(); // ★ 패배 패널과 동일하게 모달 처리
+        EnterModal();
+    }
+
+    public void ShowTopScoreboard()
+    {
+        if (topScorePanel) topScorePanel.SetActive(true);
     }
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
-
-        
-
     }
 
 
@@ -208,8 +204,8 @@ public class UIManager : MonoBehaviour
     
     public void ResetResultPanels()
     {
-        if (victoryPanel) victoryPanel.SetActive(false);
-        if (defeatPanel) defeatPanel.SetActive(false);
+        if (scoreboardPanel) scoreboardPanel.SetActive(false);
+        if (topScorePanel) topScorePanel.SetActive(false);
     }
 
     private void UpdatePowerUI(float current)
@@ -380,8 +376,8 @@ public class UIManager : MonoBehaviour
         levelUpMessageText?.gameObject.SetActive(false);
         itemEffectText?.gameObject.SetActive(false);
 
-        if (victoryPanel) victoryPanel.SetActive(false);
-        if (defeatPanel) defeatPanel.SetActive(false);
+        if (scoreboardPanel) scoreboardPanel.SetActive(false);
+        if (topScorePanel) topScorePanel.SetActive(false);
         IsModalUIMode = false;
 
         // HUD 그룹(상황에 맞게)

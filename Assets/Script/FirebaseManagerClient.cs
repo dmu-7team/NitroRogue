@@ -10,7 +10,7 @@ public class FirebaseManagerClient : MonoBehaviour
 
     [Header("Nickname UI")]
     public GameObject nicknamePanel;
-    public TextMeshProUGUI nicknameInput;
+    public TMP_InputField nicknameInput;
     public Button confirmButton;
     public Button resetButton;
 
@@ -29,10 +29,7 @@ public class FirebaseManagerClient : MonoBehaviour
     void Start()
     {
         string nick = PlayerPrefs.GetString("nickname", "");
-        if (string.IsNullOrEmpty(nick))
-            nicknamePanel.SetActive(true);
-        else
-            nicknamePanel.SetActive(false);
+        nicknamePanel.SetActive(string.IsNullOrEmpty(nick));
 
         confirmButton.onClick.AddListener(RegisterNickname);
         resetButton.onClick.AddListener(() => StartCoroutine(ResetAllData()));
@@ -40,17 +37,19 @@ public class FirebaseManagerClient : MonoBehaviour
 
     void RegisterNickname()
     {
-        string nickname = nicknameInput.text.Trim();
+        string nickname = (nicknameInput?.text ?? "").Trim();
         if (string.IsNullOrEmpty(nickname)) return;
 
         string userId = PlayerPrefs.GetString("userId", System.Guid.NewGuid().ToString());
         PlayerPrefs.SetString("userId", userId);
         PlayerPrefs.SetString("nickname", nickname);
+        PlayerPrefs.Save();
 
         string json = $@"
         {{
             ""nickname"": ""{nickname}"",
             ""summary"": {{
+                ""topKills"": 0,
                 ""totalKills"": 0,
                 ""totalDeaths"": 0,
                 ""totalDamage"": 0,
@@ -79,6 +78,7 @@ public class FirebaseManagerClient : MonoBehaviour
         else
             Debug.LogError($"[Firebase] 업로드 실패: {req.error}");
     }
+
     public string GetUserId() => PlayerPrefs.GetString("userId", "");
     public string GetNickname() => PlayerPrefs.GetString("nickname", "");
 
@@ -102,7 +102,7 @@ public class FirebaseManagerClient : MonoBehaviour
         }
 
         nicknamePanel.SetActive(true);
-        nicknameInput.text = "";
+        if (nicknameInput) nicknameInput.text = "";
         Debug.Log("<color=green>[Reset] 초기화 완료. 닉네임 다시 입력 가능.</color>");
     }
 }

@@ -38,12 +38,12 @@ public class NetworkGameState : NetworkBehaviour
     [ClientRpc]
     void RpcShowVictory()
     {
-        UIManager.Instance?.ShowVictoryPanel();
+        UIManager.Instance?.ShowScoreboard();
     }
 
     [ClientRpc]
     void RpcShowDefeat()
     {
-        UIManager.Instance?.ShowDefeatPanel();
+        UIManager.Instance?.ShowScoreboard();
     }
 }
