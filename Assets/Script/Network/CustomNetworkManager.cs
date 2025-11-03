@@ -53,6 +53,7 @@ public class CustomNetworkManager : NetworkManager
         if (!NetworkClient.isConnected && !NetworkServer.active)
         {
             NetworkManager.singleton.networkAddress = "4.217.235.248";
+            NetworkManager.singleton.networkAddress = "127.0.0.1";
             NetworkManager.singleton.StartClient();
             Debug.Log("[AutoConnect] 로컬 서버로 자동 접속 시도");
         }

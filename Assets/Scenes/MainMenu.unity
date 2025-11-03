@@ -2866,10 +2866,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 32386779}
-        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: ReturnToMainAndLeaveRoom
-        m_Mode: 1
+      - m_Target: {fileID: 1388656540}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -5471,7 +5471,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Damege
+  m_text: level
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -7912,7 +7912,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Damege
+  m_text: livetime
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -8159,7 +8159,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uCC98\uCE58"
+  m_text: "\uB370\uBBF8\uC9C0"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6e3fc796b7989284eafc49cc0e5207d0, type: 2}
   m_sharedMaterial: {fileID: 842688090706270138, guid: 6e3fc796b7989284eafc49cc0e5207d0, type: 2}
@@ -11090,6 +11090,8 @@ MonoBehaviour:
   mySurvivalTimeText: {fileID: 975262175}
   myLevelText: {fileID: 704847457}
   myTotalDamageText: {fileID: 1101832175}
+  rankText: {fileID: 894685016}
+  percentText: {fileID: 172421959}
   weaponConfigs:
   - {fileID: 11400000, guid: 3dff5e88931a98c40b76847fb0b8b26e, type: 2}
   - {fileID: 11400000, guid: a4d9ee0961c737f43a0072620bd68e3e, type: 2}
@@ -15684,7 +15686,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Damege
+  m_text: kill
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

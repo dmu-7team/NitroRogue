@@ -10,7 +10,7 @@ public class FirebaseManagerClient : MonoBehaviour
 
     [Header("Nickname UI")]
     public GameObject nicknamePanel;
-    public TMP_InputField nicknameInput;      // ★ TMP_InputField로 교체
+    public TMP_InputField nicknameInput;
     public Button confirmButton;
     public Button resetButton;
 
@@ -43,12 +43,13 @@ public class FirebaseManagerClient : MonoBehaviour
         string userId = PlayerPrefs.GetString("userId", System.Guid.NewGuid().ToString());
         PlayerPrefs.SetString("userId", userId);
         PlayerPrefs.SetString("nickname", nickname);
-        PlayerPrefs.Save(); // ★ 저장 타이밍 보장
+        PlayerPrefs.Save();
 
         string json = $@"
         {{
             ""nickname"": ""{nickname}"",
             ""summary"": {{
+                ""topKills"": 0,
                 ""totalKills"": 0,
                 ""totalDeaths"": 0,
                 ""totalDamage"": 0,

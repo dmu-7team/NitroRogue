@@ -19,6 +19,10 @@ public class ResultUIController : MonoBehaviour
     [SerializeField] private TMP_Text myLevelText;
     [SerializeField] private TMP_Text myTotalDamageText;
 
+    [Header("신기록 UI")]
+    [SerializeField] private TMP_Text rankText;
+    [SerializeField] private TMP_Text percentText;
+
     [Header("Weapon Configs (UI 참조용)")]
     [SerializeField] private WeaponConfig[] weaponConfigs;
 
@@ -37,11 +41,13 @@ public class ResultUIController : MonoBehaviour
     void OnEnable()
     {
         MatchManager.OnMatchSummaryReady += HandleMatchSummary;
+        MatchManager.OnTopRankUpdated += HandleTopRank;
     }
 
     void OnDisable()
     {
         MatchManager.OnMatchSummaryReady -= HandleMatchSummary;
+        MatchManager.OnTopRankUpdated -= HandleTopRank;
     }
 
     private void HandleMatchSummary(List<PlayerMatchRecord> records, bool isVictory)
@@ -86,10 +92,18 @@ public class ResultUIController : MonoBehaviour
             }
         }
     }
+
     private Sprite GetWeaponIcon(string weaponName)
     {
         if (weaponIconMap.TryGetValue(weaponName, out var icon))
             return icon;
         return null;
+    }
+
+    private void HandleTopRank(int rank, float percent)
+    {
+        UIManager.Instance?.ShowTopScoreboard();
+        rankText.text = $"#{rank} 세계 랭킹";
+        percentText.text = $"상위 {percent:0.0}%의 플레이어";
     }
 }

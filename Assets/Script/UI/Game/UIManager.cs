@@ -106,6 +106,11 @@ public class UIManager : MonoBehaviour
         EnterModal();
     }
 
+    public void ShowTopScoreboard()
+    {
+        if (topScorePanel) topScorePanel.SetActive(true);
+    }
+
     private void Awake()
     {
         if (Instance == null) Instance = this;

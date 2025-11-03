@@ -15,6 +15,7 @@ public class MatchManager : NetworkBehaviour
     public static readonly Dictionary<Guid, MatchManager> ActiveMatches = new Dictionary<Guid, MatchManager>();
     public static event Action<List<PlayerMatchRecord>, bool> OnMatchSummaryReady;
     public static event Action<Guid, bool> OnMatchEnded;
+    public static event Action<int, float> OnTopRankUpdated;
 
     private bool ended; // 중복 종료 방지
     [HideInInspector] public Transform startPoint;
@@ -44,6 +45,8 @@ public class MatchManager : NetworkBehaviour
     private GameObject currentClientMapInstance;
 
     private readonly HashSet<int> loadedClients = new();
+
+    private List<PlayerMatchRecord> collectedRecords;
 
     public override void OnStartServer()
     {
@@ -110,15 +113,13 @@ public class MatchManager : NetworkBehaviour
     [Server]
     public void EndMatch(bool isVictory)
     {
-        Debug.Log("엔드매치 메소드" + isVictory);
         if (ended) return;
         ended = true;
 
         var guid = GetComponent<NetworkMatch>().matchId;
-        var firebase = FirebaseManagerServer.Instance;
         float matchDuration = Time.time - matchStartTime;
 
-        List<PlayerMatchRecord> allRecords = new();
+        collectedRecords = new List<PlayerMatchRecord>();
 
         foreach (var conn in NetworkServer.connections.Values)
         {
@@ -129,13 +130,86 @@ public class MatchManager : NetworkBehaviour
             var stats = conn.identity.GetComponent<PlayerStats>();
             if (stats == null) continue;
 
-            allRecords.Add(stats.GetRecord(matchDuration));
+            collectedRecords.Add(stats.GetRecord(matchDuration));
         }
-        if (firebase != null && allRecords.Count > 0)
-            firebase.UploadMatchSummary(guid.ToString(), allRecords, isVictory, matchDuration);
 
-        RpcShowMatchSummary(allRecords, isVictory);
+        StartCoroutine(CoEndFlow(guid, isVictory, matchDuration));
+    }
+
+
+    [Server]
+    private IEnumerator CoEndFlow(Guid matchGuid, bool isVictory, float matchDuration)
+    {
+        RpcShowMatchSummary(collectedRecords, isVictory);
+
+        var firebase = FirebaseManagerServer.Instance;
+
+        if (firebase != null && collectedRecords.Count > 0)
+        {
+            yield return firebase.CoUploadAndGetRankings(
+                matchGuid.ToString(),
+                collectedRecords,
+                isVictory,
+                matchDuration,
+                this
+            );
+        }
+
+        // 4) 모든 전송 끝난 뒤에만 종료 트리거
+        FinalizeEnd(matchGuid.ToString(), isVictory);
+    }
+
+    [Server]
+    public void ShowSummaryOnly(bool isVictory)
+    {
+        RpcShowMatchSummary(collectedRecords, isVictory);
+    }
+
+    [Server]
+    public void FinalizeEnd(string matchId, bool isVictory)
+    {
+        Guid guid = Guid.Parse(matchId);
         OnMatchEnded?.Invoke(guid, isVictory);
+    }
+
+    [Server]
+    public void OnRankingResult(string userId, int rank, float percentile)
+    {
+        if (TryGetPlayerConn(userId, out var conn))
+        {
+            TargetShowRanking(conn, rank, percentile);
+        }
+        else
+        {
+            Debug.LogWarning($"[MatchManager] OnRankingResult: userId={userId} conn 미발견");
+        }
+    }
+
+    [Server]
+    private bool TryGetPlayerConn(string userId, out NetworkConnectionToClient conn)
+    {
+        conn = null;
+
+        foreach (var c in NetworkServer.connections.Values)
+        {
+            if (c?.identity == null) continue;
+            var stats = c.identity.GetComponent<PlayerStats>();
+            if (stats == null) continue;
+
+            // UserId 매칭 기준은 프로젝트 규칙에 맞게 조정
+            if (!string.IsNullOrEmpty(stats.UserId) && stats.UserId == userId)
+            {
+                conn = c;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    [TargetRpc]
+    private void TargetShowRanking(NetworkConnectionToClient connt, int rank, float percent)
+    {
+        OnTopRankUpdated?.Invoke(rank, percent);
     }
 
     [ClientRpc]
@@ -206,7 +280,7 @@ public class MatchManager : NetworkBehaviour
         UIManager.Instance?.EnterGameplayHUD();   // 게임 HUD 켜기
     }
 
-    // ★ 모든 해당 매치 참가자에게 초기화 쏘기
+    // 모든 해당 매치 참가자에게 초기화 쏘기
     [Server]
     private void ResetResultUIForAll(Guid guid)
     {

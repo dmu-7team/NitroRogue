@@ -22,6 +22,7 @@ public class JoinButtonHandler : MonoBehaviour
             };
 
             NetworkManager.singleton.networkAddress = "4.217.235.248";
+            NetworkManager.singleton.networkAddress = "127.0.0.1";
             NetworkManager.singleton.StartClient();
 
             Debug.Log($"[JoinButtonHandler] 클라이언트 시작 - matchId: {matchId}");
