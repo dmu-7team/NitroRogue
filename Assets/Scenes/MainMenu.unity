@@ -1514,7 +1514,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nicknamePanel: {fileID: 1812130549}
-  nicknameInput: {fileID: 0}
+  nicknameInput: {fileID: 870037582}
   confirmButton: {fileID: 705305201}
   resetButton: {fileID: 1899584022}
 --- !u!1 &222327619

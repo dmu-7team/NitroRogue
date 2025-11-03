@@ -129,17 +129,6 @@ public class MatchManager : NetworkBehaviour
             var stats = conn.identity.GetComponent<PlayerStats>();
             if (stats == null) continue;
 
-            if (firebase != null)
-            {
-                firebase.UploadMatchResult(
-                    stats.UserId,
-                    stats.TotalKills,
-                    stats.IsDead ? 1 : 0,
-                    Mathf.RoundToInt(stats.totalDamage),
-                    isVictory
-                );
-            }
-
             allRecords.Add(stats.GetRecord(matchDuration));
         }
         if (firebase != null && allRecords.Count > 0)

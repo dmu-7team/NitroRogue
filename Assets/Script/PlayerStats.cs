@@ -350,7 +350,7 @@ public class PlayerStats : CharacterStats
     {
         OnNicknameChangedEvt?.Invoke(newV);
     }
-}
+
     public PlayerMatchRecord GetRecord(float matchDuration)
     {
         var weaponController = GetComponent<WeaponControllerClient>();
