@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 753810617943943584}
   - component: {fileID: 2428411643152100399}
   - component: {fileID: 838433912793842020}
+  - component: {fileID: 260418749668742823}
   m_Layer: 0
   m_Name: Submunition
   m_TagString: Untagged
@@ -418,3 +419,19 @@ MonoBehaviour:
   childCount: 0
   childForce: 0
   owner: {fileID: 0}
+--- !u!114 &260418749668742823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5485618447753468225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d17e718851449a6879986e45c458fb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  MatchID: 
