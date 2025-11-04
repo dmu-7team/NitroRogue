@@ -142,5 +142,5 @@ Mirror 기반 네트워크로 **지연 없는 실시간 전투 경험**을 제�
 ---
 
 <p align="center">
-  <b>💥 NitroRogue – 당신의 생존이 전장의 운명을 바꾼다! 💥</b>
+  <b>💥 NitroRogue 2025 💥</b>
 </p>
