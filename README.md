@@ -50,7 +50,6 @@ Mirror 기반 네트워크로 **지연 없는 실시간 전투 경험**을 제�
   <img src="images/watch" width="24%">
   <img src="images/win2" width="24%">
   <img src="images/win3" width="24%">
-  <img src="images/lose" width="24%">
 </p>
 
 ---
