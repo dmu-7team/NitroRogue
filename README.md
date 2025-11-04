@@ -28,10 +28,16 @@
 
 ## 🛠️ 기술 스택
 > ![직업 이미지](images/uinity.jfif)
-* **game-engine**: Unity
+* **game-engine**: Unity6
 
 > ![직업 이미지](images/mirror.png)
-* **api**: Mirror
+* **api**: Mirror network
+
+* **cloud**: Microsoft Azure
+
+* **server**: linux-server
+
+* **DataBase**: FireBase
   
 ## 👥 팀원
 
