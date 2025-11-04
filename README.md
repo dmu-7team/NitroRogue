@@ -49,6 +49,9 @@
 * **다양한 맵 및 게임 모드** 지속 추가
 * 사용자 피드백 기반 **UX 개선**
 
+## 📺시연 영상
+> [![영상 제목](https://img.youtube.com/vi/c9MPkY4jr0s/0.jpg)](https://youtu.be/c9MPkY4jr0s)
+
 ## 🧠 개발 로직 및 구조
 
 > 
