@@ -53,8 +53,8 @@
 > [![영상 제목](https://img.youtube.com/vi/c9MPkY4jr0s/0.jpg)](https://youtu.be/c9MPkY4jr0s)
 
 ## 🧠 개발 로직 및 구조
+> ![직업 이미지](images/logic)
 
-> 
 ## 💬 느낀 점
 
 > * 김동환: 이번 프로젝트를 통해 Unity와 Mirror API를 활용한 Dedicated Server 방식의 멀티플레이 환경을 직접 구현하며 많은 것을 배웠습니다.
