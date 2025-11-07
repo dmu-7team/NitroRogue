@@ -227,20 +227,50 @@ public class MatchManager : NetworkBehaviour
     [ClientRpc]
     void RpcShowMatchSummary(List<PlayerMatchRecord> records, bool isVictory)
     {
-        // >>> 추가: 전원 공통 결과 패널 항상 켬
         var ui = UIManager.Instance;
-        if (ui != null)
+        if (ui == null) return;
+
+        ui.ShowScoreboard();
+
+        // --- 내 userId 가져오기 ---
+        string myId = "";
+        if (NetworkClient.localPlayer)
+            myId = NetworkClient.localPlayer.GetComponent<PlayerStats>()?.UserId ?? "";
+        if (string.IsNullOrEmpty(myId))
+            myId = FirebaseManagerClient.Instance?.GetUserId() ?? "";
+
+        // --- 내 레코드 찾기 (struct라 null 금지 → 인덱스 사용) ---
+        int idx = -1;
+        if (!string.IsNullOrEmpty(myId))
+            idx = records.FindIndex(r => r.userId == myId);
+
+        if (idx < 0 && NetworkClient.localPlayer)  // fallback: 닉네임으로
         {
-            ui.ShowScoreboard();   // Result Canvas / Score Panel 켜짐
-                                   // 필요하면 이후에 텍스트 채우는 함수들 만들고 여기서 호출
-                                   // ui.SetResultTitle(isVictory ? "승리!" : "패배…");
-                                   // ui.FillTeamInfo(records);
-                                   // ui.FillMyInfo(...);
+            var myNick = NetworkClient.localPlayer.GetComponent<PlayerStats>()?.Nickname;
+            if (!string.IsNullOrEmpty(myNick))
+                idx = records.FindIndex(r => r.nickname == myNick);
         }
 
-        // (선택) 기존 이벤트는 유지해도 됨 — 다른 구독자가 있으면 쓰라고 남겨둠
+        // idx >= 0 이면 내 레코드가 존재
+        if (idx >= 0)
+        {
+            var my = records[idx];
+            // TODO: 당신 프로젝트 함수명에 맞게 채우기
+            // ui.FillTeamInfo(records);
+            // ui.FillMyInfo(my, isVictory);
+        }
+        else
+        {
+            // 못 찾은 경우에도 팀 정보는 채우고, 내 정보는 빈값/미표시 처리
+            // ui.FillTeamInfo(records);
+            // ui.FillMyInfoDefault(isVictory);
+        }
+
+        // (선택) 기존 이벤트 유지
         OnMatchSummaryReady?.Invoke(records, isVictory);
     }
+
+
 
 
     // 플레이어 등록/해제
