@@ -1,10 +1,10 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System;
 using System.Collections;
 using System.Linq;
 using Mirror;
 using System.Collections.Generic;
-using UnityEditor;
+//using UnityEditor;
 using UnityEngine.Tilemaps;
 // struct DefeatMessage : NetworkMessage { public string matchId; }
 //public struct VictoryMessage : NetworkMessage { public string matchId; }
@@ -17,7 +17,7 @@ public class MatchManager : NetworkBehaviour
     public static event Action<Guid, bool> OnMatchEnded;
     public static event Action<int, float> OnTopRankUpdated;
 
-    private bool ended; // Áßº¹ Á¾·á ¹æÁö
+    private bool ended; // ì¤‘ë³µ ì¢…ë£Œ ë°©ì§€
     [HideInInspector] public Transform startPoint;
 
     [Header("Configuration")]
@@ -84,8 +84,8 @@ public class MatchManager : NetworkBehaviour
             spawner.ServerTick(Time.deltaTime, playerTransforms);
     }
 
-    // === ¿£µå ¸ÅÄ¡: ÆĞ³Î ¸ÕÀú ¡æ ÇÑ ÇÁ·¹ÀÓ µÚ ÀÌº¥Æ®¸¸ ÅëÁö (Á¤¸®´Â ¼­¹ö ¸Å´ÏÀú) ===
-    // 1) ÆÄÀÏ »ó´ÜÀÇ ¾Æ·¡ µÎ struct ¿ÏÀüÈ÷ »èÁ¦ÇÏ¼¼¿ä.
+    // === ì—”ë“œ ë§¤ì¹˜: íŒ¨ë„ ë¨¼ì € â†’ í•œ í”„ë ˆì„ ë’¤ ì´ë²¤íŠ¸ë§Œ í†µì§€ (ì •ë¦¬ëŠ” ì„œë²„ ë§¤ë‹ˆì €) ===
+    // 1) íŒŒì¼ ìƒë‹¨ì˜ ì•„ë˜ ë‘ struct ì™„ì „íˆ ì‚­ì œí•˜ì„¸ìš”.
     // public struct DefeatMessage : NetworkMessage { public string matchId; }
     // public struct VictoryMessage : NetworkMessage { public string matchId; }
 
@@ -94,18 +94,18 @@ public class MatchManager : NetworkBehaviour
     {
         if (ended) return;
 
-        // matchId¸¦ ±â¹İÀ¸·Î ÇöÀç ¸ÅÄ¡ ³» PlayerStats ÀüºÎ Á¶È¸
+        // matchIdë¥¼ ê¸°ë°˜ìœ¼ë¡œ í˜„ì¬ ë§¤ì¹˜ ë‚´ PlayerStats ì „ë¶€ ì¡°íšŒ
         var allPlayers = NetworkServer.spawned.Values
             .Select(id => id.GetComponent<PlayerStats>())
             .Where(p => p != null && p.matchIdStr == dead.matchIdStr)
             .ToList();
 
         int aliveCount = allPlayers.Count(p => p.isAlive);
-        Debug.Log($"[MatchManager] ÇÃ·¹ÀÌ¾î »ç¸Á °¨Áö: {dead.Nickname}, ³²Àº »ıÁ¸ÀÚ: {aliveCount}");
+        Debug.Log($"[MatchManager] í”Œë ˆì´ì–´ ì‚¬ë§ ê°ì§€: {dead.Nickname}, ë‚¨ì€ ìƒì¡´ì: {aliveCount}");
 
         if (aliveCount <= 0)
         {
-            Debug.Log("[MatchManager] Àü¿ø »ç¸Á ¡æ ÆĞ¹è Ã³¸®");
+            Debug.Log("[MatchManager] ì „ì› ì‚¬ë§ â†’ íŒ¨ë°° ì²˜ë¦¬");
             EndMatch(false);
         }
     }
@@ -155,7 +155,7 @@ public class MatchManager : NetworkBehaviour
             );
         }
 
-        // 4) ¸ğµç Àü¼Û ³¡³­ µÚ¿¡¸¸ Á¾·á Æ®¸®°Å
+        // 4) ëª¨ë“  ì „ì†¡ ëë‚œ ë’¤ì—ë§Œ ì¢…ë£Œ íŠ¸ë¦¬ê±°
         FinalizeEnd(matchGuid.ToString(), isVictory);
     }
 
@@ -181,7 +181,7 @@ public class MatchManager : NetworkBehaviour
         }
         else
         {
-            Debug.LogWarning($"[MatchManager] OnRankingResult: userId={userId} conn ¹Ì¹ß°ß");
+            Debug.LogWarning($"[MatchManager] OnRankingResult: userId={userId} conn ë¯¸ë°œê²¬");
         }
     }
 
@@ -196,7 +196,7 @@ public class MatchManager : NetworkBehaviour
             var stats = c.identity.GetComponent<PlayerStats>();
             if (stats == null) continue;
 
-            // UserId ¸ÅÄª ±âÁØÀº ÇÁ·ÎÁ§Æ® ±ÔÄ¢¿¡ ¸Â°Ô Á¶Á¤
+            // UserId ë§¤ì¹­ ê¸°ì¤€ì€ í”„ë¡œì íŠ¸ ê·œì¹™ì— ë§ê²Œ ì¡°ì •
             if (!string.IsNullOrEmpty(stats.UserId) && stats.UserId == userId)
             {
                 conn = c;
@@ -209,16 +209,41 @@ public class MatchManager : NetworkBehaviour
     [TargetRpc]
     private void TargetShowRanking(NetworkConnectionToClient connt, int rank, float percent)
     {
+        // >>> ì¶”ê°€: ì‹ ê¸°ë¡ìë§Œ Top Score Panel ì¼œê¸°
+        var ui = UIManager.Instance;
+        if (ui != null)
+        {
+            ui.ShowTopScoreboard();   // Result Canvas / Top Score Panel ì¼œì§
+                                      // í•„ìš”í•˜ë©´ Rank/Percent í…ìŠ¤íŠ¸ ì„¸íŒ… í•¨ìˆ˜ë„ ì—¬ê¸°ì„œ í˜¸ì¶œ
+                                      // ui.SetRankText(rank > 0 ? $"ë­í‚¹ {rank}ìœ„" : "ë­í‚¹ê¶Œ ë°–");
+                                      // ui.SetTopPercentText(rank > 0 ? $"ìƒìœ„ {percent:0.0}%" : "-");
+        }
+
+        // (ì„ íƒ) ê¸°ì¡´ ì´ë²¤íŠ¸ ìœ ì§€
         OnTopRankUpdated?.Invoke(rank, percent);
     }
+
 
     [ClientRpc]
     void RpcShowMatchSummary(List<PlayerMatchRecord> records, bool isVictory)
     {
+        // >>> ì¶”ê°€: ì „ì› ê³µí†µ ê²°ê³¼ íŒ¨ë„ í•­ìƒ ì¼¬
+        var ui = UIManager.Instance;
+        if (ui != null)
+        {
+            ui.ShowScoreboard();   // Result Canvas / Score Panel ì¼œì§
+                                   // í•„ìš”í•˜ë©´ ì´í›„ì— í…ìŠ¤íŠ¸ ì±„ìš°ëŠ” í•¨ìˆ˜ë“¤ ë§Œë“¤ê³  ì—¬ê¸°ì„œ í˜¸ì¶œ
+                                   // ui.SetResultTitle(isVictory ? "ìŠ¹ë¦¬!" : "íŒ¨ë°°â€¦");
+                                   // ui.FillTeamInfo(records);
+                                   // ui.FillMyInfo(...);
+        }
+
+        // (ì„ íƒ) ê¸°ì¡´ ì´ë²¤íŠ¸ëŠ” ìœ ì§€í•´ë„ ë¨ â€” ë‹¤ë¥¸ êµ¬ë…ìê°€ ìˆìœ¼ë©´ ì“°ë¼ê³  ë‚¨ê²¨ë‘ 
         OnMatchSummaryReady?.Invoke(records, isVictory);
     }
 
-    // ÇÃ·¹ÀÌ¾î µî·Ï/ÇØÁ¦
+
+    // í”Œë ˆì´ì–´ ë“±ë¡/í•´ì œ
     [Server] public void AddPlayer(Transform t) { if (!playerTransforms.Contains(t)) playerTransforms.Add(t); }
     [Server] public void RemovePlayer(Transform t) { playerTransforms.Remove(t); }
 
@@ -229,7 +254,7 @@ public class MatchManager : NetworkBehaviour
         var guid = GetComponent<NetworkMatch>().matchId;
         TargetResetUIForAll(guid);
 
-        // Å¸ÀÌ¸Ó/´Ü°è/º¸½º/Ä«¿îÅÍ µî ÀüºÎ ÃÊ±âÈ­
+        // íƒ€ì´ë¨¸/ë‹¨ê³„/ë³´ìŠ¤/ì¹´ìš´í„° ë“± ì „ë¶€ ì´ˆê¸°í™”
         playerTransforms.Clear();
         playerTransforms.AddRange(initialPlayers);
         matchStartTime = Time.time;
@@ -267,7 +292,7 @@ public class MatchManager : NetworkBehaviour
     [TargetRpc]
     void TargetResetUI(NetworkConnectionToClient conn)
     {
-        Debug.Log("[UI] TargetResetUI ¼ö½Å");
+        Debug.Log("[UI] TargetResetUI ìˆ˜ì‹ ");
         UIManager.Instance?.ResetAllUI();
         UIManager.Instance?.EnterGameplayHUD();
     }
@@ -276,11 +301,11 @@ public class MatchManager : NetworkBehaviour
     [TargetRpc]
     void TargetResetResultUI(NetworkConnectionToClient conn)
     {
-        UIManager.Instance?.ResetAllUI();         // ÆĞ³Î/¸ğ´Ş/¹ÙÀÎµù ¸ğµÎ ÇØÁ¦
-        UIManager.Instance?.EnterGameplayHUD();   // °ÔÀÓ HUD ÄÑ±â
+        UIManager.Instance?.ResetAllUI();         // íŒ¨ë„/ëª¨ë‹¬/ë°”ì¸ë”© ëª¨ë‘ í•´ì œ
+        UIManager.Instance?.EnterGameplayHUD();   // ê²Œì„ HUD ì¼œê¸°
     }
 
-    // ¸ğµç ÇØ´ç ¸ÅÄ¡ Âü°¡ÀÚ¿¡°Ô ÃÊ±âÈ­ ½î±â
+    // ëª¨ë“  í•´ë‹¹ ë§¤ì¹˜ ì°¸ê°€ìì—ê²Œ ì´ˆê¸°í™” ì˜ê¸°
     [Server]
     private void ResetResultUIForAll(Guid guid)
     {
@@ -394,7 +419,7 @@ public class MatchManager : NetworkBehaviour
 
         currentClientMapInstance = Instantiate(stage.clientMapPrefab, transform.position, transform.rotation, transform);
 
-        // ·ÎÄÃÇÃ·¹ÀÌ¾î¿¡°Ô¼­¸¸ ¼­¹ö¿¡ ¾Ë¸² º¸³»±â
+        // ë¡œì»¬í”Œë ˆì´ì–´ì—ê²Œì„œë§Œ ì„œë²„ì— ì•Œë¦¼ ë³´ë‚´ê¸°
         if (NetworkClient.localPlayer != null)
         {
             NetworkClient.localPlayer.GetComponent<PlayerStats>()?.CmdNotifyMapLoaded();
@@ -405,7 +430,7 @@ public class MatchManager : NetworkBehaviour
     public void OnClientMapLoaded(NetworkConnectionToClient conn)
     {
         loadedClients.Add(conn.connectionId);
-        Debug.Log($"Å¬¶ó {conn.connectionId} ¸Ê ·Îµå ¿Ï·á ({loadedClients.Count}/{playerTransforms.Count})");
+        Debug.Log($"í´ë¼ {conn.connectionId} ë§µ ë¡œë“œ ì™„ë£Œ ({loadedClients.Count}/{playerTransforms.Count})");
 
         if (loadedClients.Count >= playerTransforms.Count)
         {
@@ -444,7 +469,7 @@ public class MatchManager : NetworkBehaviour
         var stage = gameModeConfig.FindStage(currentStageId);
         if (stage == null || stage.mapSpawnSet == null || stage.mapSpawnSet.bossPrefab == null) return;
 
-        // ¡Ú ±âÁ¸ º¸½º ÀÌº¥Æ® ÇØÁ¦ ¾ÈÀüÀåÄ¡
+        // â˜… ê¸°ì¡´ ë³´ìŠ¤ ì´ë²¤íŠ¸ í•´ì œ ì•ˆì „ì¥ì¹˜
         if (currentBoss != null)
         {
             var old = currentBoss.GetComponent<EnemyBase>();
