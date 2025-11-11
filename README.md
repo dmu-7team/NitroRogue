@@ -60,6 +60,12 @@ Mirror 기반 네트워크로 **지연 없는 실시간 전투 경험**을 제�
   <img src="images/uinity.jfif" height="60">
   &nbsp;&nbsp;&nbsp;
   <img src="images/mirror.png" height="60">
+  &nbsp;&nbsp;&nbsp;
+  <img src="images/micro" height="60">
+  &nbsp;&nbsp;&nbsp;
+  <img src="images/linuxserver" height="60">
+  &nbsp;&nbsp;&nbsp;
+  <img src="images/firebase" height="60">
 </p>
 
 | 분야 | 기술 |
