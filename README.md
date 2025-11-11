@@ -152,8 +152,9 @@ Mirror 기반 네트워크로 **지연 없는 실시간 전투 경험**을 제�
 |------|--------|-----------|
 | 제안서 | 시스템분석설계_최종보고서_니트로글린세린조_주제 데디케이티드방식 멀티슈팅게임.hwp | [⬇ 다운로드](https://github.com/dmu-7team/NitroRogue/raw/main/시스템분석설계_최종보고서_니트로글린세린조_주제%20데디케이티드방식%20멀티슈팅게임.hwp) |
 | 포스터 | 니트로글리세린팀_포스터.pptx | [⬇ 다운로드](https://github.com/dmu-7team/NitroRogue/raw/main/니트로글리세린팀_포스터.pptx) |
-| 브로셔 | 2025학년도 졸업작품집 브로셔_컴퓨터소프트웨어공학과_YD반_니트로글리세린-1.hwp | [⬇ 다운로드](https://github.com/dmu-7team/NitroRogue/raw/main/2025학년도 졸업작품집 브로셔_컴퓨터소프트웨어공학과_YD반_니트로글리세린-1.hwp) |
-| 포스터 | 니트로글리세린팀_포스터.pptx | [⬇ 다운로드](https://github.com/dmu-7team/NitroRogue/raw/main/니트로글리세린팀 최종발표 ppt.pptx) |
+| 브로셔 | 2025학년도 졸업작품집 브로셔_컴퓨터소프트웨어공학과_YD반_니트로글리세린-1.hwp | [⬇ 다운로드](https://github.com/dmu-7team/NitroRogue/raw/main/2025%ED%95%99%EB%85%84%EB%8F%84%20%EC%A1%B8%EC%97%85%EC%9E%91%ED%92%88%EC%A7%91%20%EB%B8%8C%EB%A1%9C%EC%85%94_%EC%BB%B4%ED%93%A8%ED%84%B0%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4%EA%B3%B5%ED%95%99%EA%B3%BC_YD%EB%B0%98_%EB%8B%88%ED%8A%B8%EB%A1%9C%EA%B8%80%EB%A6%AC%EC%84%B8%EB%A6%B0-1.hwp) |
+| 포스터 | 니트로글리세린팀 최종발표 ppt.pptx | [⬇ 다운로드](https://github.com/dmu-7team/NitroRogue/raw/main/%EB%8B%88%ED%8A%B8%EB%A1%9C%EA%B8%80%EB%A6%AC%EC%84%B8%EB%A6%B0%ED%8C%80%20%EC%B5%9C%EC%A2%85%EB%B0%9C%ED%91%9C%20ppt.pptx) |
+
 
 
 
