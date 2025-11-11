@@ -104,7 +104,7 @@ Mirror 기반 네트워크로 **지연 없는 실시간 전투 경험**을 제�
 
 <p align="center">
   <a href="https://youtu.be/G1O0y4aMQAo" target="_blank">
-    <img src="https://img.youtube.com/vi/c9MPkY4jr0s/0.jpg" width="70%">
+    <img src="https://img.youtube.com/vi/G1O0y4aMQAo/0.jpg" width="70%">
   </a>
 </p>
 
